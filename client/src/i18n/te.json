@@ -1,0 +1,40 @@
+{
+  "Navigation": {
+    "Home": "హోమ్",
+    "Shop": "దుకాణం",
+    "Cart": "కార్ట్",
+    "MyOrders": "నా ఆర్డర్లు",
+    "Logout": "లాగ్ అవుట్",
+    "Login": "లాగిన్",
+    "SignUp": "సైన్ అప్"
+  },
+  "Auth": {
+    "FullName": "పూర్తి పేరు",
+    "MobileNumber": "మొబైల్ నంబర్",
+    "Email": "ఈమెయిల్ (ఐచ్ఛికం)",
+    "Password": "పాస్‌వర్డ్",
+    "ConfirmPassword": "పాస్‌వర్డ్‌ నిర్ధారించండి"
+  },
+  "Shop": {
+    "AddToCart": "కార్ట్‌కు జోడించు",
+    "Unavailable": "అందుబాటులో లేదు",
+    "SearchProducts": "ఉత్పత్తులను శోధించండి"
+  },
+  "Cart": {
+    "YourCart": "మీ కార్ట్",
+    "ProceedToCheckout": "చెల్లింపునకు వెళ్లండి",
+    "CartEmpty": "మీ కార్ట్ ఖాళీగా ఉంది."
+  },
+  "Order": {
+    "Status": "స్థితి",
+    "CancelOrder": "ఆర్డర్ రద్దు చేయండి",
+    "DownloadReceipt": "రసీదు డౌన్‌లోడ్ చేయండి"
+  },
+  "Common": {
+    "Save": "సేవ్",
+    "Cancel": "రద్దు",
+    "Delete": "తొలగించు",
+    "Edit": "సవరించు",
+    "Loading": "లోడ్ అవుతోంది..."
+  }
+}

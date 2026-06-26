@@ -1,0 +1,40 @@
+{
+  "Navigation": {
+    "Home": "Home",
+    "Shop": "Shop",
+    "Cart": "Cart",
+    "MyOrders": "My Orders",
+    "Logout": "Logout",
+    "Login": "Login",
+    "SignUp": "Sign Up"
+  },
+  "Auth": {
+    "FullName": "Full Name",
+    "MobileNumber": "Mobile Number",
+    "Email": "Email (optional)",
+    "Password": "Password",
+    "ConfirmPassword": "Confirm Password"
+  },
+  "Shop": {
+    "AddToCart": "Add to Cart",
+    "Unavailable": "Unavailable",
+    "SearchProducts": "Search products"
+  },
+  "Cart": {
+    "YourCart": "Your Cart",
+    "ProceedToCheckout": "Proceed to Checkout",
+    "CartEmpty": "Your cart is empty."
+  },
+  "Order": {
+    "Status": "Status",
+    "CancelOrder": "Cancel Order",
+    "DownloadReceipt": "Download Receipt"
+  },
+  "Common": {
+    "Save": "Save",
+    "Cancel": "Cancel",
+    "Delete": "Delete",
+    "Edit": "Edit",
+    "Loading": "Loading..."
+  }
+}

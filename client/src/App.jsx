@@ -1,5 +1,6 @@
 import React from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
+import { AnimatePresence } from 'framer-motion';
 
 // Pages
 import Home from './pages/customer/Home';
@@ -14,23 +15,27 @@ import CustomerDashboard from './pages/customer/CustomerDashboard';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import PrivateRoute from './components/PrivateRoute';
 import Navbar from './components/Navbar';
+import ToastContainer from './components/Toast';
+import PageWrapper from './components/PageWrapper';
 
-function App() {
+// A helper component to handle route transitions
+const AnimatedRoutes = () => {
+  const location = useLocation();
+  
   return (
-    <BrowserRouter>
-      <Navbar />
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/shop" element={<Shop />} />
-        <Route path="/cart" element={<Cart />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/signup" element={<Signup />} />
-        <Route path="/contact" element={<Contact />} />
+    <AnimatePresence mode="wait">
+      <Routes location={location} key={location.pathname}>
+        <Route path="/" element={<PageWrapper><Home /></PageWrapper>} />
+        <Route path="/shop" element={<PageWrapper><Shop /></PageWrapper>} />
+        <Route path="/cart" element={<PageWrapper><Cart /></PageWrapper>} />
+        <Route path="/login" element={<PageWrapper><Login /></PageWrapper>} />
+        <Route path="/signup" element={<PageWrapper><Signup /></PageWrapper>} />
+        <Route path="/contact" element={<PageWrapper><Contact /></PageWrapper>} />
         <Route
           path="/checkout"
           element={
             <PrivateRoute role="customer">
-              <Checkout />
+              <PageWrapper><Checkout /></PageWrapper>
             </PrivateRoute>
           }
         />
@@ -38,7 +43,7 @@ function App() {
           path="/order-confirmation/:orderId"
           element={
             <PrivateRoute role="customer">
-              <OrderConfirmation />
+              <PageWrapper><OrderConfirmation /></PageWrapper>
             </PrivateRoute>
           }
         />
@@ -46,7 +51,7 @@ function App() {
           path="/customer/dashboard"
           element={
             <PrivateRoute role="customer">
-              <CustomerDashboard />
+              <PageWrapper><CustomerDashboard /></PageWrapper>
             </PrivateRoute>
           }
         />
@@ -54,12 +59,22 @@ function App() {
           path="/admin/dashboard"
           element={
             <PrivateRoute role="admin">
-              <AdminDashboard />
+              <PageWrapper><AdminDashboard /></PageWrapper>
             </PrivateRoute>
           }
         />
-        <Route path="*" element={<div>404 Not Found</div>} />
+        <Route path="*" element={<PageWrapper><div>404 Not Found</div></PageWrapper>} />
       </Routes>
+    </AnimatePresence>
+  );
+};
+
+function App() {
+  return (
+    <BrowserRouter>
+      <Navbar />
+      <ToastContainer />
+      <AnimatedRoutes />
     </BrowserRouter>
   );
 }

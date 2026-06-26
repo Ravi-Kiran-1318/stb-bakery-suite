@@ -1,0 +1,143 @@
+const Product = require('../models/Product');
+const Notification = require('../models/Notification');
+
+// @desc    Get all available products (Public)
+// @route   GET /api/products
+const getPublicProducts = async (req, res) => {
+  try {
+    const products = await Product.find({ isAvailable: true });
+    res.json(products);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// @desc    Get all products (Admin)
+// @route   GET /api/products/all
+const getAllProducts = async (req, res) => {
+  try {
+    const products = await Product.find({});
+    res.json(products);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// @desc    Create a product (Admin)
+// @route   POST /api/products
+const createProduct = async (req, res) => {
+  try {
+    const { nameEN, nameTe, descriptionEN, descriptionTe, price, category, isAvailable } = req.body;
+    let imageUrl = '';
+    
+    if (req.file) {
+      imageUrl = req.file.path;
+    }
+
+    const product = new Product({
+      nameEN,
+      nameTe,
+      descriptionEN,
+      descriptionTe,
+      price: Number(price),
+      category,
+      imageUrl,
+      isAvailable: isAvailable === 'true' || isAvailable === true,
+    });
+
+    const createdProduct = await product.save();
+    res.status(201).json(createdProduct);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// @desc    Update a product (Admin)
+// @route   PATCH /api/products/:id
+const updateProduct = async (req, res) => {
+  try {
+    const { nameEN, nameTe, descriptionEN, descriptionTe, price, category, isAvailable } = req.body;
+    
+    const product = await Product.findById(req.params.id);
+    if (!product) {
+      return res.status(404).json({ message: 'Product not found' });
+    }
+
+    product.nameEN = nameEN || product.nameEN;
+    product.nameTe = nameTe || product.nameTe;
+    product.descriptionEN = descriptionEN || product.descriptionEN;
+    product.descriptionTe = descriptionTe || product.descriptionTe;
+    if (price) product.price = Number(price);
+    product.category = category || product.category;
+    if (isAvailable !== undefined) product.isAvailable = isAvailable === 'true' || isAvailable === true;
+
+    if (req.file) {
+      product.imageUrl = req.file.path;
+    }
+
+    const updatedProduct = await product.save();
+    res.json(updatedProduct);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// @desc    Delete a product (Admin)
+// @route   DELETE /api/products/:id
+const deleteProduct = async (req, res) => {
+  try {
+    const product = await Product.findById(req.params.id);
+    if (!product) {
+      return res.status(404).json({ message: 'Product not found' });
+    }
+
+    await product.deleteOne();
+    res.json({ message: 'Product removed' });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// @desc    Toggle product availability (Admin)
+// @route   PATCH /api/products/:id/toggle
+const toggleAvailability = async (req, res) => {
+  try {
+    const product = await Product.findById(req.params.id);
+    if (!product) {
+      return res.status(404).json({ message: 'Product not found' });
+    }
+
+    product.isAvailable = !product.isAvailable;
+    await product.save();
+
+    // If marked unavailable, notify admin
+    if (!product.isAvailable) {
+      const io = req.app.get('io');
+      const message = `${product.nameEN} is now Out of Stock. Remember to restock!`;
+      
+      const notification = await Notification.create({
+        userId: req.user.id, // The admin toggling it receives it
+        type: 'low_stock',
+        message: message,
+        actionTab: 'products',
+      });
+
+      if (io) {
+        io.to('admin_room').emit('new_notification', notification);
+      }
+    }
+
+    res.json(product);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+module.exports = {
+  getPublicProducts,
+  getAllProducts,
+  createProduct,
+  updateProduct,
+  deleteProduct,
+  toggleAvailability,
+};

@@ -2,8 +2,38 @@
 @tailwind components;
 @tailwind utilities;
 
-html, body {
-  margin: 0;
-  padding: 0;
-  font-family: 'Inter', system-ui, Avenir, Helvetica, Arial, sans-serif;
+@layer base {
+  html, body {
+    margin: 0;
+    padding: 0;
+    background-color: #ffffff;
+    color: #111827; /* dark */
+    font-family: 'Inter', system-ui, Avenir, Helvetica, Arial, sans-serif;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-accent text-white font-semibold rounded-md px-4 py-2 transition-colors duration-200 hover:bg-accent-dark;
+  }
+
+  .btn-secondary {
+    @apply border border-border text-dark rounded-md px-4 py-2 transition-colors duration-200 hover:bg-surface;
+  }
+
+  .input-field {
+    @apply border border-border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent w-full;
+  }
+
+  .card {
+    @apply bg-white shadow-sm rounded-lg;
+  }
+
+  .modal-overlay {
+    @apply fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50;
+  }
+
+  .modal-content {
+    @apply bg-white shadow-md rounded-lg max-w-md w-full;
+  }
 }

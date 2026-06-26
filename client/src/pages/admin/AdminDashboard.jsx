@@ -4,8 +4,8 @@ import { motion } from 'framer-motion';
 
 import OrdersTab from './OrdersTab';
 import ProductsTab from './ProductsTab';
-// import RevenueTab from './RevenueTab';
-// import CustomersTab from './CustomersTab';
+import RevenueTab from './RevenueTab';
+import CustomersTab from './CustomersTab';
 
 const AdminDashboard = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -26,8 +26,8 @@ const AdminDashboard = () => {
     switch (activeTab) {
       case 'orders': return <OrdersTab />;
       case 'products': return <ProductsTab />;
-      // case 'revenue': return <RevenueTab />;
-      // case 'customers': return <CustomersTab />;
+      case 'revenue': return <RevenueTab />;
+      case 'customers': return <CustomersTab />;
       default: return <OrdersTab />;
     }
   };

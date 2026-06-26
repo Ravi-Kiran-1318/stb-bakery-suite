@@ -1,5 +1,156 @@
 const Order = require('../models/Order');
 const Notification = require('../models/Notification');
+const User = require('../models/User');
+const mongoose = require('mongoose');
+const { sendAdminNewOrderEmail, sendCustomerConfirmationEmail } = require('../utils/mailer');
+
+// Helper to calculate distance between two lat/lng points in km (Haversine formula)
+const calculateDistance = (lat1, lon1, lat2, lon2) => {
+  const R = 6371; // Radius of the earth in km
+  const dLat = (lat2 - lat1) * (Math.PI / 180);
+  const dLon = (lon2 - lon1) * (Math.PI / 180);
+  const a = 
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(lat1 * (Math.PI / 180)) * Math.cos(lat2 * (Math.PI / 180)) * 
+    Math.sin(dLon / 2) * Math.sin(dLon / 2); 
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)); 
+  const d = R * c; 
+  return d;
+};
+
+// @desc    Create a new order (Customer)
+// @route   POST /api/orders
+const createOrder = async (req, res) => {
+  try {
+    const { items, deliveryType, location, requestedDate, paymentMethod, notes, customerInfo, advancePaid, razorpayOrderId, razorpayPaymentId } = req.body;
+    const userId = req.user._id;
+
+    let deliveryFee = 0;
+    
+    if (deliveryType === 'Delivery') {
+      if (!location || !location.lat || !location.lng) {
+        return res.status(400).json({ message: 'Delivery location is required for delivery orders.' });
+      }
+
+      const shopLat = parseFloat(process.env.SHOP_LAT) || 13.6288;
+      const shopLng = parseFloat(process.env.SHOP_LNG) || 79.4192;
+      
+      const distanceKm = calculateDistance(shopLat, shopLng, location.lat, location.lng);
+      
+      if (distanceKm > 10) {
+        return res.status(400).json({ message: 'Your location is outside our 10km delivery zone. Switch to Pickup or choose a closer location.' });
+      }
+      
+      deliveryFee = 50; // Flat ₹50 for delivery
+    }
+
+    const subtotal = items.reduce((acc, item) => acc + (item.price * item.qty), 0);
+    const totalAmount = subtotal + deliveryFee;
+
+    const newOrder = await Order.create({
+      user: userId,
+      customerInfo: customerInfo || { name: req.user.name, mobile: req.user.mobile },
+      items,
+      totalAmount,
+      deliveryType,
+      location: deliveryType === 'Delivery' ? location : null,
+      requestedDate,
+      paymentMethod,
+      paymentStatus: advancePaid ? 'Partial' : (paymentMethod === 'Online' ? 'Pending' : 'Pending'),
+      status: 'Received',
+      notes,
+      razorpayOrderId: razorpayOrderId || null,
+      razorpayPaymentId: razorpayPaymentId || null,
+    });
+
+    // Add loyalty points
+    const pointsEarned = Math.floor(totalAmount / 10);
+    await User.findByIdAndUpdate(userId, { $inc: { loyaltyPoints: pointsEarned } });
+
+    // Send Admin Notification
+    const notification = await Notification.create({
+      userId: null, // Global or admin specific, we'll just not assign to a user or assign to all admins
+      type: 'new_order',
+      message: `New order from ${customerInfo?.name || req.user.name} — ₹${totalAmount}`,
+      actionTab: 'orders'
+    });
+
+    // Fetch admins and assign the notification
+    const admins = await User.find({ role: 'admin' });
+    for (const admin of admins) {
+      // In a real app we might duplicate notifications per admin, or have a shared admin pool
+      // For now, emit to admin_room
+    }
+
+    const io = req.app.get('io');
+    if (io) {
+      io.to('admin_room').emit('new_notification', notification);
+      io.to('admin_room').emit('new_order', {
+        orderId: newOrder._id,
+        customerName: customerInfo?.name || req.user.name,
+        totalAmount
+      });
+    }
+
+    if (advancePaid) {
+      const advanceAmount = Math.ceil(totalAmount / 2);
+      const paymentNotification = await Notification.create({
+        userId: null,
+        type: 'payment_received',
+        message: `💳 Advance payment of ₹${advanceAmount} received from ${customerInfo?.name || req.user.name}`,
+        actionTab: 'orders'
+      });
+      if (io) {
+        io.to('admin_room').emit('payment_received', paymentNotification);
+      }
+    }
+
+    // Send emails
+    const adminEmail = process.env.ADMIN_EMAIL;
+    if (adminEmail) {
+      sendAdminNewOrderEmail(newOrder, adminEmail);
+    }
+    if (customerInfo && customerInfo.email) {
+      sendCustomerConfirmationEmail(newOrder);
+    }
+
+    res.status(201).json(newOrder);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// @desc    Get logged in user orders
+// @route   GET /api/orders/my
+const getMyOrders = async (req, res) => {
+  try {
+    const orders = await Order.find({ user: req.user._id }).sort({ createdAt: -1 });
+    res.json(orders);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// @desc    Get order by ID
+// @route   GET /api/orders/:id
+const getOrderById = async (req, res) => {
+  try {
+    const order = await Order.findById(req.params.id).populate('user', 'name email mobile');
+    
+    if (!order) {
+      return res.status(404).json({ message: 'Order not found' });
+    }
+
+    // Optional: check if customer owns the order or is admin
+    if (order.user._id.toString() !== req.user._id.toString() && req.user.role !== 'admin') {
+      return res.status(403).json({ message: 'Not authorized to view this order' });
+    }
+
+    res.json(order);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
 
 // @desc    Get all orders (Admin)
 // @route   GET /api/orders
@@ -139,8 +290,234 @@ const cancelOrder = async (req, res) => {
   }
 };
 
+const getAnalytics = async (req, res) => {
+  try {
+    const { range } = req.query; // daily, weekly, monthly, annually
+    const now = new Date();
+    let currentStart, currentEnd, prevStart, prevEnd;
+
+    currentEnd = new Date();
+
+    if (range === 'daily') {
+      currentStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      prevStart = new Date(currentStart);
+      prevStart.setDate(prevStart.getDate() - 1);
+      prevEnd = new Date(currentStart);
+    } else if (range === 'weekly') {
+      currentStart = new Date();
+      currentStart.setDate(currentStart.getDate() - 7);
+      prevStart = new Date(currentStart);
+      prevStart.setDate(prevStart.getDate() - 7);
+      prevEnd = new Date(currentStart);
+    } else if (range === 'monthly') {
+      currentStart = new Date(now.getFullYear(), now.getMonth(), 1);
+      prevStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+      prevEnd = new Date(now.getFullYear(), now.getMonth(), 1);
+    } else if (range === 'annually') {
+      currentStart = new Date(now.getFullYear(), 0, 1);
+      prevStart = new Date(now.getFullYear() - 1, 0, 1);
+      prevEnd = new Date(now.getFullYear(), 0, 1);
+    } else {
+      currentStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      prevStart = new Date(currentStart);
+      prevStart.setDate(prevStart.getDate() - 1);
+      prevEnd = new Date(currentStart);
+    }
+
+    // Helper to get orders matching a range
+    const getPeriodStats = async (start, end) => {
+      return await Order.aggregate([
+        { $match: { createdAt: { $gte: start, $lt: end }, status: { $ne: 'Cancelled' } } },
+        { $unwind: '$items' },
+        {
+          $group: {
+            _id: null,
+            totalRevenue: { $sum: '$totalAmount' },
+            uniqueOrders: { $addToSet: '$_id' },
+            itemsSold: {
+              $push: { name: '$items.name', qty: '$items.qty' },
+            },
+          },
+        },
+      ]);
+    };
+
+    const currentStatsArray = await getPeriodStats(currentStart, currentEnd);
+    const prevStatsArray = await getPeriodStats(prevStart, prevEnd);
+
+    const currentStats = currentStatsArray[0] || { totalRevenue: 0, uniqueOrders: [], itemsSold: [] };
+    const prevStats = prevStatsArray[0] || { totalRevenue: 0, uniqueOrders: [] };
+
+    const totalRevenue = currentStats.totalRevenue;
+    const totalOrders = currentStats.uniqueOrders.length;
+    const prevTotalRevenue = prevStats.totalRevenue;
+    const prevTotalOrders = prevStats.uniqueOrders.length;
+
+    const avgOrderValue = totalOrders > 0 ? totalRevenue / totalOrders : 0;
+
+    let revenueGrowth = 0;
+    if (prevTotalRevenue > 0) revenueGrowth = ((totalRevenue - prevTotalRevenue) / prevTotalRevenue) * 100;
+    else if (totalRevenue > 0) revenueGrowth = 100;
+
+    let ordersGrowth = 0;
+    if (prevTotalOrders > 0) ordersGrowth = ((totalOrders - prevTotalOrders) / prevTotalOrders) * 100;
+    else if (totalOrders > 0) ordersGrowth = 100;
+
+    // Top item
+    const itemCounts = {};
+    currentStats.itemsSold.forEach(item => {
+      itemCounts[item.name] = (itemCounts[item.name] || 0) + item.qty;
+    });
+    let topItem = { name: 'None', unitsSold: 0 };
+    for (const [name, qty] of Object.entries(itemCounts)) {
+      if (qty > topItem.unitsSold) topItem = { name, unitsSold: qty };
+    }
+
+    // Comprehensive aggregations for current period
+    const aggregations = await Order.aggregate([
+      { $match: { createdAt: { $gte: currentStart, $lt: currentEnd }, status: { $ne: 'Cancelled' } } },
+      {
+        $facet: {
+          timeSeries: [
+            {
+              $group: {
+                _id: {
+                  $dateToString: {
+                    format: range === 'daily' ? '%H:00' : range === 'annually' ? '%Y-%m' : '%Y-%m-%d',
+                    date: '$createdAt',
+                  },
+                },
+                revenue: { $sum: '$totalAmount' },
+                orders: { $sum: 1 },
+              },
+            },
+            { $sort: { _id: 1 } },
+          ],
+          categories: [
+            { $unwind: '$items' },
+            {
+              $group: {
+                _id: '$items.category',
+                revenue: { $sum: { $multiply: ['$items.price', '$items.qty'] } },
+              },
+            },
+          ],
+          payment: [
+            {
+              $group: {
+                _id: '$paymentMethod',
+                count: { $sum: 1 },
+              },
+            },
+          ],
+          delivery: [
+            {
+              $group: {
+                _id: '$deliveryType',
+                count: { $sum: 1 },
+              },
+            },
+          ],
+          peak: [
+            {
+              $group: {
+                _id: {
+                  day: { $dayOfWeek: '$createdAt' },
+                  hour: { $hour: '$createdAt' },
+                },
+                orders: { $sum: 1 },
+              },
+            },
+          ],
+        },
+      },
+    ]);
+
+    const result = aggregations[0];
+
+    const revenueTimeSeries = result.timeSeries.map(t => ({ label: t._id, revenue: t.revenue }));
+    const ordersTimeSeries = result.timeSeries.map(t => ({ label: t._id, orders: t.orders }));
+    
+    // Fill category breakdown
+    const categoryBreakdown = result.categories.map(c => ({ category: c._id || 'Unknown', revenue: c.revenue }));
+    
+    // Fill payment split
+    let onlineCount = 0, codCount = 0;
+    result.payment.forEach(p => {
+      if (p._id === 'Online') onlineCount = p.count;
+      else if (p._id === 'COD') codCount = p.count;
+    });
+
+    // Fill delivery split
+    let deliveryCount = 0, pickupCount = 0;
+    result.delivery.forEach(d => {
+      if (d._id === 'Delivery') deliveryCount = d.count;
+      else if (d._id === 'Pickup') pickupCount = d.count;
+    });
+
+    // Peak hours
+    const daysMap = [null, 'Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    const peakHours = result.peak.map(p => ({
+      day: daysMap[p._id.day],
+      hour: p._id.hour,
+      orders: p.orders,
+    }));
+
+    // New vs Returning customers
+    const currentOrdersUsers = await Order.distinct('user', { createdAt: { $gte: currentStart, $lt: currentEnd }, status: { $ne: 'Cancelled' } });
+    
+    // Find how many of these users had their FIRST order in this period vs before
+    const userFirstOrders = await Order.aggregate([
+      { $match: { user: { $in: currentOrdersUsers }, status: { $ne: 'Cancelled' } } },
+      {
+        $group: {
+          _id: '$user',
+          firstOrderDate: { $min: '$createdAt' },
+          totalOrdersCount: { $sum: 1 }
+        }
+      }
+    ]);
+
+    let newCustomers = 0;
+    let returningCustomers = 0;
+
+    userFirstOrders.forEach(u => {
+      if (u.firstOrderDate >= currentStart) {
+        newCustomers++;
+      } else {
+        returningCustomers++;
+      }
+    });
+
+    res.json({
+      summary: {
+        totalRevenue,
+        totalOrders,
+        avgOrderValue,
+        topItem,
+        revenueGrowth: Math.round(revenueGrowth),
+        ordersGrowth: Math.round(ordersGrowth),
+      },
+      revenueTimeSeries,
+      ordersTimeSeries,
+      categoryBreakdown,
+      paymentSplit: { online: onlineCount, cod: codCount },
+      deliverySplit: { delivery: deliveryCount, pickup: pickupCount },
+      peakHours,
+      newCustomers,
+      returningCustomers,
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 module.exports = {
   getOrders,
   updateOrderStatus,
   cancelOrder,
+  getAnalytics,
+  createOrder,
+  getMyOrders,
+  getOrderById,
 };

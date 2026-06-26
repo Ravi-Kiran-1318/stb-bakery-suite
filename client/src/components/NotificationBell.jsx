@@ -31,7 +31,7 @@ const NotificationBell = () => {
 
   const fetchNotifications = async () => {
     try {
-      const { data } = await axiosInstance.get('/api/notifications');
+      const { data } = await axiosInstance.get('/notifications');
       setNotifications(data);
     } catch (error) {
       console.error('Failed to fetch notifications', error);
@@ -42,7 +42,7 @@ const NotificationBell = () => {
 
   const handleMarkAsRead = async (id, actionTab) => {
     try {
-      await axiosInstance.patch(`/api/notifications/${id}/read`);
+      await axiosInstance.patch(`/notifications/${id}/read`);
       setNotifications((prev) =>
         prev.map((n) => (n._id === id ? { ...n, read: true } : n))
       );
@@ -59,7 +59,7 @@ const NotificationBell = () => {
 
   const handleMarkAllRead = async () => {
     try {
-      await axiosInstance.patch('/api/notifications/mark-all-read');
+      await axiosInstance.patch('/notifications/mark-all-read');
       setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
     } catch (error) {
       console.error('Failed to mark all as read', error);
@@ -68,7 +68,7 @@ const NotificationBell = () => {
 
   const handleClearAll = async () => {
     try {
-      await axiosInstance.delete('/api/notifications/clear-all');
+      await axiosInstance.delete('/notifications/clear-all');
       setNotifications([]);
     } catch (error) {
       console.error('Failed to clear notifications', error);
@@ -111,7 +111,7 @@ const NotificationBell = () => {
       {isOpen && (
         <>
           <div className="fixed inset-0 z-40" onClick={() => setIsOpen(false)}></div>
-          <div className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-md z-50 border border-border overflow-hidden">
+          <div className="absolute -right-16 sm:right-0 mt-2 w-80 max-w-[90vw] bg-white rounded-lg shadow-md z-50 border border-border overflow-hidden">
             <div className="flex justify-between items-center p-3 border-b border-border bg-surface">
               <h3 className="font-semibold text-dark">Notifications</h3>
               <div className="flex gap-2">
@@ -122,7 +122,10 @@ const NotificationBell = () => {
             
             <div className="max-h-[300px] overflow-y-auto">
               {notifications.length === 0 ? (
-                <div className="p-4 text-center text-sm text-muted">No notifications yet.</div>
+                <div className="p-8 text-center border-b border-border">
+                  <div className="text-3xl mb-2">🔔</div>
+                  <p className="text-sm font-medium text-dark">No notifications yet.</p>
+                </div>
               ) : (
                 notifications.map((n) => (
                   <div 

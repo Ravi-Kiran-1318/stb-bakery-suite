@@ -3,12 +3,12 @@ import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
 
 // Pages
-import Home from './pages/customer/Home';
-import Shop from './pages/customer/Shop';
-import Cart from './pages/customer/Cart';
+import Home from './pages/public/Home';
+import Shop from './pages/public/Shop';
+import Cart from './pages/public/Cart';
 import Login from './pages/auth/Login';
 import Signup from './pages/auth/Signup';
-import Contact from './pages/customer/Contact';
+import Contact from './pages/public/Contact';
 import Checkout from './pages/customer/Checkout';
 import OrderConfirmation from './pages/customer/OrderConfirmation';
 import CustomerDashboard from './pages/customer/CustomerDashboard';
@@ -17,6 +17,7 @@ import PrivateRoute from './components/PrivateRoute';
 import Navbar from './components/Navbar';
 import ToastContainer from './components/Toast';
 import PageWrapper from './components/PageWrapper';
+import FloatingHomeButton from './components/FloatingHomeButton';
 
 // A helper component to handle route transitions
 const AnimatedRoutes = () => {
@@ -75,6 +76,7 @@ function App() {
       <Navbar />
       <ToastContainer />
       <AnimatedRoutes />
+      <FloatingHomeButton />
     </BrowserRouter>
   );
 }

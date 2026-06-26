@@ -3,6 +3,8 @@ import { AuthContext } from './AuthContext';
 
 export const CartContext = createContext();
 
+export const useCart = () => useContext(CartContext);
+
 export const CartProvider = ({ children }) => {
   const { user } = useContext(AuthContext);
   const [items, setItems] = useState(() => {
@@ -33,6 +35,8 @@ export const CartProvider = ({ children }) => {
         {
           productId: product._id,
           nameEN: product.nameEN,
+          nameTe: product.nameTe,
+          imageUrl: product.imageUrl,
           price: product.price,
           qty: 1,
         },

@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { motion } from 'framer-motion';
-import axiosInstance from '../../../utils/axiosInstance';
-import { ToastContext } from '../../../context/ToastContext';
-import Loader from '../../../components/Loader';
-import ErrorState from '../../../components/ErrorState';
-import { formatCurrency } from '../../../utils/formatCurrency';
+import axiosInstance from '../../utils/axiosInstance';
+import { ToastContext } from '../../context/ToastContext';
+import Loader from '../../components/Loader';
+import ErrorState from '../../components/ErrorState';
+import { formatCurrency } from '../../utils/formatCurrency';
 
 const OrdersTab = () => {
   const [orders, setOrders] = useState([]);
@@ -25,7 +25,7 @@ const OrdersTab = () => {
   const fetchOrders = async () => {
     setLoading(true);
     try {
-      const { data } = await axiosInstance.get(`/api/orders`, {
+      const { data } = await axiosInstance.get(`/orders`, {
         params: { range, status: statusFilter, search }
       });
       setOrders(data);
@@ -43,7 +43,7 @@ const OrdersTab = () => {
 
   const handleStatusUpdate = async (id, newStatus) => {
     try {
-      await axiosInstance.patch(`/api/orders/${id}/status`, { status: newStatus });
+      await axiosInstance.patch(`/orders/${id}/status`, { status: newStatus });
       setOrders(orders.map(o => o._id === id ? { ...o, status: newStatus } : o));
       addToast(`Order marked as ${newStatus}`, 'success');
     } catch (err) {
@@ -54,7 +54,7 @@ const OrdersTab = () => {
   const handleCancelOrder = async () => {
     if (!orderToCancel) return;
     try {
-      await axiosInstance.patch(`/api/orders/${orderToCancel}/cancel`, {
+      await axiosInstance.patch(`/orders/${orderToCancel}/cancel`, {
         reason: cancelReason,
         cancelledBy: 'admin'
       });
@@ -122,12 +122,14 @@ const OrdersTab = () => {
 
       {/* Orders List */}
       {loading ? (
-        <Loader />
+        <div className="min-h-[50vh] flex items-center justify-center"><Loader /></div>
       ) : error ? (
-        <ErrorState message={error} onRetry={fetchOrders} />
+        <div className="min-h-[50vh] flex items-center justify-center"><ErrorState message={error} onRetry={fetchOrders} /></div>
       ) : orders.length === 0 ? (
-        <div className="bg-white p-8 rounded-lg shadow-sm text-center border border-border">
-          <p className="text-muted">No orders found matching your filters.</p>
+        <div className="bg-white py-16 px-4 rounded-lg shadow-sm text-center border border-border">
+          <div className="text-5xl mb-4">📦</div>
+          <h3 className="text-xl font-bold text-dark mb-2">No orders received yet.</h3>
+          <p className="text-muted">Share your shop link to start getting orders!</p>
         </div>
       ) : (
         <div className="grid gap-6">

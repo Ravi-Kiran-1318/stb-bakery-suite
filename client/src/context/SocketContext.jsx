@@ -11,8 +11,14 @@ export const SocketProvider = ({ children }) => {
   useEffect(() => {
     if (loading || !user) return;
 
-    const newSocket = io(import.meta.env.VITE_API_URL || 'http://localhost:5000', {
+    // Socket.IO must connect to the SERVER ROOT, not the /api sub-path
+    const socketUrl = import.meta.env.VITE_SOCKET_URL ||
+      (import.meta.env.VITE_API_URL || '').replace('/api', '') ||
+      'http://localhost:5000';
+
+    const newSocket = io(socketUrl, {
       withCredentials: true,
+      transports: ['websocket', 'polling'],  // prefer websocket to avoid polling CORS issues
     });
 
     setSocket(newSocket);

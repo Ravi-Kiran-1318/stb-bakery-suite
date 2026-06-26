@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useContext, useRef } from 'react';
-import axiosInstance from '../../../utils/axiosInstance';
-import { ToastContext } from '../../../context/ToastContext';
-import Loader from '../../../components/Loader';
-import ErrorState from '../../../components/ErrorState';
-import ProductCard from '../../../components/ProductCard';
+import axiosInstance from '../../utils/axiosInstance';
+import { ToastContext } from '../../context/ToastContext';
+import Loader from '../../components/Loader';
+import ErrorState from '../../components/ErrorState';
+import ProductCard from '../../components/ProductCard';
 
 const ProductsTab = () => {
   const [products, setProducts] = useState([]);
@@ -42,7 +42,7 @@ const ProductsTab = () => {
   const fetchProducts = async () => {
     setLoading(true);
     try {
-      const { data } = await axiosInstance.get('/api/products/all');
+      const { data } = await axiosInstance.get('/products/all');
       setProducts(data);
       setError('');
     } catch (err) {
@@ -114,13 +114,13 @@ const ProductsTab = () => {
 
     try {
       if (isEditing) {
-        const res = await axiosInstance.patch(`/api/products/${editingId}`, data, {
+        const res = await axiosInstance.patch(`/products/${editingId}`, data, {
           headers: { 'Content-Type': 'multipart/form-data' }
         });
         setProducts(products.map(p => p._id === editingId ? res.data : p));
         addToast('Product updated successfully', 'success');
       } else {
-        const res = await axiosInstance.post('/api/products', data, {
+        const res = await axiosInstance.post('/products', data, {
           headers: { 'Content-Type': 'multipart/form-data' }
         });
         setProducts([res.data, ...products]);
@@ -136,7 +136,7 @@ const ProductsTab = () => {
 
   const handleDeleteConfirm = async () => {
     try {
-      await axiosInstance.delete(`/api/products/${deleteId}`);
+      await axiosInstance.delete(`/products/${deleteId}`);
       setProducts(products.filter(p => p._id !== deleteId));
       addToast('Product deleted', 'success');
       setDeleteId(null);
@@ -147,7 +147,7 @@ const ProductsTab = () => {
 
   const handleToggleAvailability = async (id) => {
     try {
-      const res = await axiosInstance.patch(`/api/products/${id}/toggle`);
+      const res = await axiosInstance.patch(`/products/${id}/toggle`);
       setProducts(products.map(p => p._id === id ? res.data : p));
       addToast(`Product marked as ${res.data.isAvailable ? 'Available' : 'Out of Stock'}`, 'info');
     } catch (err) {
@@ -190,9 +190,18 @@ const ProductsTab = () => {
 
       {/* Product Grid */}
       {loading ? (
-        <Loader />
+        <div className="min-h-[50vh] flex items-center justify-center"><Loader /></div>
       ) : error ? (
-        <ErrorState message={error} onRetry={fetchProducts} />
+        <div className="min-h-[50vh] flex items-center justify-center"><ErrorState message={error} onRetry={fetchProducts} /></div>
+      ) : products.length === 0 ? (
+        <div className="bg-white py-16 px-4 rounded-lg shadow-sm text-center border border-border">
+          <div className="text-5xl mb-4">🥐</div>
+          <h3 className="text-xl font-bold text-dark mb-2">No products added yet.</h3>
+          <p className="text-muted mb-6">Start building your bakery menu by adding products.</p>
+          <button onClick={openAddModal} className="btn-primary inline-flex items-center gap-2">
+            + Add Your First Product
+          </button>
+        </div>
       ) : (
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
           {filteredProducts.map(product => (
@@ -228,7 +237,9 @@ const ProductsTab = () => {
             </div>
           ))}
           {filteredProducts.length === 0 && (
-            <div className="col-span-full py-12 text-center text-muted">No products found.</div>
+            <div className="col-span-full bg-white p-8 rounded-lg shadow-sm text-center border border-border">
+              <p className="text-muted">No products found matching your filters.</p>
+            </div>
           )}
         </div>
       )}

@@ -1,11 +1,27 @@
 let io;
 
+// Build allowed origins list from env (mirrors Express CORS)
+const getAllowedOrigins = () =>
+  (process.env.CLIENT_URL || 'http://localhost:5173')
+    .split(',')
+    .map(o => o.trim())
+    .filter(Boolean);
+
 module.exports = {
   init: (httpServer) => {
     io = require('socket.io')(httpServer, {
       cors: {
-        origin: process.env.CLIENT_URL || 'http://localhost:5173',
+        // Must use explicit origin function (not '*') when credentials: true
+        origin: (origin, callback) => {
+          const allowed = getAllowedOrigins();
+          if (!origin || allowed.includes(origin)) {
+            callback(null, true);
+          } else {
+            callback(new Error(`Socket CORS: origin '${origin}' not allowed`));
+          }
+        },
         credentials: true,
+        methods: ['GET', 'POST'],
       },
     });
 

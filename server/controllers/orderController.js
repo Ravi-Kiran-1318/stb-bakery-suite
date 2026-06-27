@@ -300,6 +300,7 @@ const getAnalytics = async (req, res) => {
     const { range } = req.query; // daily, weekly, monthly, annually
     const now = new Date();
     let currentStart, currentEnd, prevStart, prevEnd;
+    let formatStr = '';
 
     currentEnd = new Date();
 
@@ -308,77 +309,88 @@ const getAnalytics = async (req, res) => {
       prevStart = new Date(currentStart);
       prevStart.setDate(prevStart.getDate() - 1);
       prevEnd = new Date(currentStart);
+      formatStr = '%H:00';
     } else if (range === 'weekly') {
       currentStart = new Date();
       currentStart.setDate(currentStart.getDate() - 7);
       prevStart = new Date(currentStart);
       prevStart.setDate(prevStart.getDate() - 7);
       prevEnd = new Date(currentStart);
+      formatStr = '%Y-%m-%d';
     } else if (range === 'monthly') {
       currentStart = new Date(now.getFullYear(), now.getMonth(), 1);
       prevStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
       prevEnd = new Date(now.getFullYear(), now.getMonth(), 1);
+      formatStr = '%Y-%m-%d';
     } else if (range === 'annually') {
       currentStart = new Date(now.getFullYear(), 0, 1);
       prevStart = new Date(now.getFullYear() - 1, 0, 1);
       prevEnd = new Date(now.getFullYear(), 0, 1);
+      formatStr = '%Y-%m';
     } else {
       currentStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
       prevStart = new Date(currentStart);
       prevStart.setDate(prevStart.getDate() - 1);
       prevEnd = new Date(currentStart);
+      formatStr = '%H:00';
     }
 
-    // Helper to get orders matching a range
-    const getPeriodStats = async (start, end) => {
-      return await Order.aggregate([
-        { $match: { createdAt: { $gte: start, $lt: end }, status: { $ne: 'Cancelled' } } },
-        { $unwind: '$items' },
-        {
-          $group: {
-            _id: null,
-            totalRevenue: { $sum: '$totalAmount' },
-            uniqueOrders: { $addToSet: '$_id' },
-            itemsSold: {
-              $push: { name: '$items.nameEN', qty: '$items.qty' },
-            },
-          },
-        },
-      ]);
-    };
+    // --- JS based computation for highest accuracy ---
+    const currentOrders = await Order.find({ createdAt: { $gte: currentStart, $lt: currentEnd }, status: { $ne: 'Cancelled' } }).populate('items.productId');
+    const prevOrders = await Order.find({ createdAt: { $gte: prevStart, $lt: prevEnd }, status: { $ne: 'Cancelled' } });
 
-    const currentStatsArray = await getPeriodStats(currentStart, currentEnd);
-    const prevStatsArray = await getPeriodStats(prevStart, prevEnd);
+    const totalRevenue = currentOrders.reduce((sum, order) => sum + (order.totalAmount || 0), 0);
+    const totalOrders = currentOrders.length;
+    
+    const prevTotalRevenue = prevOrders.reduce((sum, order) => sum + (order.totalAmount || 0), 0);
+    const prevTotalOrders = prevOrders.length;
 
-    const currentStats = currentStatsArray[0] || { totalRevenue: 0, uniqueOrders: [], itemsSold: [] };
-    const prevStats = prevStatsArray[0] || { totalRevenue: 0, uniqueOrders: [] };
-
-    const totalRevenue = currentStats.totalRevenue;
-    const totalOrders = currentStats.uniqueOrders.length;
-    const prevTotalRevenue = prevStats.totalRevenue;
-    const prevTotalOrders = prevStats.uniqueOrders.length;
-
-    const avgOrderValue = totalOrders > 0 ? totalRevenue / totalOrders : 0;
+    const avgOrderValue = totalOrders > 0 ? Math.round(totalRevenue / totalOrders) : 0;
 
     let revenueGrowth = 0;
-    if (prevTotalRevenue > 0) revenueGrowth = ((totalRevenue - prevTotalRevenue) / prevTotalRevenue) * 100;
+    if (prevTotalRevenue > 0) revenueGrowth = Math.round(((totalRevenue - prevTotalRevenue) / prevTotalRevenue) * 100);
     else if (totalRevenue > 0) revenueGrowth = 100;
 
     let ordersGrowth = 0;
-    if (prevTotalOrders > 0) ordersGrowth = ((totalOrders - prevTotalOrders) / prevTotalOrders) * 100;
+    if (prevTotalOrders > 0) ordersGrowth = Math.round(((totalOrders - prevTotalOrders) / prevTotalOrders) * 100);
     else if (totalOrders > 0) ordersGrowth = 100;
 
     // Top item
     const itemCounts = {};
-    currentStats.itemsSold.forEach(item => {
-      itemCounts[item.name] = (itemCounts[item.name] || 0) + item.qty;
+    const categoryTotals = {};
+    let onlineCount = 0, codCount = 0;
+    let deliveryCount = 0, pickupCount = 0;
+    
+    currentOrders.forEach(order => {
+      // Payment split
+      if (order.paymentMethod === 'Online') onlineCount++;
+      else codCount++; // Since the other is Cash on Delivery
+      
+      // Delivery split
+      if (order.deliveryType === 'Delivery') deliveryCount++;
+      else pickupCount++;
+      
+      order.items.forEach(item => {
+        const name = item.nameEN || item.name || 'Unknown';
+        itemCounts[name] = (itemCounts[name] || 0) + (item.qty || 1);
+        
+        // Category Split
+        let cat = 'Other';
+        if (item.productId && item.productId.category) {
+          cat = item.productId.category;
+        }
+        categoryTotals[cat] = (categoryTotals[cat] || 0) + ((item.price || 0) * (item.qty || 1));
+      });
     });
+
     let topItem = { name: 'None', unitsSold: 0 };
     for (const [name, qty] of Object.entries(itemCounts)) {
       if (qty > topItem.unitsSold) topItem = { name, unitsSold: qty };
     }
+    
+    const categoryBreakdown = Object.keys(categoryTotals).map(cat => ({ category: cat, revenue: categoryTotals[cat] }));
 
-    // Comprehensive aggregations for current period
+    // Time Series and Peak Hours (still good for aggregation)
     const aggregations = await Order.aggregate([
       { $match: { createdAt: { $gte: currentStart, $lt: currentEnd }, status: { $ne: 'Cancelled' } } },
       {
@@ -386,90 +398,29 @@ const getAnalytics = async (req, res) => {
           timeSeries: [
             {
               $group: {
-                _id: {
-                  $dateToString: {
-                    format: range === 'daily' ? '%H:00' : range === 'annually' ? '%Y-%m' : '%Y-%m-%d',
-                    date: '$createdAt',
-                  },
-                },
+                _id: { $dateToString: { format: formatStr, date: '$createdAt' } },
                 revenue: { $sum: '$totalAmount' },
                 orders: { $sum: 1 },
               },
             },
             { $sort: { _id: 1 } },
           ],
-          categories: [
-            { $unwind: '$items' },
-            {
-              $lookup: {
-                from: 'products',
-                localField: 'items.product',
-                foreignField: '_id',
-                as: 'productDoc'
-              }
-            },
-            { $unwind: { path: '$productDoc', preserveNullAndEmptyArrays: true } },
-            {
-              $group: {
-                _id: { $ifNull: ['$productDoc.category', 'Other'] },
-                revenue: { $sum: { $multiply: ['$items.price', '$items.qty'] } },
-              },
-            },
-          ],
-          payment: [
-            {
-              $group: {
-                _id: '$paymentMethod',
-                count: { $sum: 1 },
-              },
-            },
-          ],
-          delivery: [
-            {
-              $group: {
-                _id: '$deliveryType',
-                count: { $sum: 1 },
-              },
-            },
-          ],
           peak: [
             {
               $group: {
-                _id: {
-                  day: { $dayOfWeek: '$createdAt' },
-                  hour: { $hour: '$createdAt' },
-                },
+                _id: { day: { $dayOfWeek: '$createdAt' }, hour: { $hour: '$createdAt' } },
                 orders: { $sum: 1 },
               },
             },
           ],
-        },
-      },
+        }
+      }
     ]);
 
     const result = aggregations[0];
-
     const revenueTimeSeries = result.timeSeries.map(t => ({ label: t._id, revenue: t.revenue }));
     const ordersTimeSeries = result.timeSeries.map(t => ({ label: t._id, orders: t.orders }));
     
-    // Fill category breakdown
-    const categoryBreakdown = result.categories.map(c => ({ category: c._id || 'Unknown', revenue: c.revenue }));
-    
-    // Fill payment split
-    let onlineCount = 0, codCount = 0;
-    result.payment.forEach(p => {
-      if (p._id === 'Online') onlineCount = p.count;
-      else if (p._id === 'COD') codCount = p.count;
-    });
-
-    // Fill delivery split
-    let deliveryCount = 0, pickupCount = 0;
-    result.delivery.forEach(d => {
-      if (d._id === 'Delivery') deliveryCount = d.count;
-      else if (d._id === 'Pickup') pickupCount = d.count;
-    });
-
-    // Peak hours
     const daysMap = [null, 'Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
     const peakHours = result.peak.map(p => ({
       day: daysMap[p._id.day],
@@ -479,39 +430,20 @@ const getAnalytics = async (req, res) => {
 
     // New vs Returning customers
     const currentOrdersUsers = await Order.distinct('user', { createdAt: { $gte: currentStart, $lt: currentEnd }, status: { $ne: 'Cancelled' } });
-    
-    // Find how many of these users had their FIRST order in this period vs before
     const userFirstOrders = await Order.aggregate([
       { $match: { user: { $in: currentOrdersUsers }, status: { $ne: 'Cancelled' } } },
-      {
-        $group: {
-          _id: '$user',
-          firstOrderDate: { $min: '$createdAt' },
-          totalOrdersCount: { $sum: 1 }
-        }
-      }
+      { $group: { _id: '$user', firstOrderDate: { $min: '$createdAt' } } }
     ]);
 
     let newCustomers = 0;
     let returningCustomers = 0;
-
     userFirstOrders.forEach(u => {
-      if (u.firstOrderDate >= currentStart) {
-        newCustomers++;
-      } else {
-        returningCustomers++;
-      }
+      if (u.firstOrderDate >= currentStart) newCustomers++;
+      else returningCustomers++;
     });
 
     res.json({
-      summary: {
-        totalRevenue,
-        totalOrders,
-        avgOrderValue,
-        topItem,
-        revenueGrowth: Math.round(revenueGrowth),
-        ordersGrowth: Math.round(ordersGrowth),
-      },
+      summary: { totalRevenue, totalOrders, avgOrderValue, topItem, revenueGrowth, ordersGrowth },
       revenueTimeSeries,
       ordersTimeSeries,
       categoryBreakdown,

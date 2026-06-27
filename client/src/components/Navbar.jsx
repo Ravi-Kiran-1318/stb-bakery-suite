@@ -67,13 +67,10 @@ const Navbar = () => {
       initial={{ opacity: 0, y: -20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4 }}
-      className="sticky top-0 z-50"
+      className="sticky top-0 z-50 bg-white"
       style={{
-        background: 'linear-gradient(to right, #ffffff, #fffdf2, #ffffff)',
-        borderBottom: '1px solid rgba(212,175,55,0.3)',
-        backdropFilter: 'blur(16px)',
-        WebkitBackdropFilter: 'blur(16px)',
-        boxShadow: '0 2px 10px rgba(0,0,0,0.05)',
+        borderBottom: '1px solid #f1f5f9',
+        boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)'
       }}
     >
       {/* ── Navbar inner container — responsive padding ── */}

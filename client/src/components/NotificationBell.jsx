@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect, useContext, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axiosInstance from '../utils/axiosInstance';
 import { SocketContext } from '../context/SocketContext';
@@ -10,6 +10,21 @@ const NotificationBell = () => {
   const { socket } = useContext(SocketContext);
   const { user } = useContext(AuthContext);
   const navigate = useNavigate();
+  const wrapperRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (wrapperRef.current && !wrapperRef.current.contains(event.target)) {
+        setIsOpen(false);
+      }
+    };
+    
+    // Add event listener to detect clicks outside
+    document.addEventListener('mousedown', handleClickOutside);
+    
+    // Cleanup
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   useEffect(() => {
     if (user) {
@@ -40,20 +55,26 @@ const NotificationBell = () => {
 
   const unreadCount = notifications.filter((n) => !n.read).length;
 
-  const handleMarkAsRead = async (id, actionTab) => {
+  const handleMarkAsRead = async (id, actionTab, referenceId) => {
     try {
       await axiosInstance.patch(`/notifications/${id}/read`);
       setNotifications((prev) =>
         prev.map((n) => (n._id === id ? { ...n, read: true } : n))
       );
-      setIsOpen(false);
-      
-      if (actionTab) {
-        if (user.role === 'admin') navigate(`/admin/dashboard?tab=${actionTab}`);
-        else navigate(`/customer/dashboard?tab=${actionTab}`);
-      }
     } catch (error) {
       console.error('Failed to mark as read', error);
+    } finally {
+      setIsOpen(false);
+      
+      if (user?.role === 'admin') {
+        navigate(`/admin/dashboard?tab=notifications`);
+      } else if (actionTab) {
+        let route = `/customer/dashboard?tab=${actionTab}`;
+        if (referenceId) {
+          route += `&highlightOrderId=${referenceId}`;
+        }
+        navigate(route);
+      }
     }
   };
 
@@ -88,15 +109,16 @@ const NotificationBell = () => {
   };
 
   return (
-    <div className="relative">
+    <div className="relative" ref={wrapperRef}>
       <button 
         onClick={() => setIsOpen(!isOpen)}
-        className="relative p-2 text-dark hover:text-accent transition-colors"
+        className="relative p-2 rounded-full transition-colors hover:bg-white/10"
+        style={{ color: 'rgba(212,175,55,0.8)' }}
       >
         <svg 
           xmlns="http://www.w3.org/2000/svg" 
-          fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" 
-          className={`w-6 h-6 ${unreadCount > 0 ? 'animate-[rock_1s_ease-in-out_infinite]' : ''}`}
+          fill="none" viewBox="0 0 24 24" strokeWidth={1.8} stroke="currentColor" 
+          className={`w-5 h-5 ${unreadCount > 0 ? 'animate-[rock_1s_ease-in-out_infinite]' : ''}`}
         >
           <path strokeLinecap="round" strokeLinejoin="round" d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0" />
         </svg>
@@ -110,7 +132,6 @@ const NotificationBell = () => {
 
       {isOpen && (
         <>
-          <div className="fixed inset-0 z-40" onClick={() => setIsOpen(false)}></div>
           <div className="absolute -right-16 sm:right-0 mt-2 w-80 max-w-[90vw] bg-white rounded-lg shadow-md z-50 border border-border overflow-hidden">
             <div className="flex justify-between items-center p-3 border-b border-border bg-surface">
               <h3 className="font-semibold text-dark">Notifications</h3>
@@ -130,7 +151,7 @@ const NotificationBell = () => {
                 notifications.map((n) => (
                   <div 
                     key={n._id} 
-                    onClick={() => handleMarkAsRead(n._id, n.actionTab)}
+                    onClick={() => handleMarkAsRead(n._id, n.actionTab, n.referenceId)}
                     className={`p-3 border-b border-border hover:bg-surface cursor-pointer transition-colors ${!n.read ? 'border-l-4 border-l-accent bg-amber-50/30' : ''}`}
                   >
                     <p className="text-sm text-dark">{n.message}</p>

@@ -18,6 +18,9 @@ const notificationSchema = new mongoose.Schema(
     actionTab: {
       type: String,
     },
+    referenceId: {
+      type: String,
+    },
     read: {
       type: Boolean,
       default: false,

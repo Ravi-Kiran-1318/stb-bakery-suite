@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useCart } from '../../context/CartContext';
 import { useAuth } from '../../context/AuthContext';
 import axiosInstance from '../../utils/axiosInstance';
@@ -21,7 +21,17 @@ const Checkout = () => {
   const [addressText, setAddressText] = useState('');
   const [distanceKm, setDistanceKm] = useState(0);
   
-  const [requestedDate, setRequestedDate] = useState('');
+  const [savedAddresses, setSavedAddresses] = useState([]);
+  const [selectedAddressId, setSelectedAddressId] = useState('');
+  const [isAddingNewAddress, setIsAddingNewAddress] = useState(false);
+  
+  const [requestedDate, setRequestedDate] = useState(() => {
+    const tmrw = new Date();
+    tmrw.setDate(tmrw.getDate() + 1);
+    tmrw.setHours(10, 0, 0, 0);
+    const pad = n => String(n).padStart(2, '0');
+    return `${tmrw.getFullYear()}-${pad(tmrw.getMonth()+1)}-${pad(tmrw.getDate())}T${pad(tmrw.getHours())}:${pad(tmrw.getMinutes())}`;
+  });
   const [paymentMethod, setPaymentMethod] = useState('');
   const [notes, setNotes] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -30,29 +40,41 @@ const Checkout = () => {
     if (items.length === 0) {
       navigate('/shop');
     }
-    
-    // Set default datetime to tomorrow 10 AM
-    const tmrw = new Date();
-    tmrw.setDate(tmrw.getDate() + 1);
-    tmrw.setHours(10, 0, 0, 0);
-    // Format to YYYY-MM-DDThh:mm
-    const pad = n => String(n).padStart(2, '0');
-    setRequestedDate(`${tmrw.getFullYear()}-${pad(tmrw.getMonth()+1)}-${pad(tmrw.getDate())}T${pad(tmrw.getHours())}:${pad(tmrw.getMinutes())}`);
   }, [items, navigate]);
+
+  useEffect(() => {
+    const fetchAddresses = async () => {
+      try {
+        const { data } = await axiosInstance.get('/users/addresses');
+        setSavedAddresses(data);
+        if (data.length > 0) {
+          const defaultAddr = data.find(a => a.isDefault) || data[0];
+          setSelectedAddressId(defaultAddr._id);
+        } else {
+          setIsAddingNewAddress(true);
+        }
+      } catch (error) {
+        console.error("Failed to load addresses", error);
+      }
+    };
+    if (user) fetchAddresses();
+  }, [user]);
 
   const shopLat = parseFloat(import.meta.env.VITE_SHOP_LAT) || 13.6288;
   const shopLng = parseFloat(import.meta.env.VITE_SHOP_LNG) || 79.4192;
   const shopAddress = "Sri Tirupati Venkatachalapathy Bakery, Tirupati";
 
   const subtotal = items.reduce((acc, item) => acc + item.price * item.qty, 0);
-  const deliveryFee = (deliveryType === 'Delivery' && distanceKm <= 10) ? 50 : 0;
+  const deliveryFee = deliveryType === 'Delivery' 
+    ? (!isAddingNewAddress && selectedAddressId ? 50 : (distanceKm <= 10 ? 50 : 0)) 
+    : 0;
   const totalAmount = subtotal + deliveryFee;
 
-  const handleLocationSelect = (lat, lng, address, dist) => {
+  const handleLocationSelect = useCallback((lat, lng, address, dist) => {
     setLocation({ lat, lng, address });
     setAddressText(address);
     setDistanceKm(dist);
-  };
+  }, []);
 
   const getMinDateTime = () => {
     const tmrw = new Date();
@@ -71,9 +93,14 @@ const Checkout = () => {
     if (!requestedDate) return false;
     if (!paymentMethod) return false;
     if (deliveryType === 'Delivery') {
-      if (!location) return false;
-      if (distanceKm > 10) return false;
-      if (!addressText.trim()) return false;
+      if (!isAddingNewAddress && selectedAddressId) {
+        return true;
+      }
+      if (isAddingNewAddress || savedAddresses.length === 0) {
+        if (!location) return false;
+        if (distanceKm > 10) return false;
+        if (!addressText.trim()) return false;
+      }
     }
     return true;
   };
@@ -83,7 +110,19 @@ const Checkout = () => {
     setIsSubmitting(true);
     
     try {
-      const finalLocation = deliveryType === 'Delivery' ? { ...location, address: addressText } : null;
+      let finalLocation = null;
+      if (deliveryType === 'Delivery') {
+        if (!isAddingNewAddress && selectedAddressId) {
+          const sAddr = savedAddresses.find(a => a._id === selectedAddressId);
+          finalLocation = {
+            address: `${sAddr.addressLine1}, ${sAddr.addressLine2 ? sAddr.addressLine2 + ', ' : ''}${sAddr.city}, ${sAddr.state} ${sAddr.pincode}`,
+            lat: sAddr.lat,
+            lng: sAddr.lng
+          };
+        } else {
+          finalLocation = { ...location, address: addressText };
+        }
+      }
       
       const orderData = {
         items,
@@ -103,7 +142,7 @@ const Checkout = () => {
           amount: orderResponse.advanceAmount * 100,
           currency: 'INR',
           name: 'Sri Tirupati Venkatachalapathy Bakery',
-          description: 'Advance Payment (50%)',
+          description: 'Advance Payment (20%)',
           order_id: orderResponse.razorpayOrderId,
           prefill: {
             name: user.name,
@@ -111,6 +150,11 @@ const Checkout = () => {
             contact: user.mobile,
           },
           theme: { color: '#F59E0B' },
+          modal: {
+            ondismiss: function () {
+              setIsSubmitting(false);
+            }
+          },
           handler: async (response) => {
             try {
               const verifyRes = await axiosInstance.post('/payments/verify', {
@@ -130,7 +174,7 @@ const Checkout = () => {
                 
                 clearCart();
                 addToast('Order placed successfully!', 'success');
-                navigate(`/order-confirmation/${data._id}`);
+                navigate('/customer/dashboard?tab=orders');
               }
             } catch (error) {
               addToast('Payment verification failed.', 'error');
@@ -151,7 +195,7 @@ const Checkout = () => {
         const { data } = await axiosInstance.post('/orders', orderData);
         clearCart();
         addToast('Order placed successfully!', 'success');
-        navigate(`/order-confirmation/${data._id}`);
+        navigate('/customer/dashboard?tab=orders');
       }
       
     } catch (error) {
@@ -211,30 +255,73 @@ const Checkout = () => {
                     initial={{ opacity: 0, height: 0 }}
                     animate={{ opacity: 1, height: 'auto' }}
                     exit={{ opacity: 0, height: 0 }}
-                    className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 overflow-hidden"
+                    className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 overflow-hidden space-y-6"
                   >
-                    <h2 className="text-xl font-bold text-gray-900 mb-6">Delivery Location</h2>
+                    <h2 className="text-xl font-bold text-gray-900">Delivery Location</h2>
                     
-                    <MapPicker 
-                      shopLat={shopLat} 
-                      shopLng={shopLng} 
-                      onLocationSelect={handleLocationSelect} 
-                    />
-                    
-                    <div className="mt-6">
-                      <label className="block text-sm font-semibold text-gray-700 mb-2">Complete Address</label>
-                      <textarea 
-                        className="input-field w-full h-20 resize-none"
-                        value={addressText}
-                        onChange={(e) => setAddressText(e.target.value)}
-                        placeholder="House/Flat No, Landmark, etc."
-                      />
-                    </div>
-                    
-                    {distanceKm > 10 && (
-                      <div className="mt-4 bg-red-50 text-red-700 p-4 rounded-xl border border-red-200 flex items-start gap-3">
-                        <span className="text-xl">⚠️</span>
-                        <p className="font-medium mt-0.5">Your location is outside our 10km delivery zone. Switch to Pickup or choose a closer location.</p>
+                    {!isAddingNewAddress && savedAddresses.length > 0 && (
+                      <div className="space-y-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          {savedAddresses.map((addr) => (
+                            <div 
+                              key={addr._id} 
+                              onClick={() => setSelectedAddressId(addr._id)}
+                              className={`cursor-pointer border-2 rounded-xl p-4 transition-all ${selectedAddressId === addr._id ? 'border-amber-500 bg-amber-50 shadow-md' : 'border-gray-200 hover:border-amber-300'}`}
+                            >
+                              <div className="flex items-center gap-2 mb-2">
+                                <span className="text-xl">{addr.type === 'Home' ? '🏠' : addr.type === 'Work' ? '💼' : '📍'}</span>
+                                <span className="font-bold text-gray-800">{addr.type}</span>
+                                {addr.isDefault && <span className="bg-amber-100 text-amber-700 text-[10px] font-bold px-2 py-0.5 rounded ml-auto">Default</span>}
+                              </div>
+                              <p className="text-sm text-gray-600 font-medium">{addr.name}</p>
+                              <p className="text-sm text-gray-600 truncate">{addr.addressLine1}, {addr.city}</p>
+                            </div>
+                          ))}
+                        </div>
+                        <button 
+                          onClick={() => setIsAddingNewAddress(true)}
+                          className="text-amber-600 font-bold hover:text-amber-700 flex items-center gap-1 mt-2"
+                        >
+                          + Add a new address
+                        </button>
+                      </div>
+                    )}
+
+                    {(isAddingNewAddress || savedAddresses.length === 0) && (
+                      <div className="space-y-6">
+                        {savedAddresses.length > 0 && (
+                          <div className="flex justify-between items-center border-b border-gray-100 pb-2">
+                            <h3 className="font-bold text-gray-800">Pinpoint new location</h3>
+                            <button 
+                              onClick={() => setIsAddingNewAddress(false)}
+                              className="text-sm text-gray-500 hover:text-gray-700 font-medium underline"
+                            >
+                              Use saved address
+                            </button>
+                          </div>
+                        )}
+                        <MapPicker 
+                          shopLat={shopLat} 
+                          shopLng={shopLng} 
+                          onLocationSelect={handleLocationSelect} 
+                        />
+                        
+                        <div className="mt-6">
+                          <label className="block text-sm font-semibold text-gray-700 mb-2">Complete Address</label>
+                          <textarea 
+                            className="input-field w-full h-20 resize-none"
+                            value={addressText}
+                            onChange={(e) => setAddressText(e.target.value)}
+                            placeholder="House/Flat No, Landmark, etc."
+                          />
+                        </div>
+                        
+                        {distanceKm > 10 && (
+                          <div className="mt-4 bg-red-50 text-red-700 p-4 rounded-xl border border-red-200 flex items-start gap-3">
+                            <span className="text-xl">⚠️</span>
+                            <p className="font-medium mt-0.5">Your location is outside our 10km delivery zone. Switch to Pickup or choose a closer location.</p>
+                          </div>
+                        )}
                       </div>
                     )}
                   </motion.div>
@@ -291,7 +378,7 @@ const Checkout = () => {
                       <span className="text-2xl">💳</span>
                       <h3 className="font-bold text-gray-900 text-lg">Pay Online (Razorpay)</h3>
                     </div>
-                    <p className="text-sm text-gray-600 pl-9">Pay 50% advance now, rest on delivery</p>
+                    <p className="text-sm text-gray-600 pl-9">Pay 20% advance now, rest on delivery</p>
                   </div>
 
                   <div 
@@ -314,9 +401,14 @@ const Checkout = () => {
                   <motion.div 
                     initial={{ opacity: 0, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="mt-6 bg-blue-50 text-blue-800 p-4 rounded-xl border border-blue-100 font-medium"
+                    className="mt-6 bg-blue-50 text-blue-800 p-4 rounded-xl border border-blue-100 font-medium space-y-2"
                   >
-                    You will pay <span className="font-bold">₹{Math.ceil(totalAmount / 2)}</span> now. Remaining ₹{totalAmount - Math.ceil(totalAmount / 2)} on delivery.
+                    <div>
+                      You will pay <span className="font-bold">₹{Math.ceil(totalAmount * 0.2)}</span> now. Remaining ₹{totalAmount - Math.ceil(totalAmount * 0.2)} on delivery.
+                    </div>
+                    <div className="text-sm text-blue-700 opacity-90">
+                      *Note: Minimum 20% of the total estimated price should be paid in advance.
+                    </div>
                   </motion.div>
                 )}
               </div>

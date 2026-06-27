@@ -57,6 +57,10 @@ export const CartProvider = ({ children }) => {
 
   const clearCart = () => setItems([]);
 
+  const replaceCart = (newItems) => {
+    setItems(newItems);
+  };
+
   const mergeWithServerCart = async () => {
     // In a full implementation, you would merge the local cart with the backend cart here.
     // For this boilerplate, we'll just keep the local one.
@@ -64,7 +68,7 @@ export const CartProvider = ({ children }) => {
 
   return (
     <CartContext.Provider
-      value={{ items, addToCart, removeFromCart, updateQty, clearCart, mergeWithServerCart }}
+      value={{ items, addToCart, removeFromCart, updateQty, clearCart, replaceCart, mergeWithServerCart }}
     >
       {children}
     </CartContext.Provider>

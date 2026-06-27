@@ -9,6 +9,7 @@ import Cart from './pages/public/Cart';
 import Login from './pages/auth/Login';
 import Signup from './pages/auth/Signup';
 import Contact from './pages/public/Contact';
+import ProductDetails from './pages/public/ProductDetails';
 import Checkout from './pages/customer/Checkout';
 import OrderConfirmation from './pages/customer/OrderConfirmation';
 import CustomerDashboard from './pages/customer/CustomerDashboard';
@@ -18,11 +19,32 @@ import Navbar from './components/Navbar';
 import ToastContainer from './components/Toast';
 import PageWrapper from './components/PageWrapper';
 import FloatingHomeButton from './components/FloatingHomeButton';
+import MobileBottomNav from './components/MobileBottomNav';
 
 // A helper component to handle route transitions
 const AnimatedRoutes = () => {
   const location = useLocation();
   
+  // Automatically scroll to the top when navigating, or scroll to hash if present
+  React.useEffect(() => {
+    if (location.hash) {
+      // Small delay to ensure the DOM has rendered the new page before scrolling
+      setTimeout(() => {
+        const element = document.getElementById(location.hash.substring(1));
+        if (element) {
+          // Calculate position and offset by 120px to account for the fixed Navbar + extra breathing room
+          const topPos = element.getBoundingClientRect().top + window.scrollY;
+          window.scrollTo({
+            top: topPos - 120,
+            behavior: 'smooth'
+          });
+        }
+      }, 100);
+    } else {
+      window.scrollTo(0, 0);
+    }
+  }, [location.pathname, location.hash]);
+
   return (
     <AnimatePresence mode="wait">
       <Routes location={location} key={location.pathname}>
@@ -32,6 +54,7 @@ const AnimatedRoutes = () => {
         <Route path="/login" element={<PageWrapper><Login /></PageWrapper>} />
         <Route path="/signup" element={<PageWrapper><Signup /></PageWrapper>} />
         <Route path="/contact" element={<PageWrapper><Contact /></PageWrapper>} />
+        <Route path="/product/:id" element={<PageWrapper><ProductDetails /></PageWrapper>} />
         <Route
           path="/checkout"
           element={
@@ -77,6 +100,7 @@ function App() {
       <ToastContainer />
       <AnimatedRoutes />
       <FloatingHomeButton />
+      <MobileBottomNav />
     </BrowserRouter>
   );
 }

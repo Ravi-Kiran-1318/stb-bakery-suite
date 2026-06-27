@@ -312,12 +312,13 @@ const Home = () => {
             </motion.div>
 
             {/* Mobile/Tablet horizontal category strip (below lg) */}
-            <motion.div
-              className="lg:hidden flex flex-row gap-3 justify-center pb-8 pt-4 w-full"
-              initial={{ opacity: 0, y: 16 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.5 }}
-            >
+            <div className="lg:hidden relative w-full pt-4 pb-8">
+              <motion.div
+                className="flex flex-row gap-3 overflow-x-auto justify-start w-full hide-scrollbar snap-x px-4"
+                initial={{ opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.5 }}
+              >
               {sidebarCategories.map((cat, i) => (
                 <Link
                   key={i}
@@ -344,7 +345,10 @@ const Home = () => {
                   </span>
                 </Link>
               ))}
-            </motion.div>
+              </motion.div>
+              {/* Fade gradient on the right to indicate more items to scroll */}
+              <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-[#060301] to-transparent pointer-events-none"></div>
+            </div>
 
           </div>
         </div>
@@ -405,7 +409,7 @@ const Home = () => {
                   textDecoration: 'none',
                 }}
               >
-                Explore Our Products
+                View All Products
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
                 </svg>
@@ -464,6 +468,65 @@ const Home = () => {
         </section>
 
         {/* ═══════════════════════════════════════════════════════
+            ABOUT US
+        ═══════════════════════════════════════════════════════ */}
+        <section id="about-us" className="py-14 md:py-20" style={{ background: '#080503' }}>
+          <div className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex flex-col lg:flex-row items-center gap-10 md:gap-16">
+              {/* Image/Graphic Side */}
+              <div className="w-full lg:w-1/2 flex justify-center relative">
+                <div
+                  className="rounded-t-[100px] rounded-b-[20px] overflow-hidden border-2 p-1"
+                  style={{ borderColor: 'rgba(212,175,55,0.3)', background: 'linear-gradient(to bottom, rgba(212,175,55,0.1), transparent)' }}
+                >
+                  <div className="rounded-t-[94px] rounded-b-[16px] overflow-hidden bg-[#1a0f0a] aspect-[4/5] w-full max-w-[400px] relative flex items-center justify-center">
+                    <img src="/NewBg.png" alt="Our Bakery" className="w-full h-full object-cover opacity-60" />
+
+                    {/* Floating badge */}
+                    <div className="absolute -bottom-6 -right-6 md:bottom-8 md:-right-8 w-32 h-32 md:w-40 md:h-40 rounded-full flex items-center justify-center border-4 border-[#080503] shadow-2xl" style={{ background: 'linear-gradient(135deg, #D4AF37 0%, #b87c14 100%)' }}>
+                      <div className="text-center text-[#1a0900]">
+                        <span className="block font-serif font-bold text-3xl md:text-4xl leading-none mb-1">10+</span>
+                        <span className="block font-bold text-xs md:text-sm uppercase tracking-wider">Years<br />Experience</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Text Side */}
+              <div className="w-full lg:w-1/2 text-center lg:text-left mt-8 lg:mt-0">
+                <span className="text-[10px] md:text-xs font-bold tracking-[0.28em] uppercase text-[#D4AF37] block mb-3">
+                  Our Story
+                </span>
+                <h2
+                  className="font-serif font-bold mb-6"
+                  style={{ fontSize: 'clamp(1.8rem, 4vw, 2.8rem)', color: '#EFDBB2', lineHeight: 1.2 }}
+                >
+                  A Decade of Baking <br className="hidden lg:block" />
+                  <span style={{ color: '#D4AF37' }}>Sweet Memories</span>
+                </h2>
+
+                <p className="text-[0.95rem] leading-[1.8] text-[rgba(235,220,190,0.7)] mb-5">
+                  At Sri Tirupathi Venkatachalapathi Bakery, baking isn't just a business—it's a devotion. For over a decade, we have been a part of your daily celebrations, combining timeless traditional recipes with the finest ingredients to create treats that warm the heart.
+                </p>
+                <p className="text-[0.95rem] leading-[1.8] text-[rgba(235,220,190,0.7)] mb-8">
+                  Every pastry, cake, and sweet is prepared fresh every single day. We pride ourselves on our uncompromising quality, hygienic standards, and the love we fold into every single batch. Thank you for making us a part of your family.
+                </p>
+
+                <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 text-[#D4AF37]">
+                  <div className="flex items-center gap-2 font-bold text-[0.85rem] uppercase tracking-wide bg-[#D4AF37]/10 px-4 py-2.5 rounded-full border border-[#D4AF37]/30">
+                    <span>🌟</span> 100% Eggless Options
+                  </div>
+                  <div className="flex items-center gap-2 font-bold text-[0.85rem] uppercase tracking-wide bg-[#D4AF37]/10 px-4 py-2.5 rounded-full border border-[#D4AF37]/30">
+                    <span>👨‍🍳</span> Expert Bakers
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* ═══════════════════════════════════════════════════════
             WHATSAPP CTA BANNER
         ═══════════════════════════════════════════════════════ */}
         <section
@@ -501,7 +564,6 @@ const Home = () => {
             </div>
           </div>
         </section>
-
         <Footer />
       </div>
     </PageWrapper>

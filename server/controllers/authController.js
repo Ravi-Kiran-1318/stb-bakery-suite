@@ -107,12 +107,20 @@ const logout = async (req, res) => {
 };
 
 const getMe = async (req, res) => {
-  res.json({
-    id: 'demo123',
-    name: 'Demo Admin',
-    email: 'admin@demo.com',
-    role: 'admin'
-  });
+  try {
+    if (!req.user) {
+      return res.status(401).json({ message: 'Not authorized' });
+    }
+    res.json({
+      id: req.user._id,
+      name: req.user.name,
+      mobile: req.user.mobile,
+      email: req.user.email,
+      role: req.user.role
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
 };
 
 module.exports = { signup, login, logout, getMe };

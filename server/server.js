@@ -64,32 +64,23 @@ const app = express();
 const server = http.createServer(app);
 
 // Initialize Socket.io
-socketInit(server);
+const io = socketInit(server);
+app.set('io', io);
 
-// Allowed origins — read from env, supports comma-separated list for multi-env
-const ALLOWED_ORIGINS = (process.env.CLIENT_URL || 'http://localhost:5173')
-  .split(',')
-  .map(o => o.trim())
-  .filter(Boolean);
-
-const corsOptions = {
-  origin: (origin, callback) => {
-    // Allow requests with no origin (mobile apps, curl, Postman)
-    if (!origin || ALLOWED_ORIGINS.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error(`CORS: origin '${origin}' not allowed`));
-    }
-  },
-  credentials: true,
-  allowedHeaders: ['Content-Type', 'Authorization', 'Cookie', 'X-Requested-With'],
-  exposedHeaders: ['Set-Cookie'],
-  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-};
-
-app.use(cors(corsOptions));
-// Ensure pre-flight OPTIONS requests are handled for all routes
-app.options('*', cors(corsOptions));
+// Custom strict CORS middleware to guarantee no wildcard fallbacks
+app.use((req, res, next) => {
+  const origin = req.headers.origin || process.env.CLIENT_URL || 'http://localhost:5173';
+  res.setHeader('Access-Control-Allow-Origin', origin);
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, Cookie, X-Requested-With');
+  res.setHeader('Access-Control-Expose-Headers', 'Set-Cookie');
+  
+  if (req.method === 'OPTIONS') {
+    return res.status(204).end();
+  }
+  next();
+});
 app.use(express.json());
 app.use(cookieParser());
 
@@ -99,6 +90,8 @@ app.use('/api/users', require('./routes/users'));
 app.use('/api/products', require('./routes/products'));
 app.use('/api/orders', require('./routes/orders'));
 app.use('/api/notifications', require('./routes/notifications'));
+app.use('/api/coupons', require('./routes/couponRoutes'));
+app.use('/api/custom-cakes', require('./routes/customCakeRoutes'));
 app.use('/api/payments', require('./routes/payments'));
 // app.use('/api/users', require('./routes/users'));
 

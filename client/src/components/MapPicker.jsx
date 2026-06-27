@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, Circle, useMap, useMapEvents } from 'react-leaflet';
 import L from 'leaflet';
 import axios from 'axios';
@@ -81,6 +81,8 @@ const MapPicker = ({ shopLat, shopLng, onLocationSelect }) => {
   const [address, setAddress] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [distance, setDistance] = useState(0);
+  const [suggestions, setSuggestions] = useState([]);
+  const [isSearching, setIsSearching] = useState(false);
 
   useEffect(() => {
     const dist = haversine(shopLat, shopLng, customerPos[0], customerPos[1]);
@@ -88,11 +90,56 @@ const MapPicker = ({ shopLat, shopLng, onLocationSelect }) => {
     onLocationSelect(customerPos[0], customerPos[1], address, dist);
   }, [customerPos, address, shopLat, shopLng, onLocationSelect]);
 
+  // Debounced search for suggestions
+  useEffect(() => {
+    const fetchSuggestions = async () => {
+      if (!searchQuery || searchQuery.length < 3) {
+        setSuggestions([]);
+        return;
+      }
+      setIsSearching(true);
+      try {
+        // Create a bounding box roughly 10km around the shop (10km is ~0.09 degrees)
+        const left = shopLng - 0.09;
+        const top = shopLat + 0.09;
+        const right = shopLng + 0.09;
+        const bottom = shopLat - 0.09;
+        const viewbox = `${left},${top},${right},${bottom}`;
+        
+        const res = await axios.get(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(searchQuery)}&format=json&limit=5&addressdetails=1&viewbox=${viewbox}&bounded=1`);
+        if (res.data) {
+          setSuggestions(res.data);
+        }
+      } catch (error) {
+        console.error("Suggestion fetch failed", error);
+      } finally {
+        setIsSearching(false);
+      }
+    };
+
+    const timeoutId = setTimeout(fetchSuggestions, 800);
+    return () => clearTimeout(timeoutId);
+  }, [searchQuery]);
+
+  const handleSelectSuggestion = (item) => {
+    const newPos = [parseFloat(item.lat), parseFloat(item.lon)];
+    setCustomerPos(newPos);
+    setAddress(item.display_name);
+    setSearchQuery('');
+    setSuggestions([]);
+  };
+
   const handleSearch = async (e) => {
     e.preventDefault();
     if (!searchQuery) return;
     try {
-      const res = await axios.get(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(searchQuery)}&format=json&limit=1`);
+      const left = shopLng - 0.09;
+      const top = shopLat + 0.09;
+      const right = shopLng + 0.09;
+      const bottom = shopLat - 0.09;
+      const viewbox = `${left},${top},${right},${bottom}`;
+
+      const res = await axios.get(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(searchQuery)}&format=json&limit=1&viewbox=${viewbox}&bounded=1`);
       if (res.data && res.data.length > 0) {
         const { lat, lon, display_name } = res.data[0];
         const newPos = [parseFloat(lat), parseFloat(lon)];
@@ -110,23 +157,46 @@ const MapPicker = ({ shopLat, shopLng, onLocationSelect }) => {
 
   return (
     <div className="flex flex-col gap-4">
-      <form onSubmit={handleSearch} className="flex gap-2">
-        <input
-          type="text"
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          placeholder="Search for an area, street, or landmark..."
-          className="input-field flex-grow"
-        />
-        <button type="submit" className="btn-primary">Search</button>
-      </form>
+      <div className="relative z-50">
+        <div className="flex gap-2 relative">
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                e.preventDefault();
+                handleSearch(e);
+              }
+            }}
+            placeholder="Search for an area, street, or landmark..."
+            className="input-field flex-grow"
+          />
+          <button type="button" onClick={handleSearch} className="btn-primary shrink-0">Search</button>
+        </div>
+        
+        {/* Suggestions Dropdown */}
+        {suggestions.length > 0 && (
+          <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg overflow-hidden z-[1000]">
+            {suggestions.map((item, idx) => (
+              <div 
+                key={idx} 
+                onClick={() => handleSelectSuggestion(item)}
+                className="px-4 py-3 hover:bg-amber-50 cursor-pointer border-b border-gray-100 last:border-b-0 text-sm text-gray-700 transition-colors"
+              >
+                {item.display_name}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
 
       <div className="h-[400px] w-full rounded-lg overflow-hidden border border-border shadow-sm z-0 relative">
         <MapContainer center={customerPos} zoom={13} scrollWheelZoom={true} style={{ height: '100%', width: '100%' }}>
           <ChangeView center={customerPos} zoom={14} />
           <TileLayer
-            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a>'
-            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+            attribution='&copy; <a href="https://www.esri.com/">Esri</a> &mdash; Source: Esri, DeLorme, NAVTEQ, USGS, Intermap, iPC, NRCAN, Esri Japan, METI, Esri China (Hong Kong), Esri (Thailand), TomTom, 2012'
+            url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}"
           />
           <Marker position={[shopLat, shopLng]} icon={shopIcon}>
             <Popup>

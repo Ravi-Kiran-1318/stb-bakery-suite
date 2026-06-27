@@ -72,7 +72,8 @@ const createOrder = async (req, res) => {
       userId: null, // Global or admin specific, we'll just not assign to a user or assign to all admins
       type: 'new_order',
       message: `New order from ${customerInfo?.name || req.user.name} — ₹${totalAmount}`,
-      actionTab: 'orders'
+      actionTab: 'orders',
+      referenceId: newOrder._id.toString()
     });
 
     // Fetch admins and assign the notification
@@ -84,8 +85,8 @@ const createOrder = async (req, res) => {
 
     const io = req.app.get('io');
     if (io) {
-      io.to('admin_room').emit('new_notification', notification);
-      io.to('admin_room').emit('new_order', {
+      io.to('admin').emit('new_notification', notification);
+      io.to('admin').emit('new_order', {
         orderId: newOrder._id,
         customerName: customerInfo?.name || req.user.name,
         totalAmount
@@ -93,15 +94,16 @@ const createOrder = async (req, res) => {
     }
 
     if (advancePaid) {
-      const advanceAmount = Math.ceil(totalAmount / 2);
+      const advanceAmount = Math.ceil(totalAmount * 0.2);
       const paymentNotification = await Notification.create({
         userId: null,
         type: 'payment_received',
         message: `💳 Advance payment of ₹${advanceAmount} received from ${customerInfo?.name || req.user.name}`,
-        actionTab: 'orders'
+        actionTab: 'orders',
+        referenceId: newOrder._id.toString()
       });
       if (io) {
-        io.to('admin_room').emit('payment_received', paymentNotification);
+        io.to('admin').emit('payment_received', paymentNotification);
       }
     }
 
@@ -222,9 +224,10 @@ const updateOrderStatus = async (req, res) => {
 
     const notification = await Notification.create({
       userId: order.user,
-      type: 'order_update',
+      type: 'order_status',
       message: messageMap[status] || `Your order status is now ${status}`,
-      actionTab: 'orders'
+      actionTab: 'orders',
+      referenceId: order._id.toString()
     });
 
     // Emit to customer via Socket.io
@@ -262,7 +265,8 @@ const cancelOrder = async (req, res) => {
         userId: order.user,
         type: 'order_cancelled',
         message: `Your order #${order._id.toString().slice(-6).toUpperCase()} was cancelled by the bakery. Reason: ${order.cancelReason}`,
-        actionTab: 'orders'
+        actionTab: 'orders',
+        referenceId: order._id.toString()
       });
       if (io) {
         io.to(`user_${order.user}`).emit('new_notification', notification);
@@ -276,10 +280,11 @@ const cancelOrder = async (req, res) => {
           userId: admin._id,
           type: 'order_cancelled',
           message: `Order #${order._id.toString().slice(-6).toUpperCase()} was cancelled by the customer.`,
-          actionTab: 'orders'
+          actionTab: 'orders',
+          referenceId: order._id.toString()
         });
         if (io) {
-          io.to('admin_room').emit('new_notification', notification);
+          io.to('admin').emit('new_notification', notification);
         }
       });
     }
@@ -335,7 +340,7 @@ const getAnalytics = async (req, res) => {
             totalRevenue: { $sum: '$totalAmount' },
             uniqueOrders: { $addToSet: '$_id' },
             itemsSold: {
-              $push: { name: '$items.name', qty: '$items.qty' },
+              $push: { name: '$items.nameEN', qty: '$items.qty' },
             },
           },
         },
@@ -396,8 +401,17 @@ const getAnalytics = async (req, res) => {
           categories: [
             { $unwind: '$items' },
             {
+              $lookup: {
+                from: 'products',
+                localField: 'items.product',
+                foreignField: '_id',
+                as: 'productDoc'
+              }
+            },
+            { $unwind: { path: '$productDoc', preserveNullAndEmptyArrays: true } },
+            {
               $group: {
-                _id: '$items.category',
+                _id: { $ifNull: ['$productDoc.category', 'Other'] },
                 revenue: { $sum: { $multiply: ['$items.price', '$items.qty'] } },
               },
             },

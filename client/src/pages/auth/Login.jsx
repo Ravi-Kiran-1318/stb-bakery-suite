@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import PageWrapper from '../../components/PageWrapper';
@@ -12,29 +12,42 @@ const Login = () => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const { user, loading: authLoading } = useAuth(); // rename loading to authLoading from context
 
   // Extract ?redirect= param
   const queryParams = new URLSearchParams(location.search);
   const redirect = queryParams.get('redirect');
+
+  useEffect(() => {
+    if (user && !authLoading) {
+      if (redirect) {
+        navigate(redirect);
+      } else if (user.role === 'admin') {
+        navigate('/admin/dashboard');
+      } else {
+        navigate('/customer/dashboard');
+      }
+    }
+  }, [user, authLoading, navigate, redirect]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     setLoading(true);
     try {
-      // In the real app, this calls api.post('/auth/login')
-      const user = await login(loginId, password);
-      
-      // Handle redirect
-      if (redirect) {
-        navigate(redirect);
+    // In the real app, this calls api.post('/auth/login')
+    const loggedInUser = await login(loginId, password);
+    
+    // Handle redirect
+    if (redirect) {
+      navigate(redirect);
+    } else {
+      if (loggedInUser.role === 'admin') {
+        navigate('/admin/dashboard');
       } else {
-        if (user.role === 'admin') {
-          navigate('/admin/dashboard');
-        } else {
-          navigate('/customer/dashboard');
-        }
+        navigate('/customer/dashboard');
       }
+    }
     } catch (err) {
       setError(err.response?.data?.message || 'Login failed');
     } finally {
@@ -68,14 +81,14 @@ const Login = () => {
             
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700">Email or Mobile</label>
+                <label className="block text-sm font-medium text-gray-700">Mobile Number or Gmail / Email</label>
                 <input
                   type="text"
                   required
                   className="input-field mt-1"
                   value={loginId}
                   onChange={(e) => setLoginId(e.target.value)}
-                  placeholder="Enter your email or mobile"
+                  placeholder="Enter your 10-digit mobile or gmail address"
                 />
               </div>
               <div>

@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { AuthContext } from '../context/AuthContext';
 import { CartContext } from '../context/CartContext';
 import NotificationBell from './NotificationBell';
+import { FaOm, FaStarAndCrescent, FaCross, FaSignOutAlt } from 'react-icons/fa';
 
 const Navbar = () => {
   const { user, logout } = useContext(AuthContext);
@@ -15,7 +16,7 @@ const Navbar = () => {
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
 
-  const cartItemCount = cart.reduce((total, item) => total + (item.qty || 0), 0);
+  const cartItemCount = cart.length;
 
   const toggleLanguage = () => {
     i18n.changeLanguage(i18n.language === 'en' ? 'te' : 'en');
@@ -38,13 +39,28 @@ const Navbar = () => {
 
   const navLinks = [
     { label: 'Home', to: '/' },
-    { label: 'About Us', to: '/about' },
+    { label: 'About Us', to: '/#about-us' },
     { label: 'Our Products', to: '/shop' },
     { label: 'Specials', to: '/shop?category=specials' },
     { label: 'Gallery', to: '/gallery' },
     { label: 'Events', to: '/events' },
     { label: 'Contact', to: '/contact' },
   ];
+
+  // Helper to handle smooth scrolling for hash links
+  const handleNavClick = (e, to) => {
+    if (to.startsWith('/#')) {
+      const targetId = to.substring(2);
+      // If we are already on the home page (where the section exists)
+      if (window.location.pathname === '/') {
+        e.preventDefault();
+        const element = document.getElementById(targetId);
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth' });
+        }
+      }
+    }
+  };
 
   return (
     <motion.nav
@@ -53,11 +69,11 @@ const Navbar = () => {
       transition={{ duration: 0.4 }}
       className="sticky top-0 z-50"
       style={{
-        background: 'linear-gradient(to bottom, rgba(5,3,2,0.97) 0%, rgba(10,6,3,0.94) 100%)',
-        borderBottom: '1px solid rgba(212,175,55,0.25)',
+        background: 'linear-gradient(to right, #ffffff, #fffdf2, #ffffff)',
+        borderBottom: '1px solid rgba(212,175,55,0.3)',
         backdropFilter: 'blur(16px)',
         WebkitBackdropFilter: 'blur(16px)',
-        boxShadow: '0 2px 32px rgba(0,0,0,0.6)',
+        boxShadow: '0 2px 10px rgba(0,0,0,0.05)',
       }}
     >
       {/* ── Navbar inner container — responsive padding ── */}
@@ -65,46 +81,26 @@ const Navbar = () => {
         <div className="flex items-center justify-between h-16 md:h-[72px]">
 
           {/* ── LOGO ── */}
-          <Link to="/" className="flex items-center gap-2.5 flex-shrink-0">
-            <div
-              className="w-9 h-9 md:w-10 md:h-10 rounded-full flex items-center justify-center flex-shrink-0"
-              style={{
-                background: 'radial-gradient(circle at 40% 35%, #f5d472 0%, #c8922a 55%, #7a4a00 100%)',
-                boxShadow: '0 0 12px rgba(212,175,55,0.5)',
-                border: '1.5px solid rgba(212,175,55,0.6)',
-              }}
-            >
-              <span style={{ fontSize: '17px', lineHeight: 1 }}>🪔</span>
-            </div>
-            <div className="flex flex-col leading-none">
-              <span
-                className="font-serif font-bold"
-                style={{ fontSize: 'clamp(0.95rem, 2vw, 1.1rem)', color: '#EFDBB2', letterSpacing: '0.04em' }}
-              >
-                Sri Tirupathi
-              </span>
-              <span
-                className="hidden sm:block font-sans"
-                style={{ fontSize: '0.58rem', color: '#D4AF37', letterSpacing: '0.16em', textTransform: 'uppercase', opacity: 0.85 }}
-              >
-                Venkatachalapathi Bakery
-              </span>
-            </div>
+          <Link to="/" className="flex items-center flex-shrink-0">
+            <img 
+              src="/src/assets/adminT.png" 
+              alt="Sri Tirupathi Venkatachalapathi Bakery" 
+              className="h-12 md:h-14 object-contain"
+            />
           </Link>
 
           {/* ── DESKTOP NAV LINKS (lg+) ── */}
-          <div className="hidden lg:flex items-center gap-0.5">
+          <div className="hidden lg:flex items-center gap-2 lg:gap-4 ml-4 xl:ml-8">
             {navLinks.map((item) => (
               <Link
                 key={item.label}
                 to={item.to}
-                className="px-3 py-2 text-sm font-medium transition-all duration-200 rounded-sm hover:text-[#EFDBB2] relative group"
-                style={{ color: 'rgba(212,175,55,0.85)' }}
+                onClick={(e) => handleNavClick(e, item.to)}
+                className="px-2 py-2 text-sm font-bold transition-all duration-200 hover:text-amber-600 relative group text-gray-900"
               >
                 {item.label}
                 <span
-                  className="absolute bottom-0 left-1/2 -translate-x-1/2 h-[1.5px] w-0 group-hover:w-4/5 transition-all duration-300 rounded-full"
-                  style={{ background: '#D4AF37' }}
+                  className="absolute bottom-0 left-1/2 -translate-x-1/2 h-[2px] w-0 group-hover:w-full transition-all duration-300 rounded-full bg-amber-500"
                 />
               </Link>
             ))}
@@ -117,11 +113,10 @@ const Navbar = () => {
             <div className="relative">
               <button
                 onClick={() => setSearchOpen(!searchOpen)}
-                className="p-2 rounded-full transition-colors hover:bg-white/10"
-                style={{ color: 'rgba(212,175,55,0.8)' }}
+                className="p-2 rounded-full transition-colors hover:bg-gray-100 text-gray-800"
                 aria-label="Search"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.8} stroke="currentColor" className="w-5 h-5">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
                 </svg>
               </button>
@@ -151,17 +146,15 @@ const Navbar = () => {
             {(!user || user?.role === 'customer') && (
               <Link
                 to="/cart"
-                className="relative p-2 rounded-full transition-colors hover:bg-white/10"
-                style={{ color: 'rgba(212,175,55,0.8)' }}
+                className="relative p-2 rounded-full transition-colors hover:bg-gray-100 text-gray-800"
                 aria-label="Cart"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.8} stroke="currentColor" className="w-5 h-5">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 0 0-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 0 0-16.536-1.84M7.5 14.25 5.106 5.272M6 20.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Zm12.75 0a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z" />
                 </svg>
                 {cartItemCount > 0 && (
                   <span
-                    className="absolute -top-0.5 -right-0.5 text-[9px] font-bold w-4 h-4 flex items-center justify-center rounded-full"
-                    style={{ background: '#D4AF37', color: '#000' }}
+                    className="absolute -top-0.5 -right-0.5 text-[10px] font-bold w-4 h-4 flex items-center justify-center rounded-full bg-amber-500 text-white shadow-sm"
                   >
                     {cartItemCount}
                   </span>
@@ -175,19 +168,17 @@ const Navbar = () => {
             {/* Language Toggle — desktop only */}
             <button
               onClick={toggleLanguage}
-              className="border rounded-full w-8 h-8 items-center justify-center text-xs font-semibold transition-colors hover:bg-white/10 hidden sm:flex"
-              style={{ borderColor: 'rgba(212,175,55,0.4)', color: '#EFDBB2' }}
+              className="border border-gray-300 rounded-full w-8 h-8 items-center justify-center text-xs font-bold transition-colors hover:bg-gray-100 hidden sm:flex text-gray-800"
             >
               {i18n.language === 'en' ? 'తె' : 'EN'}
             </button>
 
             {/* Auth — desktop only */}
             {!user ? (
-              <div className="hidden lg:flex items-center gap-2 ml-1">
+              <div className="hidden lg:flex items-center gap-3 ml-2">
                 <Link
                   to="/login"
-                  className="text-sm font-medium transition-colors hover:text-[#EFDBB2] whitespace-nowrap"
-                  style={{ color: 'rgba(212,175,55,0.8)' }}
+                  className="text-sm font-bold transition-colors hover:text-amber-600 whitespace-nowrap text-gray-800"
                 >
                   Login
                 </Link>
@@ -209,33 +200,51 @@ const Navbar = () => {
                 </Link>
               </div>
             ) : user.role === 'customer' ? (
-              <div className="relative group ml-1 hidden lg:block">
-                <div className="flex items-center gap-1 text-sm font-semibold cursor-pointer" style={{ color: '#D4AF37' }}>
+              <div className="relative group ml-1 hidden lg:block h-full flex items-center">
+                <div className="flex items-center gap-1 text-sm font-bold cursor-pointer h-full py-5 text-gray-800 hover:text-amber-600 transition-colors">
                   My Profile
                   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4">
                     <path fillRule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clipRule="evenodd" />
                   </svg>
                 </div>
-                <div className="absolute right-0 mt-2 w-48 rounded-lg shadow-2xl py-1 z-50 hidden group-hover:block" style={{ background: '#0f0a04', border: '1px solid rgba(212,175,55,0.25)' }}>
-                  <Link to="/customer/dashboard?tab=orders" className="block px-4 py-2.5 text-sm hover:bg-white/5" style={{ color: 'rgba(212,175,55,0.8)' }}>My Orders</Link>
-                  <Link to="/customer/dashboard?tab=loyalty" className="block px-4 py-2.5 text-sm hover:bg-white/5" style={{ color: 'rgba(212,175,55,0.8)' }}>Loyalty Points</Link>
-                  <Link to="/customer/dashboard?tab=occasions" className="block px-4 py-2.5 text-sm hover:bg-white/5" style={{ color: 'rgba(212,175,55,0.8)' }}>Occasion Reminders</Link>
-                  <div style={{ borderTop: '1px solid rgba(212,175,55,0.2)', margin: '4px 0' }} />
-                  <button onClick={handleLogout} className="block w-full text-left px-4 py-2.5 text-sm text-red-400 hover:bg-red-900/20">Logout</button>
+                {/* Invisible wrapper to cover the gap */}
+                <div className="absolute right-0 top-full pt-1 w-48 z-50 hidden group-hover:block">
+                  <div className="rounded-lg shadow-2xl py-1 overflow-hidden" style={{ background: '#0f0a04', border: '1px solid rgba(212,175,55,0.25)' }}>
+                    <Link to="/customer/dashboard?tab=orders" className="block px-4 py-2.5 text-sm transition-colors hover:bg-white/10" style={{ color: 'rgba(212,175,55,0.8)' }}>My Orders</Link>
+                    <Link to="/customer/dashboard?tab=loyalty" className="block px-4 py-2.5 text-sm transition-colors hover:bg-white/10" style={{ color: 'rgba(212,175,55,0.8)' }}>Loyalty Points</Link>
+                    <Link to="/customer/dashboard?tab=occasions" className="block px-4 py-2.5 text-sm transition-colors hover:bg-white/10" style={{ color: 'rgba(212,175,55,0.8)' }}>Occasion Reminders</Link>
+                    <div style={{ borderTop: '1px solid rgba(212,175,55,0.2)', margin: '4px 0' }} />
+                    <button onClick={handleLogout} className="w-full flex items-center justify-between text-left px-4 py-2.5 text-sm text-red-400 hover:bg-red-900/30 transition-colors">
+                      Logout
+                      <FaSignOutAlt size={14} />
+                    </button>
+                  </div>
                 </div>
               </div>
             ) : (
-              <div className="hidden lg:flex items-center gap-3 ml-1">
-                <Link to="/admin/dashboard" className="text-sm font-semibold hover:text-[#EFDBB2]" style={{ color: '#D4AF37' }}>Admin Dashboard</Link>
-                <button onClick={handleLogout} className="text-sm font-semibold text-red-400 hover:text-red-300">Logout</button>
+              <div className="hidden lg:flex items-center gap-3 ml-2">
+                <div className="relative group h-full flex items-center">
+                  <div className="flex items-center gap-1 text-sm font-bold cursor-pointer h-full py-5 text-gray-800 hover:text-amber-600 transition-colors">
+                    <img src="/src/assets/admin1.png" alt="Admin" className="w-8 h-8 rounded-full border-2 border-amber-500 mr-1 object-cover object-top" />
+                    Admin Dashboard
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4">
+                      <path fillRule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clipRule="evenodd" />
+                    </svg>
+                  </div>
+                  <div className="absolute right-0 top-full pt-1 w-40 z-50 hidden group-hover:block">
+                    <div className="rounded-lg shadow-xl py-1 overflow-hidden bg-white border border-gray-100">
+                      <Link to="/admin/dashboard" className="block px-4 py-2.5 text-sm font-semibold transition-colors hover:bg-amber-50 text-gray-800">Dashboard</Link>
+                      <button onClick={handleLogout} className="w-full text-left px-4 py-2.5 text-sm font-semibold text-red-500 hover:bg-red-50 transition-colors">Logout</button>
+                    </div>
+                  </div>
+                </div>
               </div>
             )}
 
             {/* Mobile Hamburger */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="p-2 rounded-full transition-colors hover:bg-white/10 lg:hidden ml-1"
-              style={{ color: '#D4AF37' }}
+              className="p-2 rounded-full transition-colors hover:bg-gray-100 lg:hidden ml-1 text-gray-800"
               aria-label="Menu"
             >
               <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -256,17 +265,19 @@ const Navbar = () => {
             animate={{ height: 'auto', opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.25 }}
-            className="lg:hidden overflow-hidden"
-            style={{ background: 'rgba(4,2,1,0.98)', borderTop: '1px solid rgba(212,175,55,0.18)' }}
+            className="lg:hidden overflow-hidden shadow-lg"
+            style={{ background: '#ffffff', borderTop: '1px solid rgba(212,175,55,0.18)' }}
           >
             <div className="px-4 py-4 space-y-0.5">
               {navLinks.map((item) => (
                 <Link
                   key={item.label}
                   to={item.to}
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="block px-4 py-3 rounded-lg text-[15px] font-medium transition-colors hover:bg-white/5"
-                  style={{ color: 'rgba(212,175,55,0.88)' }}
+                  onClick={(e) => {
+                    setMobileMenuOpen(false);
+                    handleNavClick(e, item.to);
+                  }}
+                  className="block px-4 py-3 rounded-lg text-[15px] font-bold transition-colors hover:bg-amber-50 text-gray-800"
                 >
                   {item.label}
                 </Link>
@@ -274,11 +285,9 @@ const Navbar = () => {
 
               <div style={{ borderTop: '1px solid rgba(212,175,55,0.18)', margin: '10px 0 8px' }} />
 
-              {/* Language on mobile */}
               <button
                 onClick={toggleLanguage}
-                className="w-full text-left px-4 py-3 rounded-lg text-[15px] font-medium transition-colors hover:bg-white/5"
-                style={{ color: 'rgba(212,175,55,0.7)' }}
+                className="w-full text-left px-4 py-3 rounded-lg text-[15px] font-bold transition-colors hover:bg-amber-50 text-gray-800"
               >
                 Switch to: {i18n.language === 'en' ? 'తెలుగు' : 'English'}
               </button>
@@ -290,31 +299,30 @@ const Navbar = () => {
                   <Link
                     to="/login"
                     onClick={() => setMobileMenuOpen(false)}
-                    className="block px-4 py-3 text-center font-semibold border rounded-xl transition-colors hover:bg-white/5"
-                    style={{ color: '#EFDBB2', borderColor: 'rgba(212,175,55,0.35)' }}
+                    className="block px-4 py-3 text-center font-bold border rounded-xl transition-colors hover:bg-amber-50 text-gray-800 border-amber-300"
                   >
                     Login
                   </Link>
                   <Link
                     to="/shop"
                     onClick={() => setMobileMenuOpen(false)}
-                    className="block px-4 py-3 text-center font-bold rounded-xl"
-                    style={{ background: 'linear-gradient(135deg, #D4AF37, #c8922a)', color: '#1a0a00' }}
+                    className="block px-4 py-3 text-center font-bold rounded-xl shadow-sm"
+                    style={{ background: 'linear-gradient(135deg, #f5d472, #c8922a)', color: '#1a0a00' }}
                   >
                     Order Online
                   </Link>
                 </div>
               ) : user.role === 'customer' ? (
                 <div className="flex flex-col gap-0.5 pt-1">
-                  <Link to="/customer/dashboard?tab=orders" onClick={() => setMobileMenuOpen(false)} className="block px-4 py-3 rounded-lg text-[15px] font-medium hover:bg-white/5" style={{ color: 'rgba(212,175,55,0.8)' }}>My Orders</Link>
-                  <Link to="/customer/dashboard?tab=loyalty" onClick={() => setMobileMenuOpen(false)} className="block px-4 py-3 rounded-lg text-[15px] font-medium hover:bg-white/5" style={{ color: 'rgba(212,175,55,0.8)' }}>Loyalty Points</Link>
-                  <Link to="/customer/dashboard?tab=occasions" onClick={() => setMobileMenuOpen(false)} className="block px-4 py-3 rounded-lg text-[15px] font-medium hover:bg-white/5" style={{ color: 'rgba(212,175,55,0.8)' }}>Occasion Reminders</Link>
-                  <button onClick={handleLogout} className="block w-full text-left px-4 py-3 rounded-lg text-[15px] font-medium text-red-400 hover:bg-red-900/20">Logout</button>
+                  <Link to="/customer/dashboard?tab=orders" onClick={() => setMobileMenuOpen(false)} className="block px-4 py-3 rounded-lg text-[15px] font-bold hover:bg-amber-50 text-gray-800">My Orders</Link>
+                  <Link to="/customer/dashboard?tab=loyalty" onClick={() => setMobileMenuOpen(false)} className="block px-4 py-3 rounded-lg text-[15px] font-bold hover:bg-amber-50 text-gray-800">Loyalty Points</Link>
+                  <Link to="/customer/dashboard?tab=occasions" onClick={() => setMobileMenuOpen(false)} className="block px-4 py-3 rounded-lg text-[15px] font-bold hover:bg-amber-50 text-gray-800">Occasion Reminders</Link>
+                  <button onClick={handleLogout} className="block w-full text-left px-4 py-3 rounded-lg text-[15px] font-bold text-red-500 hover:bg-red-50">Logout</button>
                 </div>
               ) : (
                 <div className="flex flex-col gap-0.5 pt-1">
-                  <Link to="/admin/dashboard" onClick={() => setMobileMenuOpen(false)} className="block px-4 py-3 rounded-lg text-[15px] font-medium hover:bg-white/5" style={{ color: 'rgba(212,175,55,0.8)' }}>Admin Dashboard</Link>
-                  <button onClick={handleLogout} className="block w-full text-left px-4 py-3 rounded-lg text-[15px] font-medium text-red-400 hover:bg-red-900/20">Logout</button>
+                  <Link to="/admin/dashboard" onClick={() => setMobileMenuOpen(false)} className="block px-4 py-3 rounded-lg text-[15px] font-bold hover:bg-amber-50 text-gray-800">Admin Dashboard</Link>
+                  <button onClick={handleLogout} className="block w-full text-left px-4 py-3 rounded-lg text-[15px] font-bold text-red-500 hover:bg-red-50">Logout</button>
                 </div>
               )}
             </div>

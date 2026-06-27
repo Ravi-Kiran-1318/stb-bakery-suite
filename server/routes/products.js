@@ -7,6 +7,7 @@ const {
   updateProduct,
   deleteProduct,
   toggleAvailability,
+  addReview,
 } = require('../controllers/productController');
 const authMiddleware = require('../middleware/authMiddleware');
 const adminMiddleware = require('../middleware/adminMiddleware');
@@ -14,6 +15,9 @@ const upload = require('../middleware/upload');
 
 // Public route
 router.get('/', getPublicProducts);
+
+// Protected route for customers to add reviews
+router.post('/:id/reviews', authMiddleware, addReview);
 
 // Admin routes
 router.use(authMiddleware, adminMiddleware);

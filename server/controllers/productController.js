@@ -133,6 +133,47 @@ const toggleAvailability = async (req, res) => {
   }
 };
 
+// @desc    Create new review
+// @route   POST /api/products/:id/reviews
+const addReview = async (req, res) => {
+  try {
+    const { rating, comment } = req.body;
+    const product = await Product.findById(req.params.id);
+
+    if (!product) {
+      return res.status(404).json({ message: 'Product not found' });
+    }
+
+    // Check if user already reviewed
+    const alreadyReviewed = product.reviews.find(
+      (r) => r.user.toString() === req.user.id.toString()
+    );
+
+    if (alreadyReviewed) {
+      return res.status(400).json({ message: 'You have already reviewed this product' });
+    }
+
+    const review = {
+      user: req.user.id,
+      userName: req.user.name || 'Customer',
+      rating: Number(rating),
+      comment,
+    };
+
+    product.reviews.push(review);
+    product.numReviews = product.reviews.length;
+
+    // Calculate average rating
+    const totalRating = product.reviews.reduce((acc, item) => item.rating + acc, 0);
+    product.averageRating = totalRating / product.reviews.length;
+
+    await product.save();
+    res.status(201).json({ message: 'Review added successfully' });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 module.exports = {
   getPublicProducts,
   getAllProducts,
@@ -140,4 +181,5 @@ module.exports = {
   updateProduct,
   deleteProduct,
   toggleAvailability,
+  addReview,
 };

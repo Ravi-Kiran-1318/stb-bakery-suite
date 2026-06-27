@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import axiosInstance from '../../utils/axiosInstance';
 import { formatCurrency } from '../../utils/formatCurrency';
 import { SocketContext } from '../../context/SocketContext';
+import { CartContext } from '../../context/CartContext';
 import jsPDF from 'jspdf';
 import WhatsAppButton from '../../components/WhatsAppButton';
 import Loader from '../../components/Loader';
@@ -15,6 +16,13 @@ const MyOrders = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { replaceCart } = useContext(CartContext);
+  
+  const queryParams = new URLSearchParams(location.search);
+  const highlightOrderId = queryParams.get('highlightOrderId');
 
   const fetchOrders = async () => {
     try {
@@ -50,6 +58,19 @@ const MyOrders = () => {
     }
   }, [socket]);
 
+  useEffect(() => {
+    if (highlightOrderId && orders.length > 0 && !loading) {
+      const element = document.getElementById(`order-${highlightOrderId}`);
+      if (element) {
+        // Scroll into view
+        element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        // Clean up URL parameter without reloading the page
+        const newUrl = window.location.pathname + window.location.search.replace(`&highlightOrderId=${highlightOrderId}`, '');
+        window.history.replaceState({}, '', newUrl);
+      }
+    }
+  }, [highlightOrderId, orders, loading]);
+
   const handleCancelOrder = async (orderId) => {
     if (window.confirm('Cancel this order? This cannot be undone.')) {
       try {
@@ -62,6 +83,21 @@ const MyOrders = () => {
         alert('Failed to cancel order: ' + (error.response?.data?.message || error.message));
       }
     }
+  };
+
+  const handleReorder = (order) => {
+    // Format the items to match what CartContext expects
+    const newCartItems = order.items.map(item => ({
+      productId: typeof item.productId === 'object' ? item.productId._id : item.productId,
+      nameEN: item.nameEN || item.name,
+      nameTe: item.nameTe,
+      imageUrl: item.imageUrl, // May be undefined but that's fine
+      price: item.price,
+      qty: item.qty
+    }));
+    
+    replaceCart(newCartItems);
+    navigate('/cart');
   };
 
   const generateReceipt = (order) => {
@@ -237,12 +273,17 @@ Order ID: #${shortOrderId}`;
 
               return (
                 <motion.div 
+                  id={`order-${order._id}`}
                   key={order._id}
                   layout
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, scale: 0.95 }}
-                  className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden"
+                  className={`bg-white rounded-2xl shadow-sm border overflow-hidden transition-all duration-1000 ${
+                    highlightOrderId === order._id.toString() 
+                      ? 'border-amber-500 ring-4 ring-amber-500/20 shadow-amber-500/10' 
+                      : 'border-gray-200'
+                  }`}
                 >
                   <div className="p-6">
                     <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
@@ -255,6 +296,18 @@ Order ID: #${shortOrderId}`;
                       </div>
                       <div className="text-left md:text-right">
                         <div className="text-xl font-bold text-gray-900 mb-1">{formatCurrency(order.totalAmount)}</div>
+                        
+                        {order.paymentMethod === 'Online' && order.paymentStatus === 'Partial' && (
+                          <div className="mt-1 mb-2 text-xs font-medium">
+                            <span className="text-green-600 bg-green-50 px-2 py-0.5 rounded border border-green-200">
+                              Advance Paid: ₹{Math.ceil(order.totalAmount * 0.2)}
+                            </span>
+                            <div className="text-red-600 mt-1">
+                              Due on Delivery: ₹{order.totalAmount - Math.ceil(order.totalAmount * 0.2)}
+                            </div>
+                          </div>
+                        )}
+                        
                         <div className="inline-block bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded font-semibold uppercase">
                           {order.deliveryType}
                         </div>
@@ -297,6 +350,13 @@ Order ID: #${shortOrderId}`;
 
                     {/* Actions */}
                     <div className="flex flex-wrap justify-end gap-4 pt-4 border-t border-gray-100">
+                      <button 
+                        onClick={() => handleReorder(order)}
+                        className="bg-amber-500 hover:bg-amber-600 text-white font-bold px-5 py-2 rounded-lg transition-colors text-sm shadow-md flex items-center gap-2"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                        Re-Order
+                      </button>
                       <WhatsAppButton 
                         label="Share" 
                         message={getWhatsAppMessage(order)} 

@@ -85,4 +85,75 @@ const deleteReminder = async (req, res) => {
   }
 };
 
-module.exports = { getCustomers, getReminders, addReminder, deleteReminder };
+const getAddresses = async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id);
+    res.json(user.addresses || []);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+const addAddress = async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id);
+    const newAddress = req.body;
+    
+    if (newAddress.isDefault) {
+      user.addresses.forEach(a => a.isDefault = false);
+    } else if (user.addresses.length === 0) {
+      newAddress.isDefault = true;
+    }
+    
+    user.addresses.push(newAddress);
+    await user.save();
+    res.status(201).json(user.addresses);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+const updateAddress = async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id);
+    const addressId = req.params.id;
+    const updates = req.body;
+    
+    const address = user.addresses.id(addressId);
+    if (!address) return res.status(404).json({ message: 'Address not found' });
+    
+    if (updates.isDefault) {
+      user.addresses.forEach(a => a.isDefault = false);
+    }
+    
+    Object.assign(address, updates);
+    await user.save();
+    res.json(user.addresses);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+const deleteAddress = async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id);
+    const addressId = req.params.id;
+    
+    user.addresses = user.addresses.filter(a => a._id.toString() !== addressId);
+    
+    // If we deleted the default, make the first one default
+    if (user.addresses.length > 0 && !user.addresses.some(a => a.isDefault)) {
+      user.addresses[0].isDefault = true;
+    }
+    
+    await user.save();
+    res.json(user.addresses);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+module.exports = { 
+  getCustomers, getReminders, addReminder, deleteReminder,
+  getAddresses, addAddress, updateAddress, deleteAddress
+};

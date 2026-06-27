@@ -9,8 +9,8 @@ const createRazorpayOrder = async (req, res) => {
       return res.status(400).json({ message: 'Total amount is required' });
     }
 
-    // Advance amount is 50% of totalAmount, rounded up
-    const advanceAmountRupees = Math.ceil(totalAmount / 2);
+    // Advance amount is 20% of totalAmount, rounded up
+    const advanceAmountRupees = Math.ceil(totalAmount * 0.2);
     const amountInPaise = advanceAmountRupees * 100;
 
     const razorpay = new Razorpay({

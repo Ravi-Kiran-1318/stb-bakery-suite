@@ -2,7 +2,11 @@ const Notification = require('../models/Notification');
 
 const getNotifications = async (req, res) => {
   try {
-    const notifications = await Notification.find({ userId: req.user.id })
+    let query = { userId: req.user.id };
+    if (req.user.role === 'admin') {
+      query = { $or: [{ userId: req.user.id }, { userId: null }] };
+    }
+    const notifications = await Notification.find(query)
       .sort({ createdAt: -1 })
       .limit(20);
     res.json(notifications);
@@ -13,8 +17,13 @@ const getNotifications = async (req, res) => {
 
 const markAsRead = async (req, res) => {
   try {
+    let query = { _id: req.params.id, userId: req.user.id };
+    if (req.user.role === 'admin') {
+      query = { _id: req.params.id }; // Admin can mark any notification as read
+    }
+
     const notification = await Notification.findOneAndUpdate(
-      { _id: req.params.id, userId: req.user.id },
+      query,
       { read: true },
       { new: true }
     );
@@ -29,8 +38,13 @@ const markAsRead = async (req, res) => {
 
 const markAllAsRead = async (req, res) => {
   try {
+    let query = { userId: req.user.id, read: false };
+    if (req.user.role === 'admin') {
+      query = { $or: [{ userId: req.user.id }, { userId: null }], read: false };
+    }
+
     await Notification.updateMany(
-      { userId: req.user.id, read: false },
+      query,
       { read: true }
     );
     res.json({ message: 'All notifications marked as read' });
@@ -41,7 +55,12 @@ const markAllAsRead = async (req, res) => {
 
 const clearAll = async (req, res) => {
   try {
-    await Notification.deleteMany({ userId: req.user.id });
+    let query = { userId: req.user.id };
+    if (req.user.role === 'admin') {
+      query = { $or: [{ userId: req.user.id }, { userId: null }] };
+    }
+
+    await Notification.deleteMany(query);
     res.json({ message: 'All notifications cleared' });
   } catch (error) {
     res.status(500).json({ message: error.message });

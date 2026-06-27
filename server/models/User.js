@@ -38,6 +38,21 @@ const userSchema = new mongoose.Schema(
         },
       },
     ],
+    addresses: [
+      {
+        type: { type: String, enum: ['Home', 'Work', 'Other'], default: 'Home' },
+        name: { type: String, required: true },
+        phone: { type: String, required: true },
+        addressLine1: { type: String, required: true },
+        addressLine2: String,
+        city: { type: String, required: true },
+        state: { type: String, required: true },
+        pincode: { type: String, required: true },
+        isDefault: { type: Boolean, default: false },
+        lat: { type: Number, required: true },
+        lng: { type: Number, required: true }
+      }
+    ],
   },
   { timestamps: true }
 );

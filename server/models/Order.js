@@ -2,21 +2,15 @@ const mongoose = require('mongoose');
 
 const orderSchema = new mongoose.Schema(
   {
-    customerId: {
+    user: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
       required: true,
     },
-    customerName: {
-      type: String,
-      required: true,
-    },
-    customerMobile: {
-      type: String,
-      required: true,
-    },
-    customerEmail: {
-      type: String,
+    customerInfo: {
+      name: { type: String, required: true },
+      mobile: { type: String, required: true },
+      email: { type: String },
     },
     items: [
       {
@@ -25,66 +19,51 @@ const orderSchema = new mongoose.Schema(
           ref: 'Product',
         },
         nameEN: String,
+        nameTe: String,
+        imageUrl: String,
         price: Number,
         qty: Number,
       },
     ],
-    subtotal: {
-      type: Number,
-      required: true,
-    },
-    deliveryFee: {
-      type: Number,
-      required: true,
-    },
     totalAmount: {
       type: Number,
       required: true,
     },
     deliveryType: {
       type: String,
-      enum: ['delivery', 'pickup'],
       required: true,
     },
-    deliveryAddress: {
-      type: String,
+    location: {
+      lat: Number,
+      lng: Number,
+      address: String,
     },
-    deliveryLat: {
-      type: Number,
-    },
-    deliveryLng: {
-      type: Number,
-    },
-    distanceKm: {
-      type: Number,
-    },
-    requestedDateTime: {
-      type: Date,
+    requestedDate: {
+      type: String, // from frontend it comes as a string 'YYYY-MM-DDThh:mm'
     },
     paymentMethod: {
       type: String,
-      enum: ['online', 'cod'],
       required: true,
     },
-    advancePaid: {
-      type: Boolean,
-      default: false,
-    },
-    razorpayOrderId: {
+    paymentStatus: {
       type: String,
-    },
-    razorpayPaymentId: {
-      type: String,
+      default: 'Pending',
     },
     status: {
       type: String,
       enum: ['Received', 'Preparing', 'Ready', 'Out for Delivery', 'Delivered', 'Cancelled'],
       default: 'Received',
     },
-    cancelledBy: {
-      type: String, // e.g., 'customer', 'admin'
+    notes: {
+      type: String,
     },
-    cancellationReason: {
+    cancelReason: {
+      type: String,
+    },
+    razorpayOrderId: {
+      type: String,
+    },
+    razorpayPaymentId: {
       type: String,
     },
   },

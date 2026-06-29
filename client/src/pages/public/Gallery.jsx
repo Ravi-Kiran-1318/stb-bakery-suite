@@ -62,15 +62,7 @@ const Gallery = () => {
   };
 
   const handleAddToCart = (cake) => {
-    const cartItem = {
-      productId: cake._id,
-      nameEN: cake.nameEN,
-      nameTe: cake.nameTe,
-      price: cake.price,
-      imageUrl: cake.imageUrl,
-      qty: 1
-    };
-    addToCart(cartItem);
+    addToCart({ ...cake, isGallery: true });
     addToast(`${cake.nameEN} added to cart!`, 'success');
   };
 

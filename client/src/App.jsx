@@ -5,14 +5,15 @@ import { AnimatePresence } from 'framer-motion';
 // Pages
 import Home from './pages/public/Home';
 import Shop from './pages/public/Shop';
+import PartyDecorations from './pages/public/PartyDecorations';
 import Cart from './pages/public/Cart';
 import Login from './pages/auth/Login';
 import Signup from './pages/auth/Signup';
 import Contact from './pages/public/Contact';
 import ProductDetails from './pages/public/ProductDetails';
 import Gallery from './pages/public/Gallery';
-import Events from './pages/public/Events';
 import Checkout from './pages/customer/Checkout';
+import CheckoutAddons from './pages/public/CheckoutAddons';
 import OrderConfirmation from './pages/customer/OrderConfirmation';
 import CustomerDashboard from './pages/customer/CustomerDashboard';
 import AdminDashboard from './pages/admin/AdminDashboard';
@@ -52,13 +53,21 @@ const AnimatedRoutes = () => {
       <Routes location={location} key={location.pathname}>
         <Route path="/" element={<PageWrapper><Home /></PageWrapper>} />
         <Route path="/shop" element={<PageWrapper><Shop /></PageWrapper>} />
+        <Route path="/party-decorations" element={<PageWrapper><PartyDecorations /></PageWrapper>} />
         <Route path="/cart" element={<PageWrapper><Cart /></PageWrapper>} />
         <Route path="/login" element={<PageWrapper><Login /></PageWrapper>} />
         <Route path="/signup" element={<PageWrapper><Signup /></PageWrapper>} />
         <Route path="/contact" element={<PageWrapper><Contact /></PageWrapper>} />
         <Route path="/gallery" element={<PageWrapper><Gallery /></PageWrapper>} />
-        <Route path="/events" element={<PageWrapper><Events /></PageWrapper>} />
         <Route path="/product/:id" element={<PageWrapper><ProductDetails /></PageWrapper>} />
+        <Route
+          path="/checkout-addons"
+          element={
+            <PrivateRoute role="customer">
+              <PageWrapper><CheckoutAddons /></PageWrapper>
+            </PrivateRoute>
+          }
+        />
         <Route
           path="/checkout"
           element={

@@ -34,6 +34,6 @@
   }
 
   .modal-content {
-    @apply bg-white shadow-md rounded-lg max-w-md w-full;
+    @apply bg-white shadow-xl rounded-2xl max-w-md w-[calc(100%-2rem)] mx-auto max-h-[90vh] overflow-y-auto;
   }
 }

@@ -46,7 +46,8 @@ const NotificationBell = () => {
 
   const fetchNotifications = async () => {
     try {
-      const { data } = await axiosInstance.get('/notifications');
+      const roleParam = user?.role === 'admin' ? '?role=admin' : '?role=customer';
+      const { data } = await axiosInstance.get(`/notifications${roleParam}`);
       setNotifications(data);
     } catch (error) {
       console.error('Failed to fetch notifications', error);
@@ -55,7 +56,7 @@ const NotificationBell = () => {
 
   const unreadCount = notifications.filter((n) => !n.read).length;
 
-  const handleMarkAsRead = async (id, actionTab, referenceId) => {
+  const handleMarkAsRead = async (id, actionTab, referenceId, recipientRole) => {
     try {
       await axiosInstance.patch(`/notifications/${id}/read`);
       setNotifications((prev) =>
@@ -66,14 +67,17 @@ const NotificationBell = () => {
     } finally {
       setIsOpen(false);
       
+      let basePath = user?.role === 'admin' ? '/admin/dashboard' : '/customer/dashboard';
+      if (recipientRole === 'admin') basePath = '/admin/dashboard';
+      if (recipientRole === 'customer') basePath = '/customer/dashboard';
+
       if (actionTab) {
-        const basePath = user?.role === 'admin' ? '/admin/dashboard' : '/customer/dashboard';
         if (referenceId && actionTab === 'orders') {
           navigate(`${basePath}?tab=${actionTab}&search=${referenceId}`);
         } else {
           navigate(`${basePath}?tab=${actionTab}`);
         }
-      } else if (user?.role === 'admin') {
+      } else if (basePath === '/admin/dashboard') {
         navigate(`/admin/dashboard?tab=notifications`);
       }
     }
@@ -81,7 +85,8 @@ const NotificationBell = () => {
 
   const handleMarkAllRead = async () => {
     try {
-      await axiosInstance.patch('/notifications/mark-all-read');
+      const roleParam = user?.role === 'admin' ? '?role=admin' : '?role=customer';
+      await axiosInstance.patch(`/notifications/mark-all-read${roleParam}`);
       setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
     } catch (error) {
       console.error('Failed to mark all as read', error);
@@ -90,7 +95,8 @@ const NotificationBell = () => {
 
   const handleClearAll = async () => {
     try {
-      await axiosInstance.delete('/notifications/clear-all');
+      const roleParam = user?.role === 'admin' ? '?role=admin' : '?role=customer';
+      await axiosInstance.delete(`/notifications/clear-all${roleParam}`);
       setNotifications([]);
     } catch (error) {
       console.error('Failed to clear notifications', error);
@@ -152,7 +158,7 @@ const NotificationBell = () => {
                 notifications.map((n) => (
                   <div 
                     key={n._id} 
-                    onClick={() => handleMarkAsRead(n._id, n.actionTab, n.referenceId)}
+                    onClick={() => handleMarkAsRead(n._id, n.actionTab, n.referenceId, n.recipientRole)}
                     className={`p-3 border-b border-border hover:bg-surface cursor-pointer transition-colors ${!n.read ? 'border-l-4 border-l-accent bg-amber-50/30' : ''}`}
                   >
                     <p className="text-sm text-dark">{n.message}</p>

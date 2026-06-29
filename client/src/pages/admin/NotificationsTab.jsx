@@ -16,7 +16,7 @@ const NotificationsTab = () => {
   const fetchNotifications = async () => {
     try {
       setLoading(true);
-      const { data } = await axiosInstance.get('/notifications');
+      const { data } = await axiosInstance.get('/notifications?role=admin');
       setNotifications(data);
     } catch (error) {
       console.error('Failed to fetch notifications', error);
@@ -46,7 +46,7 @@ const NotificationsTab = () => {
 
   const handleMarkAllRead = async () => {
     try {
-      await axiosInstance.patch('/notifications/mark-all-read');
+      await axiosInstance.patch('/notifications/mark-all-read?role=admin');
       setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
     } catch (error) {
       console.error('Failed to mark all as read', error);
@@ -56,7 +56,7 @@ const NotificationsTab = () => {
   const handleClearAll = async () => {
     if (window.confirm('Are you sure you want to clear all notifications?')) {
       try {
-        await axiosInstance.delete('/notifications/clear-all');
+        await axiosInstance.delete('/notifications/clear-all?role=admin');
         setNotifications([]);
       } catch (error) {
         console.error('Failed to clear notifications', error);

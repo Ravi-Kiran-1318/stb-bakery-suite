@@ -7,15 +7,16 @@ import axiosInstance from '../../utils/axiosInstance';
 import { useSearchParams } from 'react-router-dom';
 import { useCart } from '../../context/CartContext';
 
-const CATEGORIES = ['All', 'Specials', 'Bread', 'Bun', 'Cake', 'Pastry', 'Snacks', 'Beverages', 'Chocolates & Biscuits', 'Other'];
+const CATEGORIES = ['All', 'Party Items', 'Decoration Items'];
 
-const Shop = () => {
+const PartyDecorations = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchParams] = useSearchParams();
   let initialCategory = 'All';
   const categoryParam = searchParams.get('category');
-  if (categoryParam === 'specials') initialCategory = 'Specials';
+  if (categoryParam === 'party-items') initialCategory = 'Party Items';
+  else if (categoryParam === 'decoration-items') initialCategory = 'Decoration Items';
 
   const [activeCategory, setActiveCategory] = useState(initialCategory);
   const [searchQuery, setSearchQuery] = useState('');
@@ -43,8 +44,12 @@ const Shop = () => {
   // Effect to handle URL category changes
   useEffect(() => {
     const categoryQuery = searchParams.get('category');
-    if (categoryQuery === 'specials') {
-      setActiveCategory('Specials');
+    if (categoryQuery === 'party-items') {
+      setActiveCategory('Party Items');
+    } else if (categoryQuery === 'decoration-items') {
+      setActiveCategory('Decoration Items');
+    } else {
+      setActiveCategory('All');
     }
   }, [searchParams]);
 
@@ -56,14 +61,12 @@ const Shop = () => {
 
   // Filter and Sort Logic
   const filteredProducts = products.filter(product => {
-    // Hide Party Items and Decoration Items
-    if (product.category === 'Party Items' || product.category === 'Decoration Items') return false;
+    // Only show Party Items and Decoration Items
+    if (product.category !== 'Party Items' && product.category !== 'Decoration Items') return false;
 
     let matchesCategory = false;
     if (activeCategory === 'All') {
       matchesCategory = true;
-    } else if (activeCategory === 'Specials') {
-      matchesCategory = product.isSpecial === true;
     } else {
       matchesCategory = product.category === activeCategory;
     }
@@ -92,7 +95,7 @@ const Shop = () => {
         <div className="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
           
           <div className="mb-8 flex flex-col md:flex-row justify-between items-center gap-6">
-            <h1 className="text-4xl font-serif font-bold text-gray-900">Our Menu</h1>
+            <h1 className="text-4xl font-serif font-bold text-gray-900">Party & Decoration Items</h1>
             
             {/* Search and Sort */}
             <div className="flex flex-col sm:flex-row gap-4 w-full md:w-auto">
@@ -105,7 +108,7 @@ const Shop = () => {
                 </div>
                 <input 
                   type="text" 
-                  placeholder="Search our menu..." 
+                  placeholder="Search items..." 
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="w-full pl-11 pr-4 py-2.5 bg-white border-2 border-gray-100 rounded-full focus:outline-none focus:border-amber-500 focus:ring-4 focus:ring-amber-500/10 transition-all shadow-sm text-gray-700 placeholder-gray-400"
@@ -233,4 +236,4 @@ const Shop = () => {
   );
 };
 
-export default Shop;
+export default PartyDecorations;

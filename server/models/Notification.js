@@ -21,6 +21,11 @@ const notificationSchema = new mongoose.Schema(
     referenceId: {
       type: String,
     },
+    recipientRole: {
+      type: String,
+      enum: ['admin', 'customer'],
+      default: 'customer'
+    },
     read: {
       type: Boolean,
       default: false,

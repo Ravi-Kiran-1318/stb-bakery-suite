@@ -52,12 +52,12 @@ const CustomerDashboard = () => {
 
   return (
     <PageWrapper>
-      <div className="bg-gray-50 min-h-screen pt-16 flex flex-col">
-        <div className="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full flex flex-col lg:flex-row gap-8">
+      <div className="bg-gray-50 min-h-screen pt-16 lg:pt-20 flex flex-col">
+        <div className="flex-grow max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 pt-2 pb-8 lg:py-8 w-full flex flex-col lg:flex-row gap-4 lg:gap-8">
           
           {/* Navigation Menu (Sidebar on Desktop, Wrapped Grid on Mobile) */}
           <div className="w-full lg:w-72 flex-shrink-0">
-            <div className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 sticky top-24">
+            <div className="bg-white p-3 lg:p-4 rounded-2xl shadow-sm border border-gray-100 sticky top-24">
               <h2 className="hidden lg:block text-xl font-bold text-gray-800 mb-4 px-2">Dashboard Menu</h2>
               <div className="flex flex-row flex-wrap lg:flex-col gap-2 lg:gap-3">
                 {tabs.map((tab) => (

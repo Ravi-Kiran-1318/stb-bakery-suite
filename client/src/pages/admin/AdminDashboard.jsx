@@ -8,7 +8,7 @@ import RevenueTab from './RevenueTab';
 import CustomersTab from './CustomersTab';
 import NotificationsTab from './NotificationsTab';
 import GalleryAdminTab from './GalleryAdminTab';
-import EventsAdminTab from './EventsAdminTab';
+import PartyDecorationAdminTab from './PartyDecorationAdminTab';
 
 const AdminDashboard = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -24,7 +24,7 @@ const AdminDashboard = () => {
     { id: 'revenue', label: 'Revenue', icon: '📊' },
     { id: 'customers', label: 'Customers', icon: '👥' },
     { id: 'gallery', label: 'Cake Gallery', icon: '🖼️' },
-    { id: 'events', label: 'Events', icon: '🎉' },
+    { id: 'party-decorations', label: 'Party & Decor', icon: '🎉' },
     { id: 'notifications', label: 'Notifications', icon: '🔔' },
   ];
 
@@ -35,7 +35,7 @@ const AdminDashboard = () => {
       case 'revenue': return <RevenueTab />;
       case 'customers': return <CustomersTab />;
       case 'gallery': return <GalleryAdminTab />;
-      case 'events': return <EventsAdminTab />;
+      case 'party-decorations': return <PartyDecorationAdminTab />;
       case 'notifications': return <NotificationsTab />;
       default: return <OrdersTab />;
     }

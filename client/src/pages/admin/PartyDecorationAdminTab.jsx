@@ -5,7 +5,7 @@ import Loader from '../../components/Loader';
 import ErrorState from '../../components/ErrorState';
 import ProductCard from '../../components/ProductCard';
 
-const ProductsTab = () => {
+const PartyDecorationAdminTab = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -41,7 +41,7 @@ const ProductsTab = () => {
   // Delete State
   const [deleteId, setDeleteId] = useState(null);
 
-  const categories = ['All', 'Bread', 'Bun', 'Cake', 'Pastry', 'Snacks', 'Beverages', 'Chocolates & Biscuits', 'Other'];
+  const categories = ['All', 'Party Items', 'Decoration Items'];
 
   const fetchProducts = async () => {
     setLoading(true);
@@ -165,8 +165,8 @@ const ProductsTab = () => {
 
   // Filter products
   const filteredProducts = products.filter(p => {
-    // Hide Party Items and Decoration Items in this tab
-    if (p.category === 'Party Items' || p.category === 'Decoration Items') return false;
+    // Only show Party Items and Decoration Items in this tab
+    if (p.category !== 'Party Items' && p.category !== 'Decoration Items') return false;
 
     const matchesSearch = p.nameEN.toLowerCase().includes(search.toLowerCase()) || 
                           (p.nameTe && p.nameTe.includes(search));
@@ -348,4 +348,4 @@ const ProductsTab = () => {
   );
 };
 
-export default ProductsTab;
+export default PartyDecorationAdminTab;

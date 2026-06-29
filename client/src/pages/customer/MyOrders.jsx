@@ -28,7 +28,7 @@ const MyOrders = () => {
     try {
       setLoading(true);
       setError('');
-      const { data } = await axiosInstance.get('/orders/my');
+      const { data } = await axiosInstance.get(`/orders/my?t=${Date.now()}`);
       setOrders(data);
     } catch (err) {
       console.error('Failed to fetch orders', err);

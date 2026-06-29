@@ -16,6 +16,8 @@ const Navbar = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const searchParams = new URLSearchParams(location.search);
+  const currentAdminTab = searchParams.get('tab') || 'orders';
 
   const cartItemCount = cart.length;
 
@@ -39,13 +41,14 @@ const Navbar = () => {
   };
 
   const navLinks = [
-    { label: 'Home', to: '/' },
-    { label: 'About Us', to: '/#about-us' },
-    { label: 'Our Products', to: '/shop' },
-    { label: 'Specials', to: '/shop?category=specials' },
-    { label: 'Cake Gallery', to: '/gallery' },
-    { label: 'Events', to: '/events' },
-    { label: 'Contact', to: '/contact' },
+    { label: 'Home', to: '/', icon: '🏠' },
+    { label: 'About Us', to: '/#about-us', icon: 'ℹ️' },
+    { label: 'Our Products', to: '/shop', icon: '🥐' },
+    { label: 'Specials', to: '/shop?category=specials', icon: '✨' },
+    { label: 'Cake Gallery', to: '/gallery', icon: '🎂' },
+    { label: 'Party Items', to: '/party-decorations?category=party-items', icon: '🎉' },
+    { label: 'Decoration Items', to: '/party-decorations?category=decoration-items', icon: '🎀' },
+    { label: 'Contact', to: '/contact', icon: '📞' },
   ];
 
   const cakeGalleryCategories = [
@@ -71,7 +74,7 @@ const Navbar = () => {
     { id: 'revenue', label: 'Revenue', icon: '📊' },
     { id: 'customers', label: 'Customers', icon: '👥' },
     { id: 'gallery', label: 'Gallery', icon: '🖼️' },
-    { id: 'events', label: 'Events', icon: '🎉' },
+    { id: 'party-decorations', label: 'Party & Decor', icon: '🎉' },
     { id: 'notifications', label: 'Notifications', icon: '🔔' },
   ];
 
@@ -102,7 +105,7 @@ const Navbar = () => {
       }}
     >
       {/* ── Navbar inner container — responsive padding ── */}
-      <div className="max-w-[1360px] mx-auto px-4 sm:px-6 lg:px-10 xl:px-20">
+      <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-6 xl:px-8">
         <div className="flex items-center justify-between h-16 md:h-[72px]">
 
           {/* ── LOGO ── */}
@@ -110,19 +113,19 @@ const Navbar = () => {
             <img 
               src="/src/assets/adminT_cropped.png" 
               alt="Sri Tirupathi Venkatachalapathi Bakery" 
-              className="h-16 md:h-20 object-contain"
+              className="h-14 lg:h-14 object-contain"
             />
           </Link>
 
           {/* ── DESKTOP NAV LINKS (lg+) ── */}
-          <div className="hidden lg:flex items-center gap-2 lg:gap-4 ml-4 xl:ml-8">
+          <div className="hidden lg:flex items-center gap-1 xl:gap-3 ml-2 xl:ml-6 flex-1 justify-center">
             {navLinks.map((item) => (
               item.label === 'Cake Gallery' ? (
                 <div key={item.label} className="relative group flex items-center h-full py-5">
                   <Link
                     to={item.to}
                     onClick={(e) => handleNavClick(e, item.to)}
-                    className="px-2 py-2 text-sm font-bold transition-all duration-200 hover:text-amber-600 relative text-gray-900 flex items-center gap-1"
+                    className="px-2 py-2 text-[13px] xl:text-sm font-bold transition-all duration-200 hover:text-amber-600 relative text-gray-900 flex items-center gap-1 whitespace-nowrap"
                   >
                     {item.label}
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4">
@@ -145,7 +148,7 @@ const Navbar = () => {
                 key={item.label}
                 to={item.to}
                 onClick={(e) => handleNavClick(e, item.to)}
-                className="px-2 py-2 text-sm font-bold transition-all duration-200 hover:text-amber-600 relative group text-gray-900"
+                className="px-2 py-2 text-[13px] xl:text-sm font-bold transition-all duration-200 hover:text-amber-600 relative group text-gray-900 whitespace-nowrap"
               >
                 {item.label}
                 <span
@@ -352,7 +355,11 @@ const Navbar = () => {
                         key={item.id}
                         to={`/admin/dashboard?tab=${item.id}`}
                         onClick={() => setMobileMenuOpen(false)}
-                        className="flex items-center gap-3 px-4 py-3 rounded-xl text-base font-bold transition-colors hover:bg-amber-50 text-gray-800"
+                        className={`flex items-center gap-3 px-4 py-3 rounded-xl text-base font-bold transition-colors ${
+                          currentAdminTab === item.id
+                            ? 'bg-indigo-50 text-indigo-700'
+                            : 'hover:bg-amber-50 text-gray-800'
+                        }`}
                       >
                         <span className="text-xl">{item.icon}</span>
                         <span>{item.label}</span>
@@ -365,7 +372,9 @@ const Navbar = () => {
                   </>
                 ) : (
                   <>
-                    {navLinks.map((item) => (
+                    {navLinks.map((item) => {
+                      const isActive = location.pathname + location.search === item.to || (location.pathname === '/' && item.to === '/');
+                      return (
                       <Link
                         key={item.label}
                         to={item.to}
@@ -373,24 +382,38 @@ const Navbar = () => {
                           setMobileMenuOpen(false);
                           handleNavClick(e, item.to);
                         }}
-                        className="block px-4 py-3 rounded-xl text-base font-bold transition-colors hover:bg-amber-50 text-gray-800"
+                        className={`flex items-center gap-3 px-4 py-3 rounded-xl text-base font-bold transition-colors ${
+                          isActive
+                            ? 'bg-amber-100 text-amber-800'
+                            : 'hover:bg-amber-50 text-gray-800'
+                        }`}
                       >
-                        {item.label}
+                        {item.icon && <span className="text-xl">{item.icon}</span>}
+                        <span>{item.label}</span>
                       </Link>
-                    ))}
+                    )})}
                     
                     {user && user.role === 'customer' && (
                       <>
                         <div className="my-2 border-t border-gray-100" />
-                        <Link to="/customer/dashboard?tab=orders" onClick={() => setMobileMenuOpen(false)} className="block px-4 py-3 rounded-xl text-base font-bold hover:bg-amber-50 text-gray-800">My Orders</Link>
-                        <Link to="/customer/dashboard?tab=occasions" onClick={() => setMobileMenuOpen(false)} className="block px-4 py-3 rounded-xl text-base font-bold hover:bg-amber-50 text-gray-800">Occasion Reminders</Link>
+                        <Link to="/customer/dashboard?tab=orders" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-4 py-3 rounded-xl text-base font-bold hover:bg-amber-50 text-gray-800">
+                          <span className="text-xl">📦</span>
+                          <span>My Orders</span>
+                        </Link>
+                        <Link to="/customer/dashboard?tab=occasions" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-4 py-3 rounded-xl text-base font-bold hover:bg-amber-50 text-gray-800">
+                          <span className="text-xl">📅</span>
+                          <span>Occasion Reminders</span>
+                        </Link>
                       </>
                     )}
 
                     {user && user.role !== 'customer' && !location.pathname.startsWith('/admin/dashboard') && (
                       <>
                         <div className="my-2 border-t border-gray-100" />
-                        <Link to="/admin/dashboard" onClick={() => setMobileMenuOpen(false)} className="block px-4 py-3 rounded-xl text-base font-bold hover:bg-amber-50 text-gray-800">Admin Dashboard</Link>
+                        <Link to="/admin/dashboard" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-4 py-3 rounded-xl text-base font-bold hover:bg-amber-50 text-gray-800">
+                          <span className="text-xl">⚙️</span>
+                          <span>Admin Dashboard</span>
+                        </Link>
                       </>
                     )}
 

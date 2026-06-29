@@ -224,28 +224,26 @@ const Home = () => {
               {/* Feature Icons - Horizontal Row */}
               <motion.div
                 variants={itemVariant}
-                className="flex flex-wrap items-center justify-center lg:justify-start gap-y-6"
+                className="flex flex-wrap items-center justify-center lg:justify-start gap-3 mt-2"
               >
                 {features.map((f, i) => (
-                  <div key={i} className="flex items-center">
-                    <div className="flex items-center gap-3">
-                      <div
-                        className="flex items-center justify-center rounded-full border"
-                        style={{
-                          width: 44, height: 44,
-                          borderColor: '#dfcdbf',
-                        }}
-                      >
+                  <div 
+                    key={i} 
+                    className="flex items-center gap-3 bg-white/85 backdrop-blur-sm rounded-full pr-5 pl-1.5 py-1.5 shadow-sm border border-white/50 w-[170px]"
+                  >
+                    <div
+                      className="relative flex items-center justify-center rounded-full border border-[#d6bda5] bg-white flex-shrink-0 shadow-sm"
+                      style={{ width: 42, height: 42 }}
+                    >
+                      <div className="absolute inset-0 rounded-full border border-[#f0e4d8] m-[2px]" />
+                      <div className="relative z-10 text-[#7a482b]">
                         {f.icon}
                       </div>
-                      <div className="flex flex-col text-left pr-4 sm:pr-6">
-                        <span className="text-[11px] font-bold leading-tight" style={{ color: '#2d170a' }}>{f.label}</span>
-                        <span className="text-[10px] font-normal leading-tight mt-0.5" style={{ color: '#6e5a4f' }}>{f.sub}</span>
-                      </div>
                     </div>
-                    {i !== features.length - 1 && (
-                      <div className="hidden sm:block h-8 w-px mr-4 sm:mr-6" style={{ background: '#dfcdbf' }} />
-                    )}
+                    <div className="flex flex-col text-left py-0.5">
+                      <span className="text-[12px] font-bold leading-tight" style={{ color: '#4e2815' }}>{f.label}</span>
+                      <span className="text-[10px] font-medium leading-tight mt-0.5" style={{ color: '#8a6e5d' }}>{f.sub}</span>
+                    </div>
                   </div>
                 ))}
               </motion.div>
@@ -263,62 +261,85 @@ const Home = () => {
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.65, delay: 0.45, ease: 'easeOut' }}
             >
-              {sidebarCategories.map((cat, i) => (
-                <Link
-                  key={i}
-                  to={`/shop?category=${cat.label.toLowerCase().replace(/\s+/g, '-')}`}
-                  className="flex flex-col items-center justify-center gap-1.5 rounded-2xl transition-all duration-200 hover:scale-105 group bg-white shadow-sm border border-[#eae0d5]"
-                  style={{
-                    padding: '16px 14px',
-                    minWidth: 84,
-                    textDecoration: 'none',
-                  }}
-                >
-                  <div
-                    className="flex items-center justify-center rounded-full text-2xl transition-colors group-hover:bg-[#b56d36]/10"
-                    style={{ width: 44, height: 44, background: 'rgba(181,109,54,0.08)' }}
+              {sidebarCategories.map((cat, i) => {
+                const slug = cat.label.toLowerCase().replace(/\s+/g, '-');
+                const linkPath = (slug === 'party-items' || slug === 'decoration-items') 
+                  ? `/party-decorations?category=${slug}` 
+                  : `/shop?category=${slug}`;
+                
+                return (
+                  <Link
+                    key={i}
+                    to={linkPath}
+                    className="flex flex-col items-center justify-center gap-1.5 rounded-2xl transition-all duration-200 hover:scale-105 group bg-white shadow-sm border border-[#eae0d5]"
+                    style={{
+                      padding: '16px 14px',
+                      minWidth: 84,
+                      textDecoration: 'none',
+                    }}
                   >
-                    {cat.icon}
-                  </div>
-                  <span className="text-xs font-bold text-center leading-tight" style={{ color: '#4e2815' }}>
-                    {cat.label}
-                  </span>
-                </Link>
-              ))}
+                    <div
+                      className="flex items-center justify-center rounded-full text-2xl transition-colors group-hover:bg-[#b56d36]/10"
+                      style={{ width: 44, height: 44, background: 'rgba(181,109,54,0.08)' }}
+                    >
+                      {cat.icon}
+                    </div>
+                    <span className="text-xs font-bold text-center leading-tight" style={{ color: '#4e2815' }}>
+                      {cat.label}
+                    </span>
+                  </Link>
+                );
+              })}
             </motion.div>
 
             {/* Mobile/Tablet horizontal category strip */}
             <div className="lg:hidden relative w-full pt-6 pb-8">
+              <style>{`
+                .hide-scrollbar {
+                  -ms-overflow-style: none;  /* IE and Edge */
+                  scrollbar-width: none;  /* Firefox */
+                }
+                .hide-scrollbar::-webkit-scrollbar {
+                  display: none;
+                }
+              `}</style>
               <motion.div
                 className="flex flex-row gap-3 overflow-x-auto justify-start w-full hide-scrollbar snap-x px-4"
                 initial={{ opacity: 0, y: 16 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.5 }}
               >
-              {sidebarCategories.map((cat, i) => (
-                <Link
-                  key={i}
-                  to={`/shop?category=${cat.label.toLowerCase().replace(/\s+/g, '-')}`}
-                  className="flex flex-col items-center justify-center gap-1.5 rounded-2xl transition-all duration-200 active:scale-95 bg-white shadow-sm border border-[#eae0d5]"
-                  style={{
-                    padding: '12px 6px',
-                    width: 84,
-                    height: 90,
-                    textDecoration: 'none',
-                    flexShrink: 0,
-                  }}
-                >
-                  <div
-                    className="flex items-center justify-center rounded-full text-xl"
-                    style={{ width: 38, height: 38, background: 'rgba(181,109,54,0.08)' }}
+              {sidebarCategories.map((cat, i) => {
+                const slug = cat.label.toLowerCase().replace(/\s+/g, '-');
+                const linkPath = (slug === 'party-items' || slug === 'decoration-items') 
+                  ? `/party-decorations?category=${slug}` 
+                  : `/shop?category=${slug}`;
+                
+                return (
+                  <Link
+                    key={i}
+                    to={linkPath}
+                    className="flex flex-col items-center justify-center gap-1.5 rounded-2xl transition-all duration-200 active:scale-95 bg-white shadow-sm border border-[#eae0d5]"
+                    style={{
+                      padding: '12px 6px',
+                      width: 84,
+                      height: 90,
+                      textDecoration: 'none',
+                      flexShrink: 0,
+                    }}
                   >
-                    {cat.icon}
-                  </div>
-                  <span className="text-[10px] font-bold text-center leading-tight" style={{ color: '#4e2815' }}>
-                    {cat.label}
-                  </span>
-                </Link>
-              ))}
+                    <div
+                      className="flex items-center justify-center rounded-full text-xl"
+                      style={{ width: 38, height: 38, background: 'rgba(181,109,54,0.08)' }}
+                    >
+                      {cat.icon}
+                    </div>
+                    <span className="text-[10px] font-bold text-center leading-tight" style={{ color: '#4e2815' }}>
+                      {cat.label}
+                    </span>
+                  </Link>
+                );
+              })}
               </motion.div>
               <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-[#fefaf3] to-transparent pointer-events-none"></div>
             </div>

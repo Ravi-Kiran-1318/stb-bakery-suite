@@ -291,8 +291,29 @@ Order ID: #${shortOrderId}`;
                         <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
                           Order #{order._id.toString().slice(-6).toUpperCase()}
                         </h3>
-                        <p className="text-sm text-gray-500">{dateObj.toLocaleString()}</p>
-                        <p className="text-gray-700 mt-2 font-medium">{itemsSummary}</p>
+                        <p className="text-sm text-gray-500">Placed on: {dateObj.toLocaleString()}</p>
+                        {order.requestedDate && (
+                          <p className="text-sm font-semibold text-amber-600 mt-1">
+                            Requested for: {new Date(order.requestedDate).toLocaleDateString()} {order.requestedTime && `| ${order.requestedTime}`}
+                          </p>
+                        )}
+                        <div className="mt-4 flex flex-col gap-3 border-t border-gray-100 pt-3">
+                          {order.items?.map((item, i) => (
+                            <div key={item.productId || i} className="flex items-center gap-3">
+                              <div className="w-12 h-12 rounded bg-gray-100 flex-shrink-0 border border-gray-200 overflow-hidden">
+                                {item.imageUrl ? (
+                                  <img src={item.imageUrl} alt={item.nameEN || item.name} className="w-full h-full object-cover" />
+                                ) : (
+                                  <div className="w-full h-full flex items-center justify-center text-xs text-gray-400">No Img</div>
+                                )}
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <div className="font-semibold text-dark truncate">{item.nameEN || item.name}</div>
+                                <div className="text-xs text-gray-500">Qty: {item.qty} × {formatCurrency(item.price)}</div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
                       </div>
                       <div className="text-left md:text-right">
                         <div className="text-xl font-bold text-gray-900 mb-1">{formatCurrency(order.totalAmount)}</div>
@@ -334,13 +355,13 @@ Order ID: #${shortOrderId}`;
                           </div>
                           <div className="flex justify-between text-xs font-semibold text-gray-500">
                             {ORDER_STEPS.map((step, idx) => (
-                              <div key={step} className={`text-center w-1/5 ${idx <= currentStepIndex ? 'text-amber-600' : ''}`}>
+                              <div key={step} className={`text-center w-1/5 px-0.5 ${idx <= currentStepIndex ? 'text-amber-600' : ''}`}>
                                 <div className={`w-3 h-3 mx-auto rounded-full mb-1 transition-all duration-500 ${
-                                  idx < currentStepIndex ? 'bg-amber-500' : 
+                                  (idx < currentStepIndex || (idx === currentStepIndex && step === 'Delivered')) ? 'bg-amber-500' : 
                                   idx === currentStepIndex ? 'bg-amber-500 animate-pulse ring-4 ring-amber-200' : 
                                   'bg-gray-300'
                                 }`}></div>
-                                <span className="hidden sm:block">{step}</span>
+                                <span className="block text-[9px] sm:text-xs leading-tight mt-1">{step.replace('Out for Delivery', 'Out for Del.')}</span>
                               </div>
                             ))}
                           </div>
@@ -370,7 +391,7 @@ Order ID: #${shortOrderId}`;
                         📄 Receipt
                       </button>
                       
-                      {!isCancelled && (order.status === 'Received' || order.status === 'Preparing') && (
+                      {!isCancelled && order.status === 'Received' && (
                         <button 
                           onClick={() => handleCancelOrder(order._id)}
                           className="text-red-600 hover:text-white font-semibold px-4 py-2 border border-red-600 hover:bg-red-600 rounded-lg transition-colors text-sm"

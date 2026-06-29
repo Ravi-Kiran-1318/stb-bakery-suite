@@ -36,9 +36,13 @@ const GalleryAdminTab = () => {
   const [editingId, setEditingId] = useState(null);
 
   const [formData, setFormData] = useState({
-    title: '',
+    nameEN: '',
     category: 'Other',
-    isVisible: true,
+    price: '',
+    weight: '',
+    flavour: '',
+    descriptionEN: '',
+    isAvailable: true,
   });
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
@@ -48,11 +52,11 @@ const GalleryAdminTab = () => {
   const fetchItems = async () => {
     setLoading(true);
     try {
-      const { data } = await axiosInstance.get('/gallery/all');
+      const { data } = await axiosInstance.get('/products/all?isGallery=true');
       setItems(data);
       setError('');
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to load gallery');
+      setError(err.response?.data?.message || 'Failed to load gallery items');
     } finally {
       setLoading(false);
     }
@@ -81,7 +85,7 @@ const GalleryAdminTab = () => {
   const openAddModal = () => {
     setIsEditing(false);
     setEditingId(null);
-    setFormData({ title: '', category: 'Other', isVisible: true });
+    setFormData({ nameEN: '', category: 'Other', price: '', weight: '', flavour: '', descriptionEN: '', isAvailable: true });
     setImageFile(null);
     setImagePreview(null);
     setModalOpen(true);
@@ -91,9 +95,13 @@ const GalleryAdminTab = () => {
     setIsEditing(true);
     setEditingId(item._id);
     setFormData({
-      title: item.title,
-      category: item.category,
-      isVisible: item.isVisible,
+      nameEN: item.nameEN || '',
+      category: item.category || 'Other',
+      price: item.price || '',
+      weight: item.weight || '',
+      flavour: item.flavour || '',
+      descriptionEN: item.descriptionEN || '',
+      isAvailable: item.isAvailable,
     });
     setImageFile(null);
     setImagePreview(item.imageUrl);
@@ -105,22 +113,28 @@ const GalleryAdminTab = () => {
     setIsSubmitting(true);
     
     const data = new FormData();
-    data.append('title', formData.title);
+    data.append('nameEN', formData.nameEN);
     data.append('category', formData.category);
-    data.append('isVisible', formData.isVisible);
+    data.append('price', formData.price);
+    data.append('weight', formData.weight);
+    data.append('flavour', formData.flavour);
+    data.append('descriptionEN', formData.descriptionEN);
+    data.append('isAvailable', formData.isAvailable);
+    data.append('isGallery', true);
+    
     if (imageFile) {
       data.append('image', imageFile);
     }
 
     try {
       if (isEditing) {
-        const res = await axiosInstance.patch(`/gallery/${editingId}`, data, {
+        const res = await axiosInstance.patch(`/products/${editingId}`, data, {
           headers: { 'Content-Type': 'multipart/form-data' },
         });
         setItems(items.map((i) => (i._id === editingId ? res.data : i)));
         addToast('Gallery item updated', 'success');
       } else {
-        const res = await axiosInstance.post('/gallery', data, {
+        const res = await axiosInstance.post('/products', data, {
           headers: { 'Content-Type': 'multipart/form-data' },
         });
         setItems([res.data, ...items]);
@@ -136,7 +150,7 @@ const GalleryAdminTab = () => {
 
   const handleDeleteConfirm = async () => {
     try {
-      await axiosInstance.delete(`/gallery/${deleteId}`);
+      await axiosInstance.delete(`/products/${deleteId}`);
       setItems(items.filter((i) => i._id !== deleteId));
       addToast('Item deleted', 'success');
       setDeleteId(null);
@@ -151,32 +165,43 @@ const GalleryAdminTab = () => {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center bg-white p-4 rounded-lg shadow-sm border border-border">
-        <h2 className="text-xl font-bold text-dark">Gallery Management</h2>
+        <h2 className="text-xl font-bold text-dark">Cake Gallery Management</h2>
         <button onClick={openAddModal} className="btn-primary">
-          + Add Image
+          + Add Cake Design
         </button>
       </div>
 
       {items.length === 0 ? (
         <div className="bg-white py-16 px-4 rounded-lg shadow-sm text-center border border-border">
-          <p className="text-muted">No images in the gallery yet.</p>
+          <p className="text-muted">No custom cakes in the gallery yet.</p>
         </div>
       ) : (
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {items.map((item) => (
             <div key={item._id} className="bg-white rounded-lg shadow border border-border overflow-hidden relative">
-              <img src={item.imageUrl} alt={item.title} className="w-full h-48 object-cover" />
+              <div className="relative">
+                <img src={item.imageUrl} alt={item.nameEN} className="w-full h-48 object-cover" />
+                <div className="absolute top-2 right-2 flex gap-2">
+                  <button onClick={() => openEditModal(item)} className="p-2 bg-white/90 backdrop-blur-sm rounded-full shadow-sm text-amber-600 hover:bg-amber-50 hover:text-amber-700 transition-colors" title="Edit">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                    </svg>
+                  </button>
+                  <button onClick={() => setDeleteId(item._id)} className="p-2 bg-white/90 backdrop-blur-sm rounded-full shadow-sm text-red-500 hover:bg-red-50 hover:text-red-600 transition-colors" title="Delete">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
               <div className="p-3">
-                <h3 className="font-bold text-dark truncate">{item.title}</h3>
+                <h3 className="font-bold text-dark truncate">{item.nameEN}</h3>
                 <p className="text-sm text-muted">{item.category}</p>
+                <p className="text-sm font-semibold text-amber-600 mt-1">₹{item.price} {item.weight && `| ${item.weight}`}</p>
                 <div className="mt-2 flex justify-between items-center">
-                  <span className={`text-xs font-semibold px-2 py-1 rounded-full ${item.isVisible ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'}`}>
-                    {item.isVisible ? 'Visible' : 'Hidden'}
+                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded uppercase ${item.isAvailable ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                    {item.isAvailable ? 'Available' : 'Unavailable'}
                   </span>
-                  <div className="flex gap-2">
-                    <button onClick={() => openEditModal(item)} className="text-blue-500 hover:text-blue-700">✏️</button>
-                    <button onClick={() => setDeleteId(item._id)} className="text-red-500 hover:text-red-700">🗑️</button>
-                  </div>
                 </div>
               </div>
 
@@ -197,11 +222,11 @@ const GalleryAdminTab = () => {
       {modalOpen && (
         <div className="modal-overlay overflow-y-auto py-10">
           <div className="modal-content p-6 my-auto max-w-lg w-full mx-4">
-            <h2 className="text-2xl font-bold mb-6 text-dark">{isEditing ? 'Edit Image' : 'Add Image'}</h2>
+            <h2 className="text-2xl font-bold mb-6 text-dark">{isEditing ? 'Edit Cake Design' : 'Add Cake Design'}</h2>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-dark mb-1">Title *</label>
-                <input type="text" name="title" required value={formData.title} onChange={handleInputChange} className="input-field" />
+                <label className="block text-sm font-medium text-dark mb-1">Cake Name *</label>
+                <input type="text" name="nameEN" required value={formData.nameEN} onChange={handleInputChange} className="input-field" placeholder="e.g. Pink Barbie Fondant Cake" />
               </div>
               
               <div>
@@ -209,6 +234,27 @@ const GalleryAdminTab = () => {
                 <select name="category" required value={formData.category} onChange={handleInputChange} className="input-field">
                   {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
                 </select>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-dark mb-1">Price (₹) *</label>
+                  <input type="number" name="price" required min="0" value={formData.price} onChange={handleInputChange} className="input-field" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-dark mb-1">Weight</label>
+                  <input type="text" name="weight" value={formData.weight} onChange={handleInputChange} className="input-field" placeholder="e.g. 1 Kg" />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-dark mb-1">Flavour</label>
+                <input type="text" name="flavour" value={formData.flavour} onChange={handleInputChange} className="input-field" placeholder="e.g. Butterscotch" />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-dark mb-1">Description</label>
+                <textarea name="descriptionEN" value={formData.descriptionEN} onChange={handleInputChange} className="input-field h-20" placeholder="Small description of the cake design..." />
               </div>
 
               <div>
@@ -222,8 +268,8 @@ const GalleryAdminTab = () => {
               </div>
 
               <div className="flex items-center gap-2 mt-4">
-                <input type="checkbox" name="isVisible" id="isVisible" checked={formData.isVisible} onChange={handleInputChange} className="w-4 h-4 text-accent border-border rounded focus:ring-accent" />
-                <label htmlFor="isVisible" className="text-sm font-medium text-dark">Visible in public gallery</label>
+                <input type="checkbox" name="isAvailable" id="isAvailable" checked={formData.isAvailable} onChange={handleInputChange} className="w-4 h-4 text-accent border-border rounded focus:ring-accent" />
+                <label htmlFor="isAvailable" className="text-sm font-medium text-dark">Available to order</label>
               </div>
 
               <div className="flex justify-end gap-3 pt-6 mt-6 border-t border-border">

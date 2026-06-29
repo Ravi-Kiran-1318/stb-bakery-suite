@@ -66,14 +66,15 @@ const NotificationBell = () => {
     } finally {
       setIsOpen(false);
       
-      if (user?.role === 'admin') {
-        navigate(`/admin/dashboard?tab=notifications`);
-      } else if (actionTab) {
-        let route = `/customer/dashboard?tab=${actionTab}`;
-        if (referenceId) {
-          route += `&highlightOrderId=${referenceId}`;
+      if (actionTab) {
+        const basePath = user?.role === 'admin' ? '/admin/dashboard' : '/customer/dashboard';
+        if (referenceId && actionTab === 'orders') {
+          navigate(`${basePath}?tab=${actionTab}&search=${referenceId}`);
+        } else {
+          navigate(`${basePath}?tab=${actionTab}`);
         }
-        navigate(route);
+      } else if (user?.role === 'admin') {
+        navigate(`/admin/dashboard?tab=notifications`);
       }
     }
   };

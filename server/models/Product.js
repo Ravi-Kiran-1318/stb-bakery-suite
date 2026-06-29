@@ -33,7 +33,6 @@ const productSchema = new mongoose.Schema(
     },
     category: {
       type: String,
-      enum: ['Bread', 'Bun', 'Cake', 'Pastry', 'Snacks', 'Beverages', 'Other'],
     },
     price: {
       type: Number,
@@ -62,6 +61,17 @@ const productSchema = new mongoose.Schema(
     isSpecial: {
       type: Boolean,
       default: false,
+    },
+    isLoved: {
+      type: Boolean,
+      default: false,
+    },
+    isGallery: {
+      type: Boolean,
+      default: false,
+    },
+    flavour: {
+      type: String,
     },
     reviews: [reviewSchema],
     averageRating: {

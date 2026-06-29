@@ -33,8 +33,11 @@ const NotificationsTab = () => {
       );
       
       if (actionTab) {
-        // Just go to the orders tab for admins since they see all orders
-        navigate(`/admin/dashboard?tab=${actionTab}`);
+        if (referenceId && actionTab === 'orders') {
+          navigate(`/admin/dashboard?tab=${actionTab}&search=${referenceId}`);
+        } else {
+          navigate(`/admin/dashboard?tab=${actionTab}`);
+        }
       }
     } catch (error) {
       console.error('Failed to mark as read', error);

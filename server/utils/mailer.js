@@ -9,13 +9,20 @@ const nodemailer = require('nodemailer');
  * 5. Copy the 16-character password and set it as GMAIL_APP_PASSWORD in .env.
  */
 
-const transporter = nodemailer.createTransport({
-  service: 'gmail',
-  auth: {
-    user: process.env.GMAIL_USER,
-    pass: process.env.GMAIL_APP_PASSWORD,
-  },
-});
+const createTransporter = () => {
+  if (!process.env.GMAIL_USER || !process.env.GMAIL_APP_PASSWORD) {
+    return null;
+  }
+  return nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+      user: process.env.GMAIL_USER,
+      pass: process.env.GMAIL_APP_PASSWORD,
+    },
+  });
+};
+
+const transporter = createTransporter();
 
 const getItemsTableHTML = (items) => {
   let table = `
@@ -92,6 +99,11 @@ const sendAdminNewOrderEmail = async (order, adminEmail) => {
       </div>
     `;
 
+    if (!transporter) {
+      console.log('Skipping admin new order email: GMAIL credentials not configured in .env');
+      return;
+    }
+
     await transporter.sendMail({
       from: `"Bakery Orders" <${process.env.GMAIL_USER}>`,
       to: adminEmail,
@@ -149,6 +161,11 @@ const sendCustomerConfirmationEmail = async (order) => {
       </div>
     `;
 
+    if (!transporter) {
+      console.log('Skipping customer confirmation email: GMAIL credentials not configured in .env');
+      return;
+    }
+
     await transporter.sendMail({
       from: `"Sri Tirupati Venkatachalapathy Bakery" <${process.env.GMAIL_USER}>`,
       to: order.customerInfo.email,
@@ -191,6 +208,11 @@ const sendOccasionReminderEmail = async (user, reminder) => {
         </div>
       </div>
     `;
+
+    if (!transporter) {
+      console.log('Skipping occasion reminder email: GMAIL credentials not configured in .env');
+      return;
+    }
 
     await transporter.sendMail({
       from: `"Sri Tirupati Venkatachalapathy Bakery" <${process.env.GMAIL_USER}>`,

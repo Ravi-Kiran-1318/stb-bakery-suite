@@ -4,7 +4,21 @@ import { AuthContext } from '../context/AuthContext';
 import Loader from './Loader';
 
 const PrivateRoute = ({ children, role }) => {
-  // BYPASS FOR DEMO
+  const { user, loading } = useContext(AuthContext);
+  const location = useLocation();
+
+  if (loading) {
+    return <Loader />;
+  }
+
+  if (!user) {
+    return <Navigate to={`/login?redirect=${encodeURIComponent(location.pathname)}`} replace />;
+  }
+
+  if (role && user.role !== role) {
+    return <Navigate to="/" replace />;
+  }
+
   return children;
 };
 

@@ -23,8 +23,8 @@ const Navbar = () => {
     i18n.changeLanguage(i18n.language === 'en' ? 'te' : 'en');
   };
 
-  const handleLogout = () => {
-    logout();
+  const handleLogout = async () => {
+    await logout();
     navigate('/login');
     setMobileMenuOpen(false);
   };
@@ -108,9 +108,9 @@ const Navbar = () => {
           {/* ── LOGO ── */}
           <Link to="/" className="flex items-center flex-shrink-0">
             <img 
-              src="/src/assets/adminT.png" 
+              src="/src/assets/adminT_cropped.png" 
               alt="Sri Tirupathi Venkatachalapathi Bakery" 
-              className="h-12 md:h-14 object-contain"
+              className="h-16 md:h-20 object-contain"
             />
           </Link>
 
@@ -332,7 +332,7 @@ const Navbar = () => {
               className="fixed top-0 left-0 h-full w-[80%] max-w-sm bg-white z-[60] flex flex-col shadow-2xl lg:hidden overflow-y-auto"
             >
               <div className="flex items-center justify-between p-4 border-b border-gray-100">
-                <img src="/src/assets/adminT.png" alt="Logo" className="h-8 object-contain" />
+                <img src="/src/assets/adminT_cropped.png" alt="Logo" className="h-12 object-contain" />
                 <button
                   onClick={() => setMobileMenuOpen(false)}
                   className="p-2 text-gray-500 hover:text-gray-800 rounded-full hover:bg-gray-100 transition-colors"

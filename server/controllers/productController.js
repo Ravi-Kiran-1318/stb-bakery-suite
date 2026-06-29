@@ -5,7 +5,14 @@ const Notification = require('../models/Notification');
 // @route   GET /api/products
 const getPublicProducts = async (req, res) => {
   try {
-    const products = await Product.find({ isAvailable: true });
+    const isGallery = req.query.isGallery === 'true';
+    const query = { isAvailable: true };
+    if (isGallery) {
+      query.isGallery = true;
+    } else {
+      query.isGallery = { $ne: true };
+    }
+    const products = await Product.find(query);
     res.json(products);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -16,7 +23,14 @@ const getPublicProducts = async (req, res) => {
 // @route   GET /api/products/all
 const getAllProducts = async (req, res) => {
   try {
-    const products = await Product.find({});
+    const isGallery = req.query.isGallery === 'true';
+    const query = {};
+    if (isGallery) {
+      query.isGallery = true;
+    } else {
+      query.isGallery = { $ne: true };
+    }
+    const products = await Product.find(query);
     res.json(products);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -27,7 +41,7 @@ const getAllProducts = async (req, res) => {
 // @route   POST /api/products
 const createProduct = async (req, res) => {
   try {
-    const { nameEN, nameTe, descriptionEN, descriptionTe, price, weight, quantity, category, isAvailable, isSpecial } = req.body;
+    const { nameEN, nameTe, descriptionEN, descriptionTe, price, weight, quantity, category, isAvailable, isSpecial, isLoved, isGallery, flavour } = req.body;
     let imageUrl = '';
     
     if (req.file) {
@@ -46,6 +60,9 @@ const createProduct = async (req, res) => {
       imageUrl,
       isAvailable: isAvailable === 'true' || isAvailable === true,
       isSpecial: isSpecial === 'true' || isSpecial === true,
+      isLoved: isLoved === 'true' || isLoved === true,
+      isGallery: isGallery === 'true' || isGallery === true,
+      flavour,
     });
 
     const createdProduct = await product.save();
@@ -59,7 +76,7 @@ const createProduct = async (req, res) => {
 // @route   PATCH /api/products/:id
 const updateProduct = async (req, res) => {
   try {
-    const { nameEN, nameTe, descriptionEN, descriptionTe, price, weight, quantity, category, isAvailable, isSpecial } = req.body;
+    const { nameEN, nameTe, descriptionEN, descriptionTe, price, weight, quantity, category, isAvailable, isSpecial, isLoved, isGallery, flavour } = req.body;
     
     const product = await Product.findById(req.params.id);
     if (!product) {
@@ -76,6 +93,9 @@ const updateProduct = async (req, res) => {
     product.category = category || product.category;
     if (isAvailable !== undefined) product.isAvailable = isAvailable === 'true' || isAvailable === true;
     if (isSpecial !== undefined) product.isSpecial = isSpecial === 'true' || isSpecial === true;
+    if (isLoved !== undefined) product.isLoved = isLoved === 'true' || isLoved === true;
+    if (isGallery !== undefined) product.isGallery = isGallery === 'true' || isGallery === true;
+    if (flavour !== undefined) product.flavour = flavour;
 
     if (req.file) {
       product.imageUrl = req.file.path;

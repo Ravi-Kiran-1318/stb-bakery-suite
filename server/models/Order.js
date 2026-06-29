@@ -39,7 +39,10 @@ const orderSchema = new mongoose.Schema(
       address: String,
     },
     requestedDate: {
-      type: String, // from frontend it comes as a string 'YYYY-MM-DDThh:mm'
+      type: String, 
+    },
+    requestedTime: {
+      type: String, 
     },
     paymentMethod: {
       type: String,

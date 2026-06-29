@@ -78,7 +78,7 @@ const AdminDashboard = () => {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.5, delay: 0.2 }}
-        className="flex-1 p-4 md:p-8 pb-8 md:pb-8"
+        className="flex-1 p-4 md:p-8 pb-32 md:pb-8"
       >
         {renderContent()}
       </motion.main>

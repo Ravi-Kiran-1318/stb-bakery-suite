@@ -28,10 +28,17 @@ const Checkout = () => {
   const [requestedDate, setRequestedDate] = useState(() => {
     const tmrw = new Date();
     tmrw.setDate(tmrw.getDate() + 1);
-    tmrw.setHours(10, 0, 0, 0);
-    const pad = n => String(n).padStart(2, '0');
-    return `${tmrw.getFullYear()}-${pad(tmrw.getMonth()+1)}-${pad(tmrw.getDate())}T${pad(tmrw.getHours())}:${pad(tmrw.getMinutes())}`;
+    return tmrw.toISOString().slice(0, 10);
   });
+  const [requestedTime, setRequestedTime] = useState('10:00 AM - 12:00 PM');
+  
+  const TIME_SLOTS = [
+    '10:00 AM - 12:00 PM',
+    '12:00 PM - 02:00 PM',
+    '02:00 PM - 04:00 PM',
+    '04:00 PM - 06:00 PM',
+    '06:00 PM - 08:00 PM'
+  ];
   const [paymentMethod, setPaymentMethod] = useState('');
   const [notes, setNotes] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -76,17 +83,16 @@ const Checkout = () => {
     setDistanceKm(dist);
   }, []);
 
-  const getMinDateTime = () => {
+  const getMinDate = () => {
     const tmrw = new Date();
     tmrw.setDate(tmrw.getDate() + 1);
-    tmrw.setHours(0, 0, 0, 0);
-    return tmrw.toISOString().slice(0, 16);
+    return tmrw.toISOString().slice(0, 10);
   };
 
-  const getMaxDateTime = () => {
+  const getMaxDate = () => {
     const d = new Date();
     d.setDate(d.getDate() + 30);
-    return d.toISOString().slice(0, 16);
+    return d.toISOString().slice(0, 10);
   };
 
   const isFormValid = () => {
@@ -129,6 +135,7 @@ const Checkout = () => {
         deliveryType,
         location: finalLocation,
         requestedDate,
+        requestedTime,
         paymentMethod,
         notes,
         customerInfo: { name: user.name, mobile: user.mobile, email: user.email }
@@ -348,14 +355,31 @@ const Checkout = () => {
               {/* Date & Time */}
               <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100">
                 <h2 className="text-xl font-bold text-gray-900 mb-6">Requested Date & Time</h2>
-                <input 
-                  type="datetime-local" 
-                  className="input-field max-w-sm w-full"
-                  value={requestedDate}
-                  min={getMinDateTime()}
-                  max={getMaxDateTime()}
-                  onChange={(e) => setRequestedDate(e.target.value)}
-                />
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">Select Date</label>
+                    <input 
+                      type="date" 
+                      className="input-field w-full"
+                      value={requestedDate}
+                      min={getMinDate()}
+                      max={getMaxDate()}
+                      onChange={(e) => setRequestedDate(e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">Time Slot</label>
+                    <select 
+                      className="input-field w-full"
+                      value={requestedTime}
+                      onChange={(e) => setRequestedTime(e.target.value)}
+                    >
+                      {TIME_SLOTS.map(slot => (
+                        <option key={slot} value={slot}>{slot}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
                 <p className="text-gray-500 text-sm mt-3 flex items-center gap-2">
                   <span>💡</span> We need at least 24 hours. For custom cakes, order 2–3 days ahead.
                 </p>

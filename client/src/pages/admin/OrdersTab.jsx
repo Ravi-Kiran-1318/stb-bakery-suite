@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { motion } from 'framer-motion';
+import { useLocation } from 'react-router-dom';
 import axiosInstance from '../../utils/axiosInstance';
 import { ToastContext } from '../../context/ToastContext';
 import Loader from '../../components/Loader';
@@ -14,10 +15,14 @@ const OrdersTab = () => {
   const [error, setError] = useState('');
   const { addToast } = useContext(ToastContext);
 
+  const location = useLocation();
+  const queryParams = new URLSearchParams(location.search);
+  const initialSearch = queryParams.get('search') || '';
+
   // Filters
   const [range, setRange] = useState('All');
   const [statusFilter, setStatusFilter] = useState('All');
-  const [search, setSearch] = useState('');
+  const [search, setSearch] = useState(initialSearch);
 
   // Cancel Modal State
   const [cancelModalOpen, setCancelModalOpen] = useState(false);
@@ -42,6 +47,14 @@ const OrdersTab = () => {
   useEffect(() => {
     fetchOrders();
   }, [range, statusFilter, search]);
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const urlSearch = params.get('search');
+    if (urlSearch && urlSearch !== search) {
+      setSearch(urlSearch);
+    }
+  }, [location.search]);
 
   const handleStatusUpdate = async (id, newStatus) => {
     try {
@@ -86,6 +99,8 @@ const OrdersTab = () => {
 
   return (
     <div className="space-y-6">
+      <h2 className="text-2xl font-bold text-gray-800">Orders</h2>
+      
       {/* Filter Bar */}
       <div className="flex flex-col md:flex-row items-center gap-4 mb-8 bg-white p-3 rounded-2xl shadow-sm border border-gray-100">
         <div className="flex gap-1 p-1">
@@ -104,28 +119,51 @@ const OrdersTab = () => {
           ))}
         </div>
         
-        <div className="flex-1 flex gap-4 ml-auto justify-end w-full md:w-auto">
-          <div className="relative">
-            <select 
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              className="appearance-none bg-white border border-gray-200 text-gray-700 py-2.5 pl-6 pr-12 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 text-sm font-semibold shadow-sm w-48 cursor-pointer"
+        <div className="flex-1 flex flex-col sm:flex-row gap-4 ml-auto justify-end w-full md:w-auto">
+          <div className="relative w-full sm:w-56" style={{ zIndex: 40 }}>
+            <button
+              onClick={() => {
+                const el = document.getElementById('status-dropdown-menu');
+                if (el) el.classList.toggle('hidden');
+              }}
+              onBlur={() => {
+                setTimeout(() => {
+                  const el = document.getElementById('status-dropdown-menu');
+                  if (el) el.classList.add('hidden');
+                }, 200);
+              }}
+              className="w-full flex items-center justify-between bg-white border border-amber-300 text-gray-700 py-2.5 px-4 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 text-sm font-semibold shadow-sm cursor-pointer hover:border-amber-400 transition-colors"
             >
-              <option value="All">All Statuses</option>
-              {statusOptions.map(s => <option key={s} value={s}>{s}</option>)}
-            </select>
-            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-4 text-gray-400">
-              <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+              <span className="truncate">{statusFilter === 'All' ? 'All Statuses' : statusFilter}</span>
+              <svg className="w-4 h-4 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
+            </button>
+            
+            <div id="status-dropdown-menu" className="hidden absolute left-0 right-0 mt-2 bg-white border border-gray-100 rounded-xl shadow-lg overflow-hidden py-1 z-50 transform origin-top transition-all max-h-64 overflow-y-auto">
+              <div
+                onClick={() => { setStatusFilter('All'); document.getElementById('status-dropdown-menu').classList.add('hidden'); }}
+                className={`px-4 py-2.5 text-sm font-semibold cursor-pointer transition-colors ${statusFilter === 'All' ? 'bg-amber-50 text-amber-600' : 'text-gray-700 hover:bg-gray-50 hover:text-amber-600'}`}
+              >
+                All Statuses
+              </div>
+              {statusOptions.map(s => (
+                <div
+                  key={s}
+                  onClick={() => { setStatusFilter(s); document.getElementById('status-dropdown-menu').classList.add('hidden'); }}
+                  className={`px-4 py-2.5 text-sm font-semibold cursor-pointer transition-colors ${statusFilter === s ? 'bg-amber-50 text-amber-600' : 'text-gray-700 hover:bg-gray-50 hover:text-amber-600'}`}
+                >
+                  {s}
+                </div>
+              ))}
             </div>
           </div>
           
-          <div className="relative">
+          <div className="relative w-full sm:w-auto">
             <input 
               type="text"
               placeholder="Search name or mobile..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="pl-6 pr-10 py-2.5 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 text-sm w-64 shadow-sm"
+              className="pl-6 pr-10 py-2.5 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 text-sm w-full sm:w-64 shadow-sm"
             />
             <svg className="w-5 h-5 absolute right-3 top-2.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
           </div>
@@ -209,11 +247,23 @@ const OrdersTab = () => {
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path></svg>
                     Items & Payment
                   </h4>
-                  <div className="max-h-32 overflow-y-auto mb-2 text-sm border-b border-border pb-2">
-                    {order.orderItems?.map(item => (
-                      <div key={item.product} className="flex justify-between mb-1 gap-2">
-                        <span className="truncate flex-1">{item.qty}x {item.nameEN}</span>
-                        <span className="whitespace-nowrap font-medium">{formatCurrency(item.price * item.qty)}</span>
+                  <div className="max-h-48 overflow-y-auto mb-2 text-sm border-b border-border pb-2 space-y-3">
+                    {(order.items || order.orderItems)?.map((item, i) => (
+                      <div key={item.productId || i} className="flex items-center gap-3">
+                        <div className="w-12 h-12 rounded bg-gray-100 flex-shrink-0 border border-gray-200 overflow-hidden">
+                          {item.imageUrl ? (
+                            <img src={item.imageUrl} alt={item.nameEN || item.name} className="w-full h-full object-cover" />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center text-xs text-gray-400">No Img</div>
+                          )}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="font-semibold text-dark truncate">{item.nameEN || item.name}</div>
+                          <div className="text-xs text-muted">Qty: {item.qty} × {formatCurrency(item.price)}</div>
+                        </div>
+                        <div className="font-bold text-dark whitespace-nowrap">
+                          {formatCurrency(item.price * item.qty)}
+                        </div>
                       </div>
                     ))}
                   </div>
@@ -264,11 +314,11 @@ const OrdersTab = () => {
                         return (
                           <div key={step} className={`text-center w-1/5 px-0.5 ${idx <= currentStepIndex ? 'text-amber-600' : ''}`}>
                             <div className={`w-4 h-4 mx-auto rounded-full mb-1 transition-all duration-500 border-2 ${
-                              idx < currentStepIndex ? 'bg-amber-500 border-amber-500 flex items-center justify-center' : 
+                              (idx < currentStepIndex || (idx === currentStepIndex && step === 'Delivered')) ? 'bg-amber-500 border-amber-500 flex items-center justify-center' : 
                               idx === currentStepIndex ? 'bg-white border-amber-500 shadow-[0_0_10px_rgba(245,158,11,0.6)] ring-4 ring-amber-100 scale-125' : 
                               'bg-gray-200 border-gray-300'
                             }`}>
-                              {idx < currentStepIndex && <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7"></path></svg>}
+                              {(idx < currentStepIndex || (idx === currentStepIndex && step === 'Delivered')) && <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7"></path></svg>}
                             </div>
                             <span className="block leading-tight">{step.replace('Out for Delivery', 'Out for Del.')}</span>
                           </div>
@@ -319,13 +369,15 @@ const OrdersTab = () => {
                         Mark Delivered
                       </button>
                     )}
-                    <button 
-                      onClick={() => { setOrderToCancel(order._id); setCancelModalOpen(true); }}
-                      className="flex items-center gap-2 py-1.5 px-4 text-sm font-semibold text-red-500 border border-red-200 rounded-lg hover:bg-red-50 hover:text-red-600 transition-colors bg-white"
-                    >
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                      Cancel Order
-                    </button>
+                    {order.status === 'Received' && (
+                      <button 
+                        onClick={() => { setOrderToCancel(order._id); setCancelModalOpen(true); }}
+                        className="flex items-center gap-2 py-1.5 px-4 text-sm font-semibold text-red-500 border border-red-200 rounded-lg hover:bg-red-50 hover:text-red-600 transition-colors bg-white"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                        Cancel Order
+                      </button>
+                    )}
                   </div>
                 </div>
               )}

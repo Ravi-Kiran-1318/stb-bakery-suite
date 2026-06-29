@@ -22,7 +22,7 @@ const calculateDistance = (lat1, lon1, lat2, lon2) => {
 // @route   POST /api/orders
 const createOrder = async (req, res) => {
   try {
-    const { items, deliveryType, location, requestedDate, paymentMethod, notes, customerInfo, advancePaid, razorpayOrderId, razorpayPaymentId } = req.body;
+    const { items, deliveryType, location, requestedDate, requestedTime, paymentMethod, notes, customerInfo, advancePaid, razorpayOrderId, razorpayPaymentId } = req.body;
     const userId = req.user._id;
 
     let deliveryFee = 0;
@@ -55,6 +55,7 @@ const createOrder = async (req, res) => {
       deliveryType,
       location: deliveryType === 'Delivery' ? location : null,
       requestedDate,
+      requestedTime,
       paymentMethod,
       paymentStatus: advancePaid ? 'Partial' : (paymentMethod === 'Online' ? 'Pending' : 'Pending'),
       status: 'Received',
@@ -182,6 +183,7 @@ const getOrders = async (req, res) => {
     if (search) {
       const searchLower = search.toLowerCase();
       orders = orders.filter(o => 
+        (o._id && o._id.toString().toLowerCase().includes(searchLower)) ||
         (o.customerInfo && o.customerInfo.name && o.customerInfo.name.toLowerCase().includes(searchLower)) ||
         (o.customerInfo && o.customerInfo.mobile && o.customerInfo.mobile.includes(searchLower)) ||
         (o.user && o.user.name && o.user.name.toLowerCase().includes(searchLower))
@@ -218,6 +220,7 @@ const updateOrderStatus = async (req, res) => {
       'Cancelled': 'Your order has been Cancelled ❌',
     };
 
+    console.log("UPDATING ORDER STATUS:", status, "ORDER USER:", order.user);
     const notification = await Notification.create({
       userId: order.user,
       type: 'order_status',
@@ -225,6 +228,7 @@ const updateOrderStatus = async (req, res) => {
       actionTab: 'orders',
       referenceId: order._id.toString()
     });
+    console.log("CREATED NOTIFICATION:", notification);
 
     // Emit to customer via Socket.io
     const io = req.app.get('io');

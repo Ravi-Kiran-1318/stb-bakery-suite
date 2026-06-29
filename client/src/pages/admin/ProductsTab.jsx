@@ -32,6 +32,7 @@ const ProductsTab = () => {
     descriptionTe: '',
     isAvailable: true,
     isSpecial: false,
+    isLoved: false,
   });
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
@@ -79,7 +80,7 @@ const ProductsTab = () => {
     setIsEditing(false);
     setEditingId(null);
     setFormData({
-      nameEN: '', nameTe: '', category: '', price: '', weight: '', quantity: '', descriptionEN: '', descriptionTe: '', isAvailable: true, isSpecial: false
+      nameEN: '', nameTe: '', category: '', price: '', weight: '', quantity: '', descriptionEN: '', descriptionTe: '', isAvailable: true, isSpecial: false, isLoved: false
     });
     setImageFile(null);
     setImagePreview(null);
@@ -100,6 +101,7 @@ const ProductsTab = () => {
       descriptionTe: product.descriptionTe || '',
       isAvailable: product.isAvailable,
       isSpecial: product.isSpecial || false,
+      isLoved: product.isLoved || false,
     });
     setImageFile(null);
     setImagePreview(product.imageUrl || null);
@@ -321,6 +323,11 @@ const ProductsTab = () => {
               <div className="flex items-center gap-2 mt-2">
                 <input type="checkbox" name="isSpecial" id="isSpecial" checked={formData.isSpecial} onChange={handleInputChange} className="w-4 h-4 text-amber-500 border-border rounded focus:ring-amber-500" />
                 <label htmlFor="isSpecial" className="text-sm font-medium text-dark">Mark as Special Item ⭐</label>
+              </div>
+
+              <div className="flex items-center gap-2 mt-2">
+                <input type="checkbox" name="isLoved" id="isLoved" checked={formData.isLoved} onChange={handleInputChange} className="w-4 h-4 text-red-500 border-border rounded focus:ring-red-500" />
+                <label htmlFor="isLoved" className="text-sm font-medium text-dark">Mark as Loved Product ❤️</label>
               </div>
 
               <div className="flex justify-end gap-3 pt-6 border-t border-border mt-6">

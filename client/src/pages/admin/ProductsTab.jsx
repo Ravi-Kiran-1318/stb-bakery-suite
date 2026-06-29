@@ -24,11 +24,14 @@ const ProductsTab = () => {
   const [formData, setFormData] = useState({
     nameEN: '',
     nameTe: '',
-    category: 'Cake',
+    category: '',
     price: '',
+    weight: '',
+    quantity: '',
     descriptionEN: '',
     descriptionTe: '',
     isAvailable: true,
+    isSpecial: false,
   });
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
@@ -76,7 +79,7 @@ const ProductsTab = () => {
     setIsEditing(false);
     setEditingId(null);
     setFormData({
-      nameEN: '', nameTe: '', category: 'Cake', price: '', descriptionEN: '', descriptionTe: '', isAvailable: true
+      nameEN: '', nameTe: '', category: '', price: '', weight: '', quantity: '', descriptionEN: '', descriptionTe: '', isAvailable: true, isSpecial: false
     });
     setImageFile(null);
     setImagePreview(null);
@@ -89,11 +92,14 @@ const ProductsTab = () => {
     setFormData({
       nameEN: product.nameEN || '',
       nameTe: product.nameTe || '',
-      category: product.category || 'Cake',
+      category: product.category || '',
       price: product.price || '',
+      weight: product.weight || '',
+      quantity: product.quantity ?? '',
       descriptionEN: product.descriptionEN || '',
       descriptionTe: product.descriptionTe || '',
       isAvailable: product.isAvailable,
+      isSpecial: product.isSpecial || false,
     });
     setImageFile(null);
     setImagePreview(product.imageUrl || null);
@@ -266,12 +272,24 @@ const ProductsTab = () => {
                 <div>
                   <label className="block text-sm font-medium text-dark mb-1">Category *</label>
                   <select name="category" required value={formData.category} onChange={handleInputChange} className="input-field">
+                    <option value="" disabled>Select a category</option>
                     {categories.filter(c => c !== 'All').map(c => <option key={c} value={c}>{c}</option>)}
                   </select>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-dark mb-1">Price (₹) *</label>
-                  <input type="number" name="price" required min="0" step="0.01" value={formData.price} onChange={handleInputChange} className="input-field" />
+                  <input type="number" name="price" required min="0" step="0.01" value={formData.price} onChange={handleInputChange} onWheel={(e) => e.target.blur()} className="input-field" />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-dark mb-1">Weight</label>
+                  <input type="text" name="weight" placeholder="e.g., 500g, 1kg" value={formData.weight} onChange={handleInputChange} className="input-field" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-dark mb-1">Quantity in Stock</label>
+                  <input type="number" name="quantity" min="0" value={formData.quantity} onChange={handleInputChange} onWheel={(e) => e.target.blur()} className="input-field" />
                 </div>
               </div>
 
@@ -298,6 +316,11 @@ const ProductsTab = () => {
               <div className="flex items-center gap-2 mt-4">
                 <input type="checkbox" name="isAvailable" id="isAvailable" checked={formData.isAvailable} onChange={handleInputChange} className="w-4 h-4 text-accent border-border rounded focus:ring-accent" />
                 <label htmlFor="isAvailable" className="text-sm font-medium text-dark">Product is available for sale</label>
+              </div>
+
+              <div className="flex items-center gap-2 mt-2">
+                <input type="checkbox" name="isSpecial" id="isSpecial" checked={formData.isSpecial} onChange={handleInputChange} className="w-4 h-4 text-amber-500 border-border rounded focus:ring-amber-500" />
+                <label htmlFor="isSpecial" className="text-sm font-medium text-dark">Mark as Special Item ⭐</label>
               </div>
 
               <div className="flex justify-end gap-3 pt-6 border-t border-border mt-6">

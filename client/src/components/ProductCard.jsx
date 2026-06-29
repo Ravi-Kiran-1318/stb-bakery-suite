@@ -59,7 +59,7 @@ const ProductCard = ({ product, showAdminControls, onEdit, onDelete }) => {
         onMouseLeave={handleMouseLeave}
         className="card flex flex-col h-full overflow-hidden transition-all duration-200 shadow-[0_4px_16px_rgba(212,175,55,0.15)] border border-[rgba(212,175,55,0.2)] rounded-xl"
       >
-        <Link to={`/product/${product._id}`} className="block h-40 sm:h-48 overflow-hidden bg-surface relative">
+        <Link to={`/product/${product._id}`} className="block aspect-square overflow-hidden bg-surface relative">
           {product.imageUrl ? (
             <img src={product.imageUrl} alt={name} className="w-full h-full object-cover transition-transform duration-300 hover:scale-110" />
           ) : (
@@ -69,6 +69,12 @@ const ProductCard = ({ product, showAdminControls, onEdit, onDelete }) => {
           {!product.isAvailable && (
             <div className="absolute top-2 left-2 bg-gray-500 text-white text-xs px-2 py-1 rounded-md shadow">
               Unavailable
+            </div>
+          )}
+
+          {product.isAvailable && product.isSpecial && (
+            <div className="absolute top-2 left-2 bg-amber-500 text-white text-xs px-2 py-1 rounded-md shadow font-bold flex items-center gap-1">
+              ⭐ Special
             </div>
           )}
 
@@ -94,21 +100,33 @@ const ProductCard = ({ product, showAdminControls, onEdit, onDelete }) => {
 
           {showAdminControls && (
             <div className="absolute top-2 right-2 flex gap-2" onClick={(e) => e.preventDefault()}>
-              <button onClick={() => onEdit(product)} className="bg-white text-blue-600 p-1.5 rounded shadow hover:bg-blue-50">
-                ✏️
+              <button onClick={() => onEdit(product)} className="p-2 bg-white/90 backdrop-blur-sm rounded-full shadow-sm text-amber-600 hover:bg-amber-50 hover:text-amber-700 transition-colors" title="Edit">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                </svg>
               </button>
-              <button onClick={() => onDelete(product._id)} className="bg-white text-red-600 p-1.5 rounded shadow hover:bg-red-50">
-                🗑️
+              <button onClick={() => onDelete(product._id)} className="p-2 bg-white/90 backdrop-blur-sm rounded-full shadow-sm text-red-500 hover:bg-red-50 hover:text-red-600 transition-colors" title="Delete">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
               </button>
             </div>
           )}
         </Link>
 
         <div className="p-3 sm:p-4 flex flex-col flex-grow">
-          <span className="text-[10px] sm:text-xs font-semibold text-muted uppercase tracking-wider mb-1 truncate">
-            {product.category}
-          </span>
-          <h3 className="text-sm sm:text-lg font-bold text-dark leading-tight mb-2 flex-grow line-clamp-2">{name}</h3>
+          <h3 className="text-sm sm:text-lg font-bold text-dark leading-tight mb-1 flex-grow line-clamp-2">{name}</h3>
+          
+          {(product.weight || (showAdminControls && product.quantity !== undefined)) && (
+            <div className="flex items-center gap-2 mb-2 text-xs font-medium">
+              {product.weight && <span className="text-muted bg-slate-100 px-2 py-0.5 rounded">{product.weight}</span>}
+              {showAdminControls && product.quantity !== undefined && (
+                <span className={`px-2 py-0.5 rounded ${product.quantity > 0 ? 'bg-blue-50 text-blue-600' : 'bg-red-50 text-red-600'}`}>
+                  Stock: {product.quantity}
+                </span>
+              )}
+            </div>
+          )}
           
           <div className="flex flex-wrap items-center justify-between mt-auto pt-3 border-t border-border gap-2">
             <span className="text-sm sm:text-xl font-bold text-accent pr-1">

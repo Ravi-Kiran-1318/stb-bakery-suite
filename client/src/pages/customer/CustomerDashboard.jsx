@@ -6,7 +6,6 @@ import MyOrders from './MyOrders';
 import ProfileTab from './ProfileTab';
 import RemindersTab from './RemindersTab';
 import FavoritesTab from './FavoritesTab';
-import CouponsTab from './CouponsTab';
 import AddressesTab from './AddressesTab';
 import CustomOrdersTab from './CustomOrdersTab';
 
@@ -18,7 +17,7 @@ const CustomerDashboard = () => {
 
   useEffect(() => {
     // Redirect if invalid tab
-    if (!['orders', 'profile', 'reminders', 'loyalty', 'favorites', 'coupons', 'addresses', 'customcakes'].includes(activeTab)) {
+    if (!['orders', 'profile', 'reminders', 'favorites', 'addresses', 'customcakes'].includes(activeTab)) {
       navigate('/customer/dashboard?tab=orders', { replace: true });
     }
   }, [activeTab, navigate]);
@@ -30,12 +29,9 @@ const CustomerDashboard = () => {
       case 'favorites':
         return <FavoritesTab />;
       case 'profile':
-      case 'loyalty':
         return <ProfileTab />;
       case 'reminders':
         return <RemindersTab />;
-      case 'coupons':
-        return <CouponsTab />;
       case 'addresses':
         return <AddressesTab />;
       case 'customcakes':
@@ -49,7 +45,6 @@ const CustomerDashboard = () => {
     { id: 'orders', label: '📦 My Orders' },
     { id: 'favorites', label: '❤️ Favorites' },
     { id: 'customcakes', label: '🎂 Custom Cakes' },
-    { id: 'coupons', label: '🎟️ Coupons' },
     { id: 'addresses', label: '📍 Addresses' },
     { id: 'reminders', label: '📅 Reminders' },
     { id: 'profile', label: '👤 Profile' },

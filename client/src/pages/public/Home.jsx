@@ -40,8 +40,8 @@ const Home = () => {
   const sidebarCategories = [
     { icon: '🎂', label: 'Cakes' },
     { icon: '🍪', label: 'Cookies' },
-    { icon: '🍬', label: 'Sweets' },
-    { icon: '🎁', label: 'Gift Hampers' },
+    { icon: '🎉', label: 'Party items' },
+    { icon: '🎈', label: 'Decoration items' },
   ];
 
   const features = [

@@ -27,7 +27,7 @@ const getAllProducts = async (req, res) => {
 // @route   POST /api/products
 const createProduct = async (req, res) => {
   try {
-    const { nameEN, nameTe, descriptionEN, descriptionTe, price, category, isAvailable } = req.body;
+    const { nameEN, nameTe, descriptionEN, descriptionTe, price, weight, quantity, category, isAvailable, isSpecial } = req.body;
     let imageUrl = '';
     
     if (req.file) {
@@ -40,9 +40,12 @@ const createProduct = async (req, res) => {
       descriptionEN,
       descriptionTe,
       price: Number(price),
+      weight,
+      quantity: Number(quantity) || 0,
       category,
       imageUrl,
       isAvailable: isAvailable === 'true' || isAvailable === true,
+      isSpecial: isSpecial === 'true' || isSpecial === true,
     });
 
     const createdProduct = await product.save();
@@ -56,7 +59,7 @@ const createProduct = async (req, res) => {
 // @route   PATCH /api/products/:id
 const updateProduct = async (req, res) => {
   try {
-    const { nameEN, nameTe, descriptionEN, descriptionTe, price, category, isAvailable } = req.body;
+    const { nameEN, nameTe, descriptionEN, descriptionTe, price, weight, quantity, category, isAvailable, isSpecial } = req.body;
     
     const product = await Product.findById(req.params.id);
     if (!product) {
@@ -68,8 +71,11 @@ const updateProduct = async (req, res) => {
     product.descriptionEN = descriptionEN || product.descriptionEN;
     product.descriptionTe = descriptionTe || product.descriptionTe;
     if (price) product.price = Number(price);
+    if (weight !== undefined) product.weight = weight;
+    if (quantity !== undefined) product.quantity = Number(quantity);
     product.category = category || product.category;
     if (isAvailable !== undefined) product.isAvailable = isAvailable === 'true' || isAvailable === true;
+    if (isSpecial !== undefined) product.isSpecial = isSpecial === 'true' || isSpecial === true;
 
     if (req.file) {
       product.imageUrl = req.file.path;

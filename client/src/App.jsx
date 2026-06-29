@@ -10,6 +10,8 @@ import Login from './pages/auth/Login';
 import Signup from './pages/auth/Signup';
 import Contact from './pages/public/Contact';
 import ProductDetails from './pages/public/ProductDetails';
+import Gallery from './pages/public/Gallery';
+import Events from './pages/public/Events';
 import Checkout from './pages/customer/Checkout';
 import OrderConfirmation from './pages/customer/OrderConfirmation';
 import CustomerDashboard from './pages/customer/CustomerDashboard';
@@ -54,6 +56,8 @@ const AnimatedRoutes = () => {
         <Route path="/login" element={<PageWrapper><Login /></PageWrapper>} />
         <Route path="/signup" element={<PageWrapper><Signup /></PageWrapper>} />
         <Route path="/contact" element={<PageWrapper><Contact /></PageWrapper>} />
+        <Route path="/gallery" element={<PageWrapper><Gallery /></PageWrapper>} />
+        <Route path="/events" element={<PageWrapper><Events /></PageWrapper>} />
         <Route path="/product/:id" element={<PageWrapper><ProductDetails /></PageWrapper>} />
         <Route
           path="/checkout"

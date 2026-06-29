@@ -18,7 +18,7 @@ const ProfileTab = () => {
 
   if (!user) return null;
 
-  const pointsValue = (user.loyaltyPoints * 0.1).toFixed(2); // e.g. 1 point = 0.1 rupees
+
 
   return (
     <div className="max-w-4xl mx-auto space-y-8">
@@ -47,31 +47,6 @@ const ProfileTab = () => {
               <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Email Address</label>
               <p className="text-lg font-medium text-gray-900">{user.email || 'Not provided'}</p>
             </div>
-          </div>
-        </div>
-
-        {/* Loyalty Points */}
-        <div className="bg-gradient-to-br from-amber-400 to-amber-600 p-8 rounded-3xl shadow-lg text-white flex flex-col justify-between relative overflow-hidden">
-          {/* Background decoration */}
-          <div className="absolute -top-10 -right-10 text-9xl opacity-10">🌟</div>
-          
-          <div>
-            <h3 className="text-2xl font-bold mb-2">Loyalty Points</h3>
-            <p className="text-amber-100 font-medium">Earn 1 point for every ₹10 spent</p>
-          </div>
-          
-          <div className="my-8 text-center">
-            <div className="text-7xl font-bold mb-2">
-              <AnimatedCounter value={user.loyaltyPoints || 0} />
-            </div>
-            <p className="text-amber-100 text-lg">Total Points Available</p>
-          </div>
-          
-          <div className="bg-black/20 p-4 rounded-xl backdrop-blur-sm">
-            <p className="text-sm font-medium">
-              <span className="font-bold text-white">{user.loyaltyPoints || 0} points</span> = ₹{pointsValue} value
-            </p>
-            <p className="text-xs text-amber-100 mt-1 uppercase tracking-wide">Redemption coming soon</p>
           </div>
         </div>
 

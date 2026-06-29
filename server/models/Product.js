@@ -39,6 +39,13 @@ const productSchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
+    weight: {
+      type: String,
+    },
+    quantity: {
+      type: Number,
+      default: 0,
+    },
     descriptionEN: {
       type: String,
     },
@@ -51,6 +58,10 @@ const productSchema = new mongoose.Schema(
     isAvailable: {
       type: Boolean,
       default: true,
+    },
+    isSpecial: {
+      type: Boolean,
+      default: false,
     },
     reviews: [reviewSchema],
     averageRating: {

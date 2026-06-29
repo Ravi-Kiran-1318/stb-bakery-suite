@@ -108,17 +108,17 @@ const ProductDetails = () => {
         <motion.div 
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
-          className="w-3/4 sm:w-2/3 md:w-1/2"
+          className="w-full sm:w-3/4 md:w-1/2 lg:w-5/12 max-w-md mx-auto md:mx-0"
         >
-          <div className="rounded-xl md:rounded-2xl overflow-hidden shadow-[0_5px_15px_rgba(212,175,55,0.15)] md:shadow-[0_10px_30px_rgba(212,175,55,0.2)] border border-[rgba(212,175,55,0.3)] bg-surface aspect-video md:aspect-square relative flex items-center justify-center">
+          <div className="rounded-xl md:rounded-2xl overflow-hidden shadow-[0_5px_15px_rgba(212,175,55,0.15)] md:shadow-[0_10px_30px_rgba(212,175,55,0.2)] border border-[rgba(212,175,55,0.3)] bg-surface relative">
             {product.imageUrl ? (
               <img 
                 src={product.imageUrl} 
                 alt={name} 
-                className="w-full h-full object-contain p-2 md:p-4"
+                className="w-full h-auto max-h-[500px] object-contain block"
               />
             ) : (
-              <div className="text-muted text-xl">No Image Available</div>
+              <div className="text-muted text-xl p-12 text-center">No Image Available</div>
             )}
             {!product.isAvailable && (
               <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
@@ -139,11 +139,11 @@ const ProductDetails = () => {
           <span className="text-[10px] sm:text-sm font-semibold tracking-widest text-muted uppercase mb-1 md:mb-2 block">
             {product.category}
           </span>
-          <h1 className="text-xl sm:text-4xl md:text-5xl font-bold text-dark mb-2 md:mb-3 leading-tight">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-dark mb-2 md:mb-3 leading-tight">
             {name}
           </h1>
           
-          <div className="text-lg sm:text-3xl font-bold text-accent mb-4 md:mb-6">
+          <div className="text-xl sm:text-2xl md:text-3xl font-bold text-accent mb-4 md:mb-6">
             {formatCurrency(product.price)}
           </div>
 
@@ -201,7 +201,7 @@ const ProductDetails = () => {
           className="pt-10 md:pt-12 border-t border-border mt-10 md:mt-12"
         >
           <h2 className="text-xl md:text-3xl font-bold text-dark mb-4 md:mb-8 text-center">You May Also Like</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 sm:gap-6">
             {relatedProducts.map(relatedProduct => (
               <ProductCard key={relatedProduct._id} product={relatedProduct} />
             ))}

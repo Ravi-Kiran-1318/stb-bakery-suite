@@ -63,10 +63,6 @@ const createOrder = async (req, res) => {
       razorpayPaymentId: razorpayPaymentId || null,
     });
 
-    // Add loyalty points
-    const pointsEarned = Math.floor(totalAmount / 10);
-    await User.findByIdAndUpdate(userId, { $inc: { loyaltyPoints: pointsEarned } });
-
     // Send Admin Notification
     const notification = await Notification.create({
       userId: null, // Global or admin specific, we'll just not assign to a user or assign to all admins

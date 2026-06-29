@@ -211,9 +211,9 @@ const OrdersTab = () => {
                   </h4>
                   <div className="max-h-32 overflow-y-auto mb-2 text-sm border-b border-border pb-2">
                     {order.orderItems?.map(item => (
-                      <div key={item.product} className="flex justify-between mb-1">
-                        <span>{item.qty}x {item.nameEN}</span>
-                        <span>{formatCurrency(item.price * item.qty)}</span>
+                      <div key={item.product} className="flex justify-between mb-1 gap-2">
+                        <span className="truncate flex-1">{item.qty}x {item.nameEN}</span>
+                        <span className="whitespace-nowrap font-medium">{formatCurrency(item.price * item.qty)}</span>
                       </div>
                     ))}
                   </div>
@@ -222,11 +222,11 @@ const OrdersTab = () => {
                     <span className="text-accent">{formatCurrency(order.totalAmount || 0)}</span>
                   </div>
                   {order.paymentStatus === 'Partial' && (
-                    <div className="mt-1 flex flex-col items-end text-xs font-semibold">
-                      <span className="text-green-600 bg-green-50 px-2 py-0.5 rounded-full mb-0.5">
+                    <div className="mt-2 flex flex-col items-end text-[10px] sm:text-xs font-semibold gap-1">
+                      <span className="text-green-600 bg-green-50 px-2 py-1 rounded-full">
                         Advance Paid: {formatCurrency(Math.ceil((order.totalAmount || 0) * 0.2))}
                       </span>
-                      <span className="text-red-600 bg-red-50 px-2 py-0.5 rounded-full">
+                      <span className="text-red-600 bg-red-50 px-2 py-1 rounded-full">
                         Due on Delivery: {formatCurrency((order.totalAmount || 0) - Math.ceil((order.totalAmount || 0) * 0.2))}
                       </span>
                     </div>
@@ -258,11 +258,11 @@ const OrdersTab = () => {
                         className="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-amber-500 transition-all duration-500"
                       ></div>
                     </div>
-                    <div className="flex justify-between text-xs font-semibold text-gray-500">
+                    <div className="flex justify-between text-[9px] sm:text-xs font-semibold text-gray-500">
                       {ORDER_STEPS.map((step, idx) => {
                         const currentStepIndex = ORDER_STEPS.indexOf(order.status);
                         return (
-                          <div key={step} className={`text-center w-1/5 ${idx <= currentStepIndex ? 'text-amber-600' : ''}`}>
+                          <div key={step} className={`text-center w-1/5 px-0.5 ${idx <= currentStepIndex ? 'text-amber-600' : ''}`}>
                             <div className={`w-4 h-4 mx-auto rounded-full mb-1 transition-all duration-500 border-2 ${
                               idx < currentStepIndex ? 'bg-amber-500 border-amber-500 flex items-center justify-center' : 
                               idx === currentStepIndex ? 'bg-white border-amber-500 shadow-[0_0_10px_rgba(245,158,11,0.6)] ring-4 ring-amber-100 scale-125' : 
@@ -270,7 +270,7 @@ const OrdersTab = () => {
                             }`}>
                               {idx < currentStepIndex && <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7"></path></svg>}
                             </div>
-                            <span className="hidden sm:block">{step}</span>
+                            <span className="block leading-tight">{step.replace('Out for Delivery', 'Out for Del.')}</span>
                           </div>
                         );
                       })}

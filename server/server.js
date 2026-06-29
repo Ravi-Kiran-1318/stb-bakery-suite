@@ -90,9 +90,10 @@ app.use('/api/users', require('./routes/users'));
 app.use('/api/products', require('./routes/products'));
 app.use('/api/orders', require('./routes/orders'));
 app.use('/api/notifications', require('./routes/notifications'));
-app.use('/api/coupons', require('./routes/couponRoutes'));
 app.use('/api/custom-cakes', require('./routes/customCakeRoutes'));
 app.use('/api/payments', require('./routes/payments'));
+app.use('/api/gallery', require('./routes/galleryRoutes'));
+app.use('/api/events', require('./routes/eventRoutes'));
 // app.use('/api/users', require('./routes/users'));
 
 const PORT = process.env.PORT || 5000;

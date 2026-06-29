@@ -69,25 +69,39 @@ const Cart = () => {
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                       exit={{ opacity: 0 }}
-                      className="flex items-center gap-4 bg-white border border-gray-200 p-4 rounded-2xl shadow-sm"
+                      className="flex flex-col sm:flex-row items-start sm:items-center gap-4 bg-white border border-gray-200 p-4 rounded-2xl shadow-sm relative overflow-hidden"
                     >
-                      {/* Image */}
-                      <div className="w-[80px] h-[80px] flex-shrink-0 bg-gray-100 rounded-xl overflow-hidden">
-                        {item.imageUrl ? (
-                          <img src={item.imageUrl} alt={name} className="w-full h-full object-cover" />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center text-gray-400 text-xs">No img</div>
-                        )}
-                      </div>
+                      {/* Image & Info Wrapper for mobile */}
+                      <div className="flex items-center gap-4 w-full sm:w-auto flex-grow">
+                        {/* Image */}
+                        <div className="w-[70px] h-[70px] sm:w-[80px] sm:h-[80px] flex-shrink-0 bg-gray-100 rounded-xl overflow-hidden">
+                          {item.imageUrl ? (
+                            <img src={item.imageUrl} alt={name} className="w-full h-full object-cover" />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center text-gray-400 text-[10px] sm:text-xs text-center leading-tight">No img</div>
+                          )}
+                        </div>
 
-                      {/* Info */}
-                      <div className="flex-grow">
-                        <h3 className="font-bold text-gray-900 text-lg line-clamp-2 leading-tight mb-1">{name}</h3>
-                        <p className="text-gray-500 font-medium">{formatCurrency(item.price)}</p>
+                        {/* Info */}
+                        <div className="flex-grow min-w-0">
+                          <h3 className="font-bold text-gray-900 text-base sm:text-lg line-clamp-2 leading-tight mb-1 pr-8 sm:pr-0">{name}</h3>
+                          <p className="text-gray-500 font-medium text-sm sm:text-base">{formatCurrency(item.price)}</p>
+                        </div>
+                        
+                        {/* Mobile Delete Button (Absolute on mobile) */}
+                        <button 
+                          onClick={() => removeFromCart(item.productId)}
+                          className="sm:hidden absolute top-4 right-4 text-gray-400 hover:text-red-500 transition-colors"
+                          title="Remove item"
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
+                          </svg>
+                        </button>
                       </div>
 
                       {/* Controls */}
-                      <div className="flex flex-col items-end gap-3 flex-shrink-0">
+                      <div className="flex items-center justify-between sm:justify-end gap-4 w-full sm:w-auto mt-2 sm:mt-0 flex-shrink-0">
                         <div className="flex items-center border border-gray-300 rounded-lg overflow-hidden h-9">
                           <button 
                             onClick={() => updateQty(item.productId, item.qty - 1)}
@@ -95,7 +109,7 @@ const Cart = () => {
                           >
                             -
                           </button>
-                          <span className="px-4 font-semibold text-gray-900">{item.qty}</span>
+                          <span className="w-10 text-center font-semibold text-gray-900">{item.qty}</span>
                           <button 
                             onClick={() => updateQty(item.productId, item.qty + 1)}
                             className="px-3 bg-gray-50 hover:bg-gray-100 text-gray-600 font-bold h-full border-l border-gray-300 transition-colors"
@@ -103,11 +117,11 @@ const Cart = () => {
                             +
                           </button>
                         </div>
-                        <div className="flex items-center gap-4">
+                        <div className="flex items-center gap-3">
                           <span className="font-bold text-gray-900">{formatCurrency(item.price * item.qty)}</span>
                           <button 
                             onClick={() => removeFromCart(item.productId)}
-                            className="text-red-500 hover:text-red-700 bg-red-50 hover:bg-red-100 p-2 rounded-full transition-colors"
+                            className="hidden sm:block text-red-500 hover:text-red-700 bg-red-50 hover:bg-red-100 p-2 rounded-full transition-colors"
                             title="Remove item"
                           >
                             🗑️

@@ -2,10 +2,10 @@ import React from 'react';
 import { SHOP_CONFIG } from '../config/shopConfig';
 
 const WhatsAppButton = ({ label, message, variant = 'filled', className = '' }) => {
-  const shopWhatsApp = import.meta.env.VITE_SHOP_WHATSAPP || '910000000000';
+  const shopWhatsApp = import.meta.env.VITE_SHOP_WHATSAPP || '918074381678';
   const href = message 
     ? `https://wa.me/${shopWhatsApp.replace(/\D/g, '')}?text=${encodeURIComponent(message)}`
-    : `https://wa.me/${shopWhatsApp.replace(/\D/g, '')}?text=${encodeURIComponent("Hello! I'd like to know more about your bakery products. 🎂")}`;
+    : `https://wa.me/${shopWhatsApp.replace(/\D/g, '')}?text=${encodeURIComponent("Hello! I'm interested in ordering from Sri Tirupathi Venkatachalapathi Bakery. Could you please share your menu or tell me more about your fresh products and daily specials? 🎂🍰")}`;
 
   const baseClasses = "rounded-md font-medium transition-colors duration-200 inline-flex items-center justify-center gap-2";
   const variants = {

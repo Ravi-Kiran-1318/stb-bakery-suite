@@ -4,14 +4,17 @@ import ProductCard from '../../components/ProductCard';
 import PageWrapper from '../../components/PageWrapper';
 import Footer from '../../components/Footer';
 import axiosInstance from '../../utils/axiosInstance';
+import { useSearchParams } from 'react-router-dom';
 import { useCart } from '../../context/CartContext';
 
-const CATEGORIES = ['All', 'Bread', 'Bun', 'Cake', 'Pastry', 'Snacks', 'Beverages', 'Other'];
+const CATEGORIES = ['All', 'Specials', 'Bread', 'Bun', 'Cake', 'Pastry', 'Snacks', 'Beverages', 'Other'];
 
 const Shop = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [activeCategory, setActiveCategory] = useState('All');
+  const [searchParams] = useSearchParams();
+  const initialCategory = searchParams.get('category') === 'specials' ? 'Specials' : 'All';
+  const [activeCategory, setActiveCategory] = useState(initialCategory);
   const [searchQuery, setSearchQuery] = useState('');
   const [sortOrder, setSortOrder] = useState('default');
   const [isSortOpen, setIsSortOpen] = useState(false);
@@ -33,6 +36,14 @@ const Shop = () => {
     fetchProducts();
   }, []);
 
+  // Effect to handle URL category changes (e.g. clicking Specials in navbar while already on Shop page)
+  useEffect(() => {
+    const categoryQuery = searchParams.get('category');
+    if (categoryQuery === 'specials') {
+      setActiveCategory('Specials');
+    }
+  }, [searchParams]);
+
   const handleAddToCart = (product) => {
     addToCart(product);
     setToastMessage('✓ Added to cart');
@@ -41,7 +52,14 @@ const Shop = () => {
 
   // Filter and Sort Logic
   const filteredProducts = products.filter(product => {
-    const matchesCategory = activeCategory === 'All' || product.category === activeCategory;
+    let matchesCategory = false;
+    if (activeCategory === 'All') {
+      matchesCategory = true;
+    } else if (activeCategory === 'Specials') {
+      matchesCategory = product.isSpecial === true;
+    } else {
+      matchesCategory = product.category === activeCategory;
+    }
     const searchLower = searchQuery.toLowerCase();
     const matchesSearch = 
       (product.nameEN && product.nameEN.toLowerCase().includes(searchLower)) ||

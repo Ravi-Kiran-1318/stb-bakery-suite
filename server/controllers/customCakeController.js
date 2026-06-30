@@ -89,13 +89,26 @@ const updateRequestStatus = async (req, res) => {
         recipientRole: 'admin'
       });
     } else if (status === 'Cancelled' && oldStatus !== 'Cancelled') {
-      await dispatchNotification(req, {
-        message: `${request.user.name} cancelled their custom cake request.`,
-        type: 'custom_cake',
-        actionTab: 'custom-cakes',
-        referenceId: request._id,
-        recipientRole: 'admin'
-      });
+      if (req.user.role === 'admin') {
+        // Admin cancelled it -> Notify customer
+        await dispatchNotification(req, {
+          userId: request.user._id,
+          message: `Your custom cake request was cancelled by the bakery.`,
+          type: 'custom_cake',
+          actionTab: 'customcakes',
+          referenceId: request._id,
+          recipientRole: 'customer'
+        });
+      } else {
+        // Customer cancelled it -> Notify admin
+        await dispatchNotification(req, {
+          message: `${request.user.name} cancelled their custom cake request.`,
+          type: 'custom_cake',
+          actionTab: 'custom-cakes',
+          referenceId: request._id,
+          recipientRole: 'admin'
+        });
+      }
     }
 
     res.json(request);

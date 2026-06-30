@@ -3,9 +3,14 @@ import { SHOP_CONFIG } from '../config/shopConfig';
 
 const WhatsAppButton = ({ label, message, variant = 'filled', className = '' }) => {
   const shopWhatsApp = import.meta.env.VITE_SHOP_WHATSAPP || '918074381678';
+  let cleanNumber = shopWhatsApp.replace(/\D/g, '');
+  if (cleanNumber.length === 10) {
+    cleanNumber = '91' + cleanNumber;
+  }
+  
   const href = message 
-    ? `https://wa.me/${shopWhatsApp.replace(/\D/g, '')}?text=${encodeURIComponent(message)}`
-    : `https://wa.me/${shopWhatsApp.replace(/\D/g, '')}?text=${encodeURIComponent("Hello! I'm interested in ordering from Sri Tirupathi Venkatachalapathi Bakery. Could you please share your menu or tell me more about your fresh products and daily specials? 🎂🍰")}`;
+    ? `https://wa.me/${cleanNumber}?text=${encodeURIComponent(message)}`
+    : `https://wa.me/${cleanNumber}?text=${encodeURIComponent("Hello! I'm interested in ordering from Sri Tirupathi Venkatachalapathi Bakery. Could you please share your menu or tell me more about your fresh products and daily specials? 🎂🍰")}`;
 
   const baseClasses = "rounded-md font-medium transition-colors duration-200 inline-flex items-center justify-center gap-2";
   const variants = {

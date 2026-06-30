@@ -83,6 +83,16 @@ const createOrder = async (req, res) => {
       recipientRole: 'admin'
     });
 
+    // Send Customer Notification
+    await dispatchNotification(req, {
+      userId: userId,
+      type: 'order_status',
+      message: `Your order #${newOrder._id.toString().slice(-6).toUpperCase()} was placed successfully! 🎉`,
+      actionTab: 'orders',
+      referenceId: newOrder._id.toString(),
+      recipientRole: 'customer'
+    });
+
     const io = req.app.get('io');
     if (io) {
       io.to('admin').emit('new_order', {

@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import PageWrapper from '../../components/PageWrapper';
 import Footer from '../../components/Footer';
+import NotificationPrompt from '../../components/NotificationPrompt';
 import MyOrders from './MyOrders';
 import ProfileTab from './ProfileTab';
 import RemindersTab from './RemindersTab';
@@ -79,6 +80,7 @@ const CustomerDashboard = () => {
 
           {/* Main Content Area */}
           <div className="flex-grow min-w-0">
+            <NotificationPrompt />
             {renderTab()}
           </div>
 

@@ -421,22 +421,18 @@ const Checkout = () => {
                   >
                     <h2 className="text-xl font-bold text-gray-900 mb-4">Pickup Location</h2>
                     
-                    <div className="relative w-full h-[350px] rounded-2xl overflow-hidden shadow-md border border-gray-200">
-                      <iframe 
-                        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3876.9940654032895!2d79.4184646!3d13.6288!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3a4d4b1a4bb7433f%3A0x6d11fbdc21062635!2sSri%20Tirupathi%20Venkatachalapathi%20Bakery!5e0!3m2!1sen!2sin!4v1700000000000!5m2!1sen!2sin" 
-                        width="100%" 
-                        height="100%" 
-                        style={{ border: 0 }} 
-                        allowFullScreen="" 
-                        loading="lazy" 
-                        referrerPolicy="no-referrer-when-downgrade"
-                      ></iframe>
+                    <div className="relative w-full rounded-2xl overflow-hidden shadow-md border border-gray-200">
+                      <MapPicker 
+                        shopLat={shopLat} 
+                        shopLng={shopLng} 
+                        isPickupMode={true} 
+                      />
                       
                       <a 
                         href={`https://www.google.com/maps/dir/?api=1&destination=${shopLat},${shopLng}`}
                         target="_blank" 
                         rel="noopener noreferrer"
-                        className="absolute top-4 left-4 bg-white px-4 py-2.5 rounded-lg shadow-lg font-bold text-blue-600 flex items-center gap-2 hover:bg-gray-50 transition-colors z-10"
+                        className="absolute top-4 left-4 bg-white px-4 py-2.5 rounded-lg shadow-lg font-bold text-blue-600 flex items-center gap-2 hover:bg-gray-50 transition-colors z-[1000]"
                       >
                         Open in Maps <span className="text-lg">↗</span>
                       </a>

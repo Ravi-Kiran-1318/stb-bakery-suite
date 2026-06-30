@@ -76,7 +76,7 @@ const DraggableMarker = ({ position, setPosition, setAddress }) => {
   );
 };
 
-const MapPicker = ({ shopLat, shopLng, onLocationSelect }) => {
+const MapPicker = ({ shopLat, shopLng, onLocationSelect, isPickupMode = false }) => {
   const [customerPos, setCustomerPos] = useState([shopLat, shopLng]);
   const [address, setAddress] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
@@ -85,10 +85,11 @@ const MapPicker = ({ shopLat, shopLng, onLocationSelect }) => {
   const [isSearching, setIsSearching] = useState(false);
 
   useEffect(() => {
+    if (isPickupMode || !onLocationSelect) return;
     const dist = haversine(shopLat, shopLng, customerPos[0], customerPos[1]);
     setDistance(dist);
     onLocationSelect(customerPos[0], customerPos[1], address, dist);
-  }, [customerPos, address, shopLat, shopLng, onLocationSelect]);
+  }, [customerPos, address, shopLat, shopLng, onLocationSelect, isPickupMode]);
 
   // Debounced search for suggestions
   useEffect(() => {
@@ -154,6 +155,26 @@ const MapPicker = ({ shopLat, shopLng, onLocationSelect }) => {
   };
 
   const isEligible = distance <= 5;
+
+  if (isPickupMode) {
+    return (
+      <div className="flex flex-col gap-4">
+        <div className="h-[350px] w-full rounded-2xl overflow-hidden shadow-md border border-gray-200 z-0 relative">
+          <MapContainer center={[shopLat, shopLng]} zoom={15} scrollWheelZoom={true} style={{ height: '100%', width: '100%' }}>
+            <TileLayer
+              attribution='&copy; Google Maps'
+              url="https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}"
+            />
+            <Marker position={[shopLat, shopLng]} icon={shopIcon}>
+              <Popup>
+                <b>Bakery Location</b><br/>Sri Tirupati Venkatachalapathy Bakery
+              </Popup>
+            </Marker>
+          </MapContainer>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col gap-4">

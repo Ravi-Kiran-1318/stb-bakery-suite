@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { protect } = require('../middleware/authMiddleware');
+const authMiddleware = require('../middleware/authMiddleware');
 const User = require('../models/User');
 
 // GET /api/push/vapid-public-key
@@ -9,7 +9,7 @@ router.get('/vapid-public-key', (req, res) => {
 });
 
 // POST /api/push/subscribe
-router.post('/subscribe', protect, async (req, res) => {
+router.post('/subscribe', authMiddleware, async (req, res) => {
   try {
     const subscription = req.body;
     

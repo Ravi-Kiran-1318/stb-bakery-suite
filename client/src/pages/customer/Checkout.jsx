@@ -421,24 +421,7 @@ const Checkout = () => {
                   >
                     <h2 className="text-xl font-bold text-gray-900 mb-4">Pickup Location</h2>
                     
-                    <div className="relative w-full rounded-2xl overflow-hidden shadow-md border border-gray-200">
-                      <MapPicker 
-                        shopLat={shopLat} 
-                        shopLng={shopLng} 
-                        isPickupMode={true} 
-                      />
-                      
-                      <a 
-                        href={`https://www.google.com/maps/dir/?api=1&destination=${shopLat},${shopLng}`}
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        className="absolute top-4 left-4 bg-white px-4 py-2.5 rounded-lg shadow-lg font-bold text-blue-600 flex items-center gap-2 hover:bg-gray-50 transition-colors z-[1000]"
-                      >
-                        Open in Maps <span className="text-lg">↗</span>
-                      </a>
-                    </div>
-                    
-                    <div className="mt-4 bg-amber-50 p-4 rounded-xl border border-amber-100 flex items-start gap-3">
+                    <div className="bg-amber-50 p-4 rounded-xl border border-amber-100 flex items-start gap-3">
                       <span className="text-2xl mt-0.5">🏪</span>
                       <div>
                         <p className="font-bold text-gray-900">Sri Tirupati Venkatachalapathy Bakery</p>

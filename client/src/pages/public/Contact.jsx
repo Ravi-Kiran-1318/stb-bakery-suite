@@ -63,7 +63,9 @@ const Contact = () => {
                   
                   <div className="flex items-center gap-4">
                     <span className="text-2xl">📞</span>
-                    <p>{shopWhatsApp}</p>
+                    <a href={`tel:${shopWhatsApp}`} className="hover:text-amber-600 font-bold transition-colors">
+                      {shopWhatsApp}
+                    </a>
                   </div>
                 </div>
               </div>
@@ -98,14 +100,7 @@ const Contact = () => {
                 referrerPolicy="no-referrer-when-downgrade"
               ></iframe>
               
-              <a 
-                href="https://www.google.com/maps/dir/?api=1&destination=13.6288,79.4184646"
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="absolute top-4 left-4 bg-white px-4 py-2.5 rounded-lg shadow-lg font-bold text-blue-600 flex items-center gap-2 hover:bg-gray-50 transition-colors z-10"
-              >
-                Open in Maps <span className="text-lg">↗</span>
-              </a>
+
             </motion.div>
 
           </div>

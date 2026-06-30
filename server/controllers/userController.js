@@ -1,4 +1,5 @@
 const User = require('../models/User');
+const bcrypt = require('bcrypt');
 
 const getCustomers = async (req, res) => {
   try {
@@ -153,7 +154,52 @@ const deleteAddress = async (req, res) => {
   }
 };
 
+const updateProfile = async (req, res) => {
+  try {
+    const { name, mobile, email } = req.body;
+    const user = await User.findById(req.user._id);
+    
+    if (name) user.name = name;
+    if (mobile) user.mobile = mobile;
+    if (email !== undefined) user.email = email;
+    
+    await user.save();
+    
+    res.json({
+      _id: user._id,
+      name: user.name,
+      mobile: user.mobile,
+      email: user.email,
+      role: user.role,
+      loyaltyPoints: user.loyaltyPoints
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+const updatePassword = async (req, res) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+    const user = await User.findById(req.user._id);
+    
+    const isMatch = await bcrypt.compare(currentPassword, user.passwordHash);
+    if (!isMatch) {
+      return res.status(400).json({ message: 'Incorrect current password.' });
+    }
+    
+    const salt = await bcrypt.genSalt(10);
+    user.passwordHash = await bcrypt.hash(newPassword, salt);
+    
+    await user.save();
+    res.json({ message: 'Password updated successfully' });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 module.exports = { 
   getCustomers, getReminders, addReminder, deleteReminder,
-  getAddresses, addAddress, updateAddress, deleteAddress
+  getAddresses, addAddress, updateAddress, deleteAddress,
+  updateProfile, updatePassword
 };

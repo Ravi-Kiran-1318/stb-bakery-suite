@@ -76,6 +76,7 @@ const Navbar = () => {
     { id: 'gallery', label: 'Gallery', icon: '🖼️' },
     { id: 'party-decorations', label: 'Party & Decor', icon: '🎉' },
     { id: 'notifications', label: 'Notifications', icon: '🔔' },
+    { id: 'profile', label: 'My Profile', icon: '👤' },
   ];
 
   // Helper to handle smooth scrolling for hash links
@@ -403,6 +404,10 @@ const Navbar = () => {
                         <Link to="/customer/dashboard?tab=occasions" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-4 py-3 rounded-xl text-base font-bold hover:bg-amber-50 text-gray-800">
                           <span className="text-xl">📅</span>
                           <span>Occasion Reminders</span>
+                        </Link>
+                        <Link to="/customer/dashboard?tab=profile" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-4 py-3 rounded-xl text-base font-bold hover:bg-amber-50 text-gray-800">
+                          <span className="text-xl">👤</span>
+                          <span>My Profile</span>
                         </Link>
                       </>
                     )}

@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { FaCcVisa, FaCcMastercard, FaMobileAlt, FaWallet } from 'react-icons/fa';
 
 const Footer = () => {
   return (
@@ -147,14 +148,14 @@ const Footer = () => {
           <p className="text-xs text-[#5c3800]/80 font-medium">
             &copy; {new Date().getFullYear()} Sri Tirupathi Venkatachalapathi Bakery. All rights reserved.
           </p>
-          <div className="flex items-center gap-3 text-xs font-bold text-[#c8922a]">
-            <span>VISA</span>
+          <div className="flex flex-wrap items-center justify-center md:justify-end gap-3 text-[11px] md:text-xs font-bold text-[#c8922a] mt-4 md:mt-0">
+            <span className="flex items-center gap-1"><FaCcVisa className="text-lg md:text-xl" /> VISA</span>
             <div className="w-1 h-1 rounded-full bg-[#c8922a]" />
-            <span>MASTERCARD</span>
+            <span className="flex items-center gap-1"><FaCcMastercard className="text-lg md:text-xl" /> MASTERCARD</span>
             <div className="w-1 h-1 rounded-full bg-[#c8922a]" />
-            <span>UPI</span>
+            <span className="flex items-center gap-1"><FaMobileAlt className="text-sm md:text-base" /> UPI</span>
             <div className="w-1 h-1 rounded-full bg-[#c8922a]" />
-            <span>PAYTM</span>
+            <span className="flex items-center gap-1"><FaWallet className="text-sm md:text-base" /> PAYTM</span>
           </div>
         </div>
 

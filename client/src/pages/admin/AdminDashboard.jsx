@@ -10,6 +10,7 @@ import NotificationsTab from './NotificationsTab';
 import GalleryAdminTab from './GalleryAdminTab';
 import PartyDecorationAdminTab from './PartyDecorationAdminTab';
 import CustomOrdersAdminTab from './CustomOrdersAdminTab';
+import ProfileTab from '../customer/ProfileTab';
 
 const AdminDashboard = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -29,6 +30,7 @@ const AdminDashboard = () => {
     { id: 'revenue', label: 'Revenue', icon: '💰' },
     { id: 'customers', label: 'Customers', icon: '👥' },
     { id: 'notifications', label: 'Send Alert', icon: '🔔' },
+    { id: 'profile', label: 'My Profile', icon: '👤' },
   ];
 
   const renderContent = () => {
@@ -41,6 +43,7 @@ const AdminDashboard = () => {
       case 'gallery': return <GalleryAdminTab />;
       case 'party-decorations': return <PartyDecorationAdminTab />;
       case 'notifications': return <NotificationsTab />;
+      case 'profile': return <ProfileTab />;
       default: return <OrdersTab />;
     }
   };

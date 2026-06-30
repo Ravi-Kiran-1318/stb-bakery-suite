@@ -3,6 +3,7 @@ import { useAuth } from '../../context/AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
 import PageWrapper from '../../components/PageWrapper';
 import { motion } from 'framer-motion';
+import { FiEye, FiEyeOff } from 'react-icons/fi';
 
 const Signup = () => {
   const { signup, user, loading: authLoading } = useAuth();
@@ -18,6 +19,7 @@ const Signup = () => {
   
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   useEffect(() => {
     if (user && !authLoading) {
@@ -131,28 +133,46 @@ const Signup = () => {
               
               <div>
                 <label className="block text-sm font-medium text-gray-700">Password *</label>
-                <input
-                  type="password"
-                  name="password"
-                  required
-                  className="input-field mt-1"
-                  value={formData.password}
-                  onChange={handleChange}
-                  placeholder="Create a password"
-                />
+                <div className="relative mt-1">
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    name="password"
+                    required
+                    className="input-field w-full pr-10"
+                    value={formData.password}
+                    onChange={handleChange}
+                    placeholder="Create a password"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 text-lg"
+                  >
+                    {showPassword ? <FiEyeOff /> : <FiEye />}
+                  </button>
+                </div>
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700">Confirm Password *</label>
-                <input
-                  type="password"
-                  name="confirmPassword"
-                  required
-                  className="input-field mt-1"
-                  value={formData.confirmPassword}
-                  onChange={handleChange}
-                  placeholder="Confirm your password"
-                />
+                <div className="relative mt-1">
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    name="confirmPassword"
+                    required
+                    className="input-field w-full pr-10"
+                    value={formData.confirmPassword}
+                    onChange={handleChange}
+                    placeholder="Confirm your password"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 text-lg"
+                  >
+                    {showPassword ? <FiEyeOff /> : <FiEye />}
+                  </button>
+                </div>
               </div>
             </div>
 

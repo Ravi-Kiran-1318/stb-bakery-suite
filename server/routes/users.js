@@ -2,7 +2,8 @@ const express = require('express');
 const router = express.Router();
 const { 
   getCustomers, getReminders, addReminder, deleteReminder,
-  getAddresses, addAddress, updateAddress, deleteAddress
+  getAddresses, addAddress, updateAddress, deleteAddress,
+  updateProfile, updatePassword
 } = require('../controllers/userController');
 const authMiddleware = require('../middleware/authMiddleware');
 const adminMiddleware = require('../middleware/adminMiddleware');
@@ -17,5 +18,8 @@ router.get('/addresses', authMiddleware, getAddresses);
 router.post('/addresses', authMiddleware, addAddress);
 router.put('/addresses/:id', authMiddleware, updateAddress);
 router.delete('/addresses/:id', authMiddleware, deleteAddress);
+
+router.put('/profile', authMiddleware, updateProfile);
+router.put('/password', authMiddleware, updatePassword);
 
 module.exports = router;

@@ -23,6 +23,7 @@ import ToastContainer from './components/Toast';
 import PageWrapper from './components/PageWrapper';
 import FloatingHomeButton from './components/FloatingHomeButton';
 import MobileBottomNav from './components/MobileBottomNav';
+import InstallPrompt from './components/InstallPrompt';
 
 // A helper component to handle route transitions
 const AnimatedRoutes = () => {
@@ -114,6 +115,7 @@ function App() {
       <AnimatedRoutes />
       <FloatingHomeButton />
       <MobileBottomNav />
+      <InstallPrompt />
     </BrowserRouter>
   );
 }

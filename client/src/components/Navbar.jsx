@@ -336,6 +336,13 @@ const Navbar = () => {
               </div>
 
               <div className="flex-1 px-4 py-6 space-y-1 overflow-y-auto pb-8">
+                {user && (
+                  <div className="mb-6 px-4 py-3 bg-amber-50 rounded-xl border border-amber-100 flex items-center gap-2">
+                    <p className="text-lg font-bold text-gray-900">
+                      Welcome {user.name} 🙏
+                    </p>
+                  </div>
+                )}
                 {/* Admin Nav Links or Customer Nav Links */}
                 {location.pathname.startsWith('/admin/dashboard') && user?.role === 'admin' ? (
                   <>

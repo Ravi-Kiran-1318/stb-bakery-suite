@@ -1,20 +1,28 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import axiosInstance from '../../utils/axiosInstance';
 import { ToastContext } from '../../context/ToastContext';
+import { CartContext } from '../../context/CartContext';
 
 const CustomOrdersTab = () => {
   const [requests, setRequests] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const { addToast } = useContext(ToastContext);
 
   const [formData, setFormData] = useState({
     description: '',
     referenceImageUrl: '',
     weight: 1,
-    requestedDate: ''
+    requestedDate: '',
+    requestedTime: '',
+    flavour: '',
+    color: '',
+    shape: ''
   });
+  const [imageFile, setImageFile] = useState(null);
 
   useEffect(() => {
     fetchRequests();
@@ -35,26 +43,101 @@ const CustomOrdersTab = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    try {
-      const { data } = await axiosInstance.post('/custom-cakes', formData);
-      setRequests([data, ...requests]);
-      setShowForm(false);
-      setFormData({ description: '', referenceImageUrl: '', weight: 1, requestedDate: '' });
-      addToast('Custom cake request submitted successfully!', 'success');
-    } catch (error) {
-      addToast('Failed to submit request', 'error');
+  const handleImageChange = (e) => {
+    if (e.target.files && e.target.files[0]) {
+      setImageFile(e.target.files[0]);
     }
   };
 
-  const handleAcceptQuote = async (id) => {
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    
+    if (!imageFile) {
+      addToast('Please provide a reference image', 'error');
+      return;
+    }
+
+    setIsSubmitting(true);
+    // Open window synchronously to bypass popup blocker
+    const newWindow = window.open('about:blank', '_blank');
+    
     try {
-      await axiosInstance.put(`/custom-cakes/${id}/accept`);
-      setRequests(requests.map(req => req._id === id ? { ...req, status: 'Accepted' } : req));
-      addToast('Quote accepted! We will contact you for payment.', 'success');
+      const submitData = new FormData();
+      Object.keys(formData).forEach(key => {
+        submitData.append(key, formData[key]);
+      });
+      if (imageFile) {
+        submitData.append('image', imageFile);
+      }
+
+      const { data } = await axiosInstance.post('/custom-cakes', submitData);
+      setRequests([data, ...requests]);
+      setShowForm(false);
+      
+      // Open WhatsApp
+      let waNumber = import.meta.env.VITE_SHOP_WHATSAPP || '0000000000';
+      if (waNumber.length === 10) waNumber = '91' + waNumber;
+      const rawText = `Hello sir/ Madam,\n\nI just submitted a custom cake request.\n\n*Details:*\n- Weight: ${formData.weight} kg\n- Flavour: ${formData.flavour || 'N/A'}\n- Shape: ${formData.shape || 'N/A'}\n- Color: ${formData.color || 'N/A'}\n- Date Required: ${formData.requestedDate}\n- Time Required: ${formData.requestedTime || 'N/A'}\n- Description: ${formData.description}${data.referenceImageUrl ? `\n- Image: ${data.referenceImageUrl}` : ''}`;
+      const text = encodeURIComponent(rawText);
+      
+      if (newWindow) {
+        newWindow.location.href = `https://wa.me/${waNumber}?text=${text}`;
+      } else {
+        window.location.href = `https://wa.me/${waNumber}?text=${text}`;
+      }
+      
+      setFormData({ description: '', referenceImageUrl: '', weight: 1, requestedDate: '', requestedTime: '', flavour: '', color: '', shape: '' });
+      setImageFile(null);
+      addToast('Custom cake request submitted! Sending you to WhatsApp...', 'success');
     } catch (error) {
-      addToast('Failed to accept quote', 'error');
+      if (newWindow) newWindow.close();
+      addToast('Failed to submit request', 'error');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const { addToCart, items } = useContext(CartContext);
+  const navigate = useNavigate();
+
+  const handleAddToCart = async (req) => {
+    try {
+      if (req.status !== 'Accepted') {
+        // Set status to accepted in DB
+        await axiosInstance.put(`/custom-cakes/${req._id}/accept`);
+        setRequests(requests.map(r => r._id === req._id ? { ...r, status: 'Accepted' } : r));
+      }
+      
+      const exists = items.find(i => i.customCakeId === req._id);
+      if (!exists) {
+        // Add to local CartContext
+        addToCart({
+          _id: req._id,
+          nameEN: `Custom Cake Request - ${req.weight}kg`,
+          nameTe: `Custom Cake Request - ${req.weight}kg`,
+          imageUrl: req.referenceImageUrl || '/bg3.png',
+          price: req.quotePrice,
+          isCustomCake: true,
+          customCakeId: req._id,
+          requestedDate: req.requestedDate,
+          requestedTime: req.requestedTime
+        });
+      }
+      
+      addToast('Proceeding to checkout...', 'success');
+      navigate('/checkout-addons');
+    } catch (error) {
+      addToast('Failed to proceed', 'error');
+    }
+  };
+
+  const handleCancelQuote = async (id) => {
+    try {
+      await axiosInstance.put(`/custom-cakes/${id}/cancel`);
+      setRequests(requests.map(req => req._id === id ? { ...req, status: 'Cancelled' } : req));
+      addToast('Request cancelled successfully', 'success');
+    } catch (error) {
+      addToast('Failed to cancel request', 'error');
     }
   };
 
@@ -64,6 +147,7 @@ const CustomOrdersTab = () => {
       case 'Quoted': return <span className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-semibold">Quote Received</span>;
       case 'Accepted': return <span className="px-3 py-1 bg-green-100 text-green-800 rounded-full text-xs font-semibold">Accepted</span>;
       case 'Rejected': return <span className="px-3 py-1 bg-red-100 text-red-800 rounded-full text-xs font-semibold">Declined</span>;
+      case 'Cancelled': return <span className="px-3 py-1 bg-gray-200 text-gray-800 rounded-full text-xs font-semibold">Cancelled</span>;
       case 'Completed': return <span className="px-3 py-1 bg-gray-100 text-gray-800 rounded-full text-xs font-semibold">Completed</span>;
       default: return <span className="px-3 py-1 bg-gray-100 text-gray-800 rounded-full text-xs font-semibold">{status}</span>;
     }
@@ -80,15 +164,15 @@ const CustomOrdersTab = () => {
       transition={{ duration: 0.4 }}
       className="space-y-6"
     >
-      <div className="flex justify-between items-end border-b border-gray-200 pb-4">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end border-b border-gray-200 pb-4 gap-4">
         <div>
           <h2 className="text-2xl font-bold text-gray-800">Custom Cake Requests</h2>
-          <p className="text-gray-500 mt-1">Upload an image and request a quote for your dream cake.</p>
+          <p className="text-gray-500 mt-1 text-sm sm:text-base">Upload an image and request a quote for your dream cake.</p>
         </div>
         {!showForm && (
           <button 
             onClick={() => setShowForm(true)} 
-            className="bg-amber-500 hover:bg-amber-600 text-white px-4 py-2 rounded-lg font-medium shadow-sm transition-colors"
+            className="bg-amber-500 hover:bg-amber-600 text-white px-4 py-2 rounded-lg font-medium shadow-sm transition-colors w-full sm:w-auto text-center"
           >
             + Request Custom Cake
           </button>
@@ -112,20 +196,20 @@ const CustomOrdersTab = () => {
               />
             </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 mb-1">Upload Reference Image *</label>
+              <input 
+                type="file"
+                accept="image/*"
+                onChange={handleImageChange}
+                required
+                className="w-full border border-gray-300 rounded-lg p-1.5 focus:ring-2 focus:ring-amber-500 focus:border-amber-500 bg-white"
+              />
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Reference Image URL (Optional)</label>
-                <input 
-                  type="url"
-                  name="referenceImageUrl"
-                  value={formData.referenceImageUrl}
-                  onChange={handleChange}
-                  className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
-                  placeholder="https://example.com/cake-image.jpg"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Approximate Weight (kg) *</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Approx. Weight (kg) *</label>
                 <input 
                   type="number"
                   name="weight"
@@ -137,18 +221,63 @@ const CustomOrdersTab = () => {
                   className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
                 />
               </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Flavour</label>
+                <input 
+                  type="text"
+                  name="flavour"
+                  value={formData.flavour}
+                  onChange={handleChange}
+                  placeholder="e.g. Chocolate, Vanilla"
+                  className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Color</label>
+                <input 
+                  type="text"
+                  name="color"
+                  value={formData.color}
+                  onChange={handleChange}
+                  placeholder="e.g. Pink, Blue"
+                  className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Shape</label>
+                <input 
+                  type="text"
+                  name="shape"
+                  value={formData.shape}
+                  onChange={handleChange}
+                  placeholder="e.g. Round, Heart"
+                  className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
+                />
+              </div>
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Date Required By *</label>
-              <input 
-                type="date"
-                name="requestedDate"
-                required
-                value={formData.requestedDate}
-                onChange={handleChange}
-                className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
-              />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Date Required By *</label>
+                <input 
+                  type="date"
+                  name="requestedDate"
+                  required
+                  value={formData.requestedDate}
+                  onChange={handleChange}
+                  className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Time Required By</label>
+                <input 
+                  type="time"
+                  name="requestedTime"
+                  value={formData.requestedTime}
+                  onChange={handleChange}
+                  className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
+                />
+              </div>
             </div>
 
             <div className="flex space-x-3 pt-4 border-t border-gray-100">
@@ -194,12 +323,27 @@ const CustomOrdersTab = () => {
                 
                 <p className="text-gray-600 text-sm mb-4 line-clamp-2">{req.description}</p>
                 
-                <div className="grid grid-cols-2 gap-4 text-sm mb-4">
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-y-2 gap-x-4 text-sm mb-4">
                   <div>
                     <span className="text-gray-500">Weight:</span> <span className="font-medium">{req.weight} kg</span>
                   </div>
+                  {req.flavour && (
+                    <div>
+                      <span className="text-gray-500">Flavour:</span> <span className="font-medium">{req.flavour}</span>
+                    </div>
+                  )}
+                  {req.color && (
+                    <div>
+                      <span className="text-gray-500">Color:</span> <span className="font-medium">{req.color}</span>
+                    </div>
+                  )}
+                  {req.shape && (
+                    <div>
+                      <span className="text-gray-500">Shape:</span> <span className="font-medium">{req.shape}</span>
+                    </div>
+                  )}
                   <div>
-                    <span className="text-gray-500">Needed By:</span> <span className="font-medium">{new Date(req.requestedDate).toLocaleDateString()}</span>
+                    <span className="text-gray-500">Needed By:</span> <span className="font-medium">{new Date(req.requestedDate).toLocaleDateString()} {req.requestedTime && `at ${req.requestedTime}`}</span>
                   </div>
                 </div>
 
@@ -209,18 +353,34 @@ const CustomOrdersTab = () => {
                       <span className="font-semibold">Bakery Admin:</span> We can make this for <span className="font-bold text-lg">₹{req.quotePrice}</span>.
                       {req.adminNotes && <span className="block mt-1 italic text-blue-700">"{req.adminNotes}"</span>}
                     </p>
-                    <button 
-                      onClick={() => handleAcceptQuote(req._id)}
-                      className="mt-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-1.5 rounded-md text-sm font-medium transition-colors"
-                    >
-                      Accept Quote
-                    </button>
+                    <div className="flex gap-3 mt-4">
+                      <button 
+                        onClick={() => handleAddToCart(req)}
+                        className="flex-1 bg-amber-500 hover:bg-amber-600 text-white font-medium py-2 px-4 rounded-lg shadow-sm transition-colors"
+                      >
+                        Accept & Proceed to Checkout
+                      </button>
+                      <button 
+                        onClick={() => handleCancelQuote(req._id)}
+                        className="flex-1 bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 font-medium py-2 px-4 rounded-lg shadow-sm transition-colors"
+                      >
+                        Cancel Request
+                      </button>
+                    </div>
                   </div>
                 )}
                 
                 {req.status === 'Accepted' && (
-                  <div className="text-sm text-green-700 font-medium bg-green-50 p-2 rounded inline-block mt-2">
-                    Quote Accepted (₹{req.quotePrice}). We will contact you soon.
+                  <div className="bg-green-50 border border-green-100 rounded-lg p-4 mt-2 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                    <p className="text-sm text-green-700 font-medium">
+                      Quote Accepted (₹{req.quotePrice}).
+                    </p>
+                    <button 
+                      onClick={() => handleAddToCart(req)}
+                      className="w-full sm:w-auto bg-amber-500 hover:bg-amber-600 text-white font-medium py-2 px-6 rounded-lg shadow-sm transition-colors"
+                    >
+                      Proceed to Checkout
+                    </button>
                   </div>
                 )}
               </div>

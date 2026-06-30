@@ -4,12 +4,19 @@ const { createRequest, getMyRequests, getAllRequests, updateRequestStatus } = re
 const authMiddleware = require('../middleware/authMiddleware');
 const adminMiddleware = require('../middleware/adminMiddleware');
 
+const upload = require('../middleware/upload');
+
 // Customer routes
-router.post('/', authMiddleware, createRequest);
+router.post('/', authMiddleware, upload.single('image'), createRequest);
 router.get('/my-requests', authMiddleware, getMyRequests);
 router.put('/:id/accept', authMiddleware, async (req, res, next) => {
   // Shortcut for customer to accept quote
   req.body = { status: 'Accepted' };
+  next();
+}, updateRequestStatus);
+router.put('/:id/cancel', authMiddleware, async (req, res, next) => {
+  // Shortcut for customer to cancel request
+  req.body = { status: 'Cancelled' };
   next();
 }, updateRequestStatus);
 

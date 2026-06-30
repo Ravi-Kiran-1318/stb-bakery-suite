@@ -47,10 +47,17 @@ const createOrder = async (req, res) => {
     const subtotal = items.reduce((acc, item) => acc + (item.price * item.qty), 0);
     const totalAmount = subtotal + deliveryFee;
 
+    const formattedItems = items.map(item => {
+      if (item.isCustomCake) {
+        return { ...item, customCakeId: item.productId, productId: undefined };
+      }
+      return item;
+    });
+
     const newOrder = await Order.create({
       user: userId,
       customerInfo: customerInfo || { name: req.user.name, mobile: req.user.mobile },
-      items,
+      items: formattedItems,
       totalAmount,
       deliveryType,
       location: deliveryType === 'Delivery' ? location : null,
@@ -125,7 +132,7 @@ const createOrder = async (req, res) => {
 // @route   GET /api/orders/my
 const getMyOrders = async (req, res) => {
   try {
-    const orders = await Order.find({ user: req.user._id }).sort({ createdAt: -1 });
+    const orders = await Order.find({ user: req.user._id }).populate('items.customCakeId').sort({ createdAt: -1 });
     res.json(orders);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -179,7 +186,7 @@ const getOrders = async (req, res) => {
       }
     }
 
-    let orders = await Order.find(query).populate('user', 'name email').sort({ createdAt: -1 });
+    let orders = await Order.find(query).populate('user', 'name email').populate('items.customCakeId').sort({ createdAt: -1 });
 
     // Text search (simple filter on results for now)
     if (search) {

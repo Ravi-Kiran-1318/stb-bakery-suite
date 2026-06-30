@@ -73,6 +73,12 @@ const productSchema = new mongoose.Schema(
     flavour: {
       type: String,
     },
+    color: {
+      type: String,
+    },
+    shape: {
+      type: String,
+    },
     reviews: [reviewSchema],
     averageRating: {
       type: Number,

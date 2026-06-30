@@ -41,6 +41,8 @@ const GalleryAdminTab = () => {
     price: '',
     weight: '',
     flavour: '',
+    color: '',
+    shape: '',
     descriptionEN: '',
     isAvailable: true,
   });
@@ -85,7 +87,7 @@ const GalleryAdminTab = () => {
   const openAddModal = () => {
     setIsEditing(false);
     setEditingId(null);
-    setFormData({ nameEN: '', category: 'Other', price: '', weight: '', flavour: '', descriptionEN: '', isAvailable: true });
+    setFormData({ nameEN: '', category: 'Other', price: '', weight: '', flavour: '', color: '', shape: '', descriptionEN: '', isAvailable: true });
     setImageFile(null);
     setImagePreview(null);
     setModalOpen(true);
@@ -100,6 +102,8 @@ const GalleryAdminTab = () => {
       price: item.price || '',
       weight: item.weight || '',
       flavour: item.flavour || '',
+      color: item.color || '',
+      shape: item.shape || '',
       descriptionEN: item.descriptionEN || '',
       isAvailable: item.isAvailable,
     });
@@ -118,6 +122,8 @@ const GalleryAdminTab = () => {
     data.append('price', formData.price);
     data.append('weight', formData.weight);
     data.append('flavour', formData.flavour);
+    data.append('color', formData.color);
+    data.append('shape', formData.shape);
     data.append('descriptionEN', formData.descriptionEN);
     data.append('isAvailable', formData.isAvailable);
     data.append('isGallery', true);
@@ -247,9 +253,19 @@ const GalleryAdminTab = () => {
                 </div>
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-dark mb-1">Flavour</label>
-                <input type="text" name="flavour" value={formData.flavour} onChange={handleInputChange} className="input-field" placeholder="e.g. Butterscotch" />
+              <div className="grid grid-cols-3 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-dark mb-1">Flavour</label>
+                  <input type="text" name="flavour" value={formData.flavour} onChange={handleInputChange} className="input-field" placeholder="e.g. Butterscotch" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-dark mb-1">Color</label>
+                  <input type="text" name="color" value={formData.color} onChange={handleInputChange} className="input-field" placeholder="e.g. Pink & White" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-dark mb-1">Shape</label>
+                  <input type="text" name="shape" value={formData.shape} onChange={handleInputChange} className="input-field" placeholder="e.g. Heart" />
+                </div>
               </div>
 
               <div>

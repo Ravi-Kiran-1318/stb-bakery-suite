@@ -41,7 +41,7 @@ const getAllProducts = async (req, res) => {
 // @route   POST /api/products
 const createProduct = async (req, res) => {
   try {
-    const { nameEN, nameTe, descriptionEN, descriptionTe, price, weight, quantity, category, isAvailable, isSpecial, isLoved, isGallery, flavour } = req.body;
+    const { nameEN, nameTe, descriptionEN, descriptionTe, price, weight, quantity, category, isAvailable, isSpecial, isLoved, isGallery, flavour, color, shape } = req.body;
     let imageUrl = '';
     
     if (req.file) {
@@ -63,6 +63,8 @@ const createProduct = async (req, res) => {
       isLoved: isLoved === 'true' || isLoved === true,
       isGallery: isGallery === 'true' || isGallery === true,
       flavour,
+      color,
+      shape,
     });
 
     const createdProduct = await product.save();
@@ -76,7 +78,7 @@ const createProduct = async (req, res) => {
 // @route   PATCH /api/products/:id
 const updateProduct = async (req, res) => {
   try {
-    const { nameEN, nameTe, descriptionEN, descriptionTe, price, weight, quantity, category, isAvailable, isSpecial, isLoved, isGallery, flavour } = req.body;
+    const { nameEN, nameTe, descriptionEN, descriptionTe, price, weight, quantity, category, isAvailable, isSpecial, isLoved, isGallery, flavour, color, shape } = req.body;
     
     const product = await Product.findById(req.params.id);
     if (!product) {
@@ -96,6 +98,8 @@ const updateProduct = async (req, res) => {
     if (isLoved !== undefined) product.isLoved = isLoved === 'true' || isLoved === true;
     if (isGallery !== undefined) product.isGallery = isGallery === 'true' || isGallery === true;
     if (flavour !== undefined) product.flavour = flavour;
+    if (color !== undefined) product.color = color;
+    if (shape !== undefined) product.shape = shape;
 
     if (req.file) {
       product.imageUrl = req.file.path;

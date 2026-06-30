@@ -18,6 +18,14 @@ const orderSchema = new mongoose.Schema(
           type: mongoose.Schema.Types.ObjectId,
           ref: 'Product',
         },
+        customCakeId: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: 'CustomCakeRequest',
+        },
+        isCustomCake: {
+          type: Boolean,
+          default: false,
+        },
         nameEN: String,
         nameTe: String,
         imageUrl: String,

@@ -18,13 +18,25 @@ const customCakeSchema = new mongoose.Schema(
       type: Number, // In kg
       required: true,
     },
+    flavour: {
+      type: String,
+    },
+    color: {
+      type: String,
+    },
+    shape: {
+      type: String,
+    },
+    requestedTime: {
+      type: String,
+    },
     requestedDate: {
       type: String,
       required: true,
     },
     status: {
       type: String,
-      enum: ['Pending', 'Quoted', 'Accepted', 'Rejected', 'Completed'],
+      enum: ['Pending', 'Quoted', 'Accepted', 'Rejected', 'Completed', 'Cancelled'],
       default: 'Pending',
     },
     quotePrice: {

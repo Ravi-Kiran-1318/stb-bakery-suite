@@ -26,11 +26,20 @@ const Checkout = () => {
   const [isAddingNewAddress, setIsAddingNewAddress] = useState(false);
   
   const [requestedDate, setRequestedDate] = useState(() => {
-    const tmrw = new Date();
-    tmrw.setDate(tmrw.getDate() + 1);
-    return tmrw.toISOString().slice(0, 10);
+    const customCakeItem = items.find(i => i.isCustomCake);
+    if (customCakeItem && customCakeItem.requestedDate) {
+      return customCakeItem.requestedDate.substring(0, 10);
+    }
+    const today = new Date();
+    return today.toISOString().slice(0, 10);
   });
-  const [requestedTime, setRequestedTime] = useState('10:00 AM - 12:00 PM');
+  const [requestedTime, setRequestedTime] = useState(() => {
+    const customCakeItem = items.find(i => i.isCustomCake);
+    if (customCakeItem && customCakeItem.requestedTime) {
+      return customCakeItem.requestedTime;
+    }
+    return '10:00 AM - 12:00 PM';
+  });
   
   const TIME_SLOTS = [
     '10:00 AM - 12:00 PM',
@@ -84,9 +93,8 @@ const Checkout = () => {
   }, []);
 
   const getMinDate = () => {
-    const tmrw = new Date();
-    tmrw.setDate(tmrw.getDate() + 1);
-    return tmrw.toISOString().slice(0, 10);
+    const today = new Date();
+    return today.toISOString().slice(0, 10);
   };
 
   const getMaxDate = () => {
@@ -104,11 +112,44 @@ const Checkout = () => {
       }
       if (isAddingNewAddress || savedAddresses.length === 0) {
         if (!location) return false;
-        if (distanceKm > 10) return false;
+        if (distanceKm > 5) return false;
         if (!addressText.trim()) return false;
       }
     }
     return true;
+  };
+
+  const sendWhatsApp = (orderId) => {
+    let waNumber = import.meta.env.VITE_SHOP_WHATSAPP || '0000000000';
+    if (waNumber.length === 10) waNumber = '91' + waNumber;
+
+    let itemsText = '';
+    items.forEach(item => {
+      let extraDetails = '';
+      if (item.flavour) extraDetails += ` | ${item.flavour}`;
+      if (item.color) extraDetails += ` | ${item.color}`;
+      if (item.shape) extraDetails += ` | ${item.shape}`;
+      if (item.imageUrl) extraDetails += `\n  Image: ${item.imageUrl}`;
+
+      if (item.isCustomCake) {
+        itemsText += `- [Custom Request] ${item.nameEN} (Qty: ${item.qty})${extraDetails}\n`;
+      } else if (item.isGallery) {
+        itemsText += `- [Cake Gallery] ${item.nameEN} (Qty: ${item.qty})${extraDetails}\n`;
+      } else {
+        itemsText += `- ${item.nameEN} (Qty: ${item.qty})${extraDetails}\n`;
+      }
+    });
+
+    const rawText = `Hello sir/ Madam,\n\nI just placed a new order!\n\n*Order ID:* ${orderId}\n*Delivery Type:* ${deliveryType}\n*Date:* ${requestedDate}\n*Time:* ${requestedTime}\n*Total Amount:* ₹${totalAmount}\n*Payment:* ${paymentMethod}\n\n*Items:*\n${itemsText}`;
+    const text = encodeURIComponent(rawText);
+    
+    // Navigate before redirecting so when user returns, they are on dashboard
+    navigate('/customer/dashboard?tab=orders', { replace: true });
+    
+    // Slight timeout to let React router finish state update
+    setTimeout(() => {
+      window.location.href = `https://wa.me/${waNumber}?text=${text}`;
+    }, 100);
   };
 
   const handlePlaceOrder = async () => {
@@ -180,8 +221,8 @@ const Checkout = () => {
                 });
                 
                 clearCart();
-                addToast('Order placed successfully!', 'success');
-                navigate('/customer/dashboard?tab=orders');
+                addToast('Order placed successfully! Redirecting to WhatsApp...', 'success');
+                sendWhatsApp(data._id);
               }
             } catch (error) {
               addToast('Payment verification failed.', 'error');
@@ -201,8 +242,8 @@ const Checkout = () => {
         // COD Flow
         const { data } = await axiosInstance.post('/orders', orderData);
         clearCart();
-        addToast('Order placed successfully!', 'success');
-        navigate('/customer/dashboard?tab=orders');
+        addToast('Order placed successfully! Redirecting to WhatsApp...', 'success');
+        sendWhatsApp(data._id);
       }
       
     } catch (error) {
@@ -323,10 +364,10 @@ const Checkout = () => {
                           />
                         </div>
                         
-                        {distanceKm > 10 && (
+                        {distanceKm > 5 && (
                           <div className="mt-4 bg-red-50 text-red-700 p-4 rounded-xl border border-red-200 flex items-start gap-3">
                             <span className="text-xl">⚠️</span>
-                            <p className="font-medium mt-0.5">Your location is outside our 10km delivery zone. Switch to Pickup or choose a closer location.</p>
+                            <p className="font-medium mt-0.5">Your location is outside our 5km delivery zone. Switch to Pickup or choose a closer location.</p>
                           </div>
                         )}
                       </div>
@@ -341,11 +382,33 @@ const Checkout = () => {
                     className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 overflow-hidden"
                   >
                     <h2 className="text-xl font-bold text-gray-900 mb-4">Pickup Location</h2>
-                    <div className="bg-amber-50 p-6 rounded-2xl border border-amber-100 flex items-center gap-4">
-                      <span className="text-4xl">🏪</span>
+                    
+                    <div className="relative w-full h-[350px] rounded-2xl overflow-hidden shadow-md border border-gray-200">
+                      <iframe 
+                        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3876.9940654032895!2d79.4184646!3d13.6288!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3a4d4b1a4bb7433f%3A0x6d11fbdc21062635!2sSri%20Tirupathi%20Venkatachalapathi%20Bakery!5e0!3m2!1sen!2sin!4v1700000000000!5m2!1sen!2sin" 
+                        width="100%" 
+                        height="100%" 
+                        style={{ border: 0 }} 
+                        allowFullScreen="" 
+                        loading="lazy" 
+                        referrerPolicy="no-referrer-when-downgrade"
+                      ></iframe>
+                      
+                      <a 
+                        href={`https://www.google.com/maps/dir/?api=1&destination=${shopLat},${shopLng}`}
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="absolute top-4 left-4 bg-white px-4 py-2.5 rounded-lg shadow-lg font-bold text-blue-600 flex items-center gap-2 hover:bg-gray-50 transition-colors z-10"
+                      >
+                        Open in Maps <span className="text-lg">↗</span>
+                      </a>
+                    </div>
+                    
+                    <div className="mt-4 bg-amber-50 p-4 rounded-xl border border-amber-100 flex items-start gap-3">
+                      <span className="text-2xl mt-0.5">🏪</span>
                       <div>
-                        <p className="font-bold text-gray-900">You will pick up your order from:</p>
-                        <p className="text-gray-700 mt-1">{shopAddress}</p>
+                        <p className="font-bold text-gray-900">Sri Tirupati Venkatachalapathy Bakery</p>
+                        <p className="text-gray-700 text-sm mt-0.5">{shopAddress}</p>
                       </div>
                     </div>
                   </motion.div>

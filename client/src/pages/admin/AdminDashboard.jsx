@@ -9,9 +9,11 @@ import CustomersTab from './CustomersTab';
 import NotificationsTab from './NotificationsTab';
 import GalleryAdminTab from './GalleryAdminTab';
 import PartyDecorationAdminTab from './PartyDecorationAdminTab';
+import CustomOrdersAdminTab from './CustomOrdersAdminTab';
 
 const AdminDashboard = () => {
   const [searchParams, setSearchParams] = useSearchParams();
+
   const activeTab = searchParams.get('tab') || 'orders';
 
   const handleTabChange = (tab) => {
@@ -20,17 +22,19 @@ const AdminDashboard = () => {
 
   const tabs = [
     { id: 'orders', label: 'Orders', icon: '📦' },
-    { id: 'products', label: 'Products', icon: '🥐' },
-    { id: 'revenue', label: 'Revenue', icon: '📊' },
+    { id: 'custom-cakes', label: 'Custom Cakes', icon: '🎂' },
+    { id: 'products', label: 'Products', icon: '🧁' },
+    { id: 'gallery', label: 'Gallery', icon: '🖼️' },
+    { id: 'party-decorations', label: 'Party Items', icon: '🎉' },
+    { id: 'revenue', label: 'Revenue', icon: '💰' },
     { id: 'customers', label: 'Customers', icon: '👥' },
-    { id: 'gallery', label: 'Cake Gallery', icon: '🖼️' },
-    { id: 'party-decorations', label: 'Party & Decor', icon: '🎉' },
-    { id: 'notifications', label: 'Notifications', icon: '🔔' },
+    { id: 'notifications', label: 'Send Alert', icon: '🔔' },
   ];
 
   const renderContent = () => {
     switch (activeTab) {
       case 'orders': return <OrdersTab />;
+      case 'custom-cakes': return <CustomOrdersAdminTab />;
       case 'products': return <ProductsTab />;
       case 'revenue': return <RevenueTab />;
       case 'customers': return <CustomersTab />;

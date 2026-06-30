@@ -271,6 +271,8 @@ Order ID: #${shortOrderId}`;
                 itemsSummary = order.items.length > 1 ? `${firstItem} and ${order.items.length - 1} more items` : firstItem;
               }
 
+              const hasCustomCake = order.items?.some(item => item.isCustomCake);
+
               return (
                 <motion.div 
                   id={`order-${order._id}`}
@@ -279,13 +281,18 @@ Order ID: #${shortOrderId}`;
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, scale: 0.95 }}
-                  className={`bg-white rounded-2xl shadow-sm border overflow-hidden transition-all duration-1000 ${
-                    highlightOrderId === order._id.toString() 
+                  className={`relative bg-white rounded-2xl shadow-sm border overflow-hidden transition-all duration-1000 ${
+                    highlightOrderId === order._id.toString() || hasCustomCake
                       ? 'border-amber-500 ring-4 ring-amber-500/20 shadow-amber-500/10' 
                       : 'border-gray-200'
                   }`}
                 >
-                  <div className="p-6">
+                  {hasCustomCake && (
+                    <div className="absolute top-0 left-0 bg-amber-500 text-white text-[10px] md:text-xs font-bold px-4 py-1.5 rounded-br-2xl flex items-center gap-1.5 shadow-sm z-10">
+                      🎂 CUSTOM CAKE
+                    </div>
+                  )}
+                  <div className={`p-6 ${hasCustomCake ? 'pt-10' : ''}`}>
                     <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
                       <div>
                         <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
@@ -308,8 +315,23 @@ Order ID: #${shortOrderId}`;
                                 )}
                               </div>
                               <div className="flex-1 min-w-0">
-                                <div className="font-semibold text-dark truncate">{item.nameEN || item.name}</div>
-                                <div className="text-xs text-gray-500">Qty: {item.qty} × {formatCurrency(item.price)}</div>
+                                <div className="font-semibold text-dark flex items-center flex-wrap gap-2">
+                                  <span className="truncate">{item.isCustomCake && item.customCakeId ? 'Custom Cake' : (item.nameEN || item.name)}</span>
+                                  {item.isCustomCake && (
+                                    <span className="bg-amber-100 text-amber-800 text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wide">
+                                      Custom Cake
+                                    </span>
+                                  )}
+                                </div>
+                                {item.isCustomCake && item.customCakeId && (
+                                  <div className="text-xs text-gray-600 mt-1 flex flex-wrap gap-x-3 gap-y-1">
+                                    {item.customCakeId.weight && <span><span className="text-gray-400">Weight:</span> {item.customCakeId.weight}kg</span>}
+                                    {item.customCakeId.flavour && <span><span className="text-gray-400">Flavour:</span> {item.customCakeId.flavour}</span>}
+                                    {item.customCakeId.shape && <span><span className="text-gray-400">Shape:</span> {item.customCakeId.shape}</span>}
+                                    {item.customCakeId.color && <span><span className="text-gray-400">Color:</span> {item.customCakeId.color}</span>}
+                                  </div>
+                                )}
+                                <div className="text-xs text-gray-500 mt-1">Qty: {item.qty} × {formatCurrency(item.price)}</div>
                               </div>
                             </div>
                           ))}

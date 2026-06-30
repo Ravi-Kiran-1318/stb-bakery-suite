@@ -8,19 +8,26 @@ import { formatCurrency } from '../../utils/formatCurrency';
 import { useTranslation } from 'react-i18next';
 
 const CheckoutAddons = () => {
+  const { addToCart, items, removeFromCart } = useCart();
   const [step, setStep] = useState(1);
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [selectedAddons, setSelectedAddons] = useState([]);
-  const { addToCart, items } = useCart();
+  const [selectedAddons, setSelectedAddons] = useState(() => {
+    return items
+      .filter(item => !item.isGallery && !item.isCustomCake)
+      .map(item => ({
+        product: { _id: item.productId, nameEN: item.nameEN, nameTe: item.nameTe, imageUrl: item.imageUrl, price: item.price },
+        qty: item.qty
+      }));
+  });
   const navigate = useNavigate();
   const { i18n } = useTranslation();
   const lang = i18n.language === 'te' ? 'te' : 'en';
 
   useEffect(() => {
-    // If cart is empty or no gallery cake, redirect back
-    const hasGalleryCake = items.some(item => item.isGallery);
-    if (!hasGalleryCake) {
+    // If cart is empty or no gallery/custom cake, redirect back
+    const hasCake = items.some(item => item.isGallery || item.isCustomCake);
+    if (!hasCake) {
       navigate('/cart');
     }
   }, [items, navigate]);
@@ -48,15 +55,28 @@ const CheckoutAddons = () => {
     }
   };
 
-  const toggleSelection = (product) => {
+  const updateQuantity = (product, delta, e) => {
+    if (e) e.stopPropagation();
     setSelectedAddons(prev => {
-      const isSelected = prev.some(p => p._id === product._id);
-      if (isSelected) {
-        return prev.filter(p => p._id !== product._id);
-      } else {
-        return [...prev, product];
+      const existing = prev.find(p => (p.product?._id || p._id) === product._id);
+      if (existing) {
+        const newQty = (existing.qty || 1) + delta;
+        if (newQty <= 0) {
+          return prev.filter(p => (p.product?._id || p._id) !== product._id);
+        }
+        return prev.map(p => (p.product?._id || p._id) === product._id ? { product: existing.product || existing, qty: newQty } : p);
+      } else if (delta > 0) {
+        return [...prev, { product, qty: delta }];
       }
+      return prev;
     });
+  };
+
+  const handleCardClick = (product) => {
+    const isSelected = selectedAddons.some(p => (p.product?._id || p._id) === product._id);
+    if (!isSelected) {
+      updateQuantity(product, 1);
+    }
   };
 
   const handleNext = () => {
@@ -65,8 +85,17 @@ const CheckoutAddons = () => {
       window.scrollTo(0, 0);
     } else {
       // Finalize
-      selectedAddons.forEach(product => {
-        addToCart(product);
+      // Remove previously saved addons from cart to avoid duplicates
+      const existingAddons = items.filter(item => !item.isGallery && !item.isCustomCake);
+      existingAddons.forEach(item => {
+        removeFromCart(item.productId);
+      });
+
+      // Add the currently selected ones
+      selectedAddons.forEach(({ product, qty }) => {
+        for (let i = 0; i < qty; i++) {
+          addToCart(product);
+        }
       });
       navigate('/checkout');
     }
@@ -125,13 +154,15 @@ const CheckoutAddons = () => {
                   </div>
                 ) : (
                   products.map(product => {
-                    const isSelected = selectedAddons.some(p => p._id === product._id);
+                    const selectedItem = selectedAddons.find(p => (p.product?._id || p._id) === product._id);
+                    const isSelected = !!selectedItem;
+                    const qty = selectedItem ? (selectedItem.qty || 1) : 0;
                     const name = lang === 'te' && product.nameTe ? product.nameTe : product.nameEN;
                     
                     return (
                       <div 
                         key={product._id}
-                        onClick={() => toggleSelection(product)}
+                        onClick={() => handleCardClick(product)}
                         className={`cursor-pointer rounded-2xl overflow-hidden border-2 transition-all duration-200 bg-white shadow-sm flex flex-col ${isSelected ? 'border-[#c37e50] ring-2 ring-[#c37e50]/20 scale-[1.02]' : 'border-transparent hover:border-gray-200 hover:shadow-md'}`}
                       >
                         <div className="h-32 sm:h-48 overflow-hidden relative">
@@ -152,11 +183,19 @@ const CheckoutAddons = () => {
                           <h3 className="font-bold text-gray-900 mb-1 line-clamp-2">{name}</h3>
                           <div className="mt-auto pt-2 flex justify-between items-center">
                             <span className="font-bold text-[#c37e50]">{formatCurrency(product.price)}</span>
-                            <button 
-                              className={`text-sm font-semibold px-3 py-1 rounded-full transition-colors ${isSelected ? 'bg-[#c37e50] text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
-                            >
-                              {isSelected ? 'Selected' : 'Select'}
-                            </button>
+                            {isSelected ? (
+                              <div className="flex items-center bg-[#c37e50] text-white rounded-full overflow-hidden" onClick={e => e.stopPropagation()}>
+                                <button onClick={(e) => updateQuantity(product, -1, e)} className="px-3 py-1 hover:bg-[#a66840] font-bold">-</button>
+                                <span className="px-2 font-semibold text-sm">{qty}</span>
+                                <button onClick={(e) => updateQuantity(product, 1, e)} className="px-3 py-1 hover:bg-[#a66840] font-bold">+</button>
+                              </div>
+                            ) : (
+                              <button 
+                                className="text-sm font-semibold px-4 py-1 rounded-full transition-colors bg-gray-100 text-gray-700 hover:bg-gray-200"
+                              >
+                                Add
+                              </button>
+                            )}
                           </div>
                         </div>
                       </div>
@@ -172,7 +211,7 @@ const CheckoutAddons = () => {
             <div className="max-w-5xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-4">
               <div className="text-gray-600 font-medium">
                 {selectedAddons.length > 0 ? (
-                  <span>{selectedAddons.length} item(s) selected</span>
+                  <span>{selectedAddons.reduce((acc, curr) => acc + curr.qty, 0)} item(s) selected</span>
                 ) : (
                   <span>No items selected</span>
                 )}

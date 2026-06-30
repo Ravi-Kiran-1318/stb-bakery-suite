@@ -39,7 +39,11 @@ export const CartProvider = ({ children }) => {
           imageUrl: product.imageUrl,
           price: product.price,
           qty: 1,
-          isGallery: product.isGallery || false
+          isGallery: product.isGallery || false,
+          isCustomCake: product.isCustomCake || false,
+          customCakeId: product.customCakeId || null,
+          requestedDate: product.requestedDate || null,
+          requestedTime: product.requestedTime || null
         },
       ];
     });

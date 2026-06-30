@@ -153,7 +153,7 @@ const MapPicker = ({ shopLat, shopLng, onLocationSelect }) => {
     }
   };
 
-  const isEligible = distance <= 10;
+  const isEligible = distance <= 5;
 
   return (
     <div className="flex flex-col gap-4">
@@ -205,7 +205,7 @@ const MapPicker = ({ shopLat, shopLng, onLocationSelect }) => {
           </Marker>
           <Circle 
             center={[shopLat, shopLng]} 
-            radius={10000} // 10km in meters
+            radius={5000} // 5km in meters
             pathOptions={{ color: '#F59E0B', fillColor: '#F59E0B', fillOpacity: 0.08 }} 
           />
           <DraggableMarker position={customerPos} setPosition={setCustomerPos} setAddress={setAddress} />

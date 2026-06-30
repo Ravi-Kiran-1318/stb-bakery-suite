@@ -321,9 +321,9 @@ const Navbar = () => {
               animate={{ x: 0 }}
               exit={{ x: '-100%' }}
               transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-              className="fixed top-0 left-0 h-full w-[80%] max-w-sm bg-white z-[60] flex flex-col shadow-2xl lg:hidden overflow-y-auto"
+              className="fixed top-0 left-0 h-[100dvh] w-[80%] max-w-sm bg-white z-[60] flex flex-col shadow-2xl lg:hidden overflow-y-auto pb-safe"
             >
-              <div className="flex items-center justify-between p-4 border-b border-gray-100">
+              <div className="flex items-center justify-between p-4 border-b border-gray-100 flex-shrink-0">
                 <img src={logoImg} alt="Logo" className="h-12 object-contain" />
                 <button
                   onClick={() => setMobileMenuOpen(false)}
@@ -335,7 +335,7 @@ const Navbar = () => {
                 </button>
               </div>
 
-              <div className="flex-1 px-4 py-6 space-y-1 overflow-y-auto pb-8">
+              <div className="flex-1 px-4 py-6 space-y-1 overflow-y-auto pb-24">
                 {user && (
                   <div className="mb-6 px-4 py-3 bg-amber-50 rounded-xl border border-amber-100 flex items-center gap-2">
                     <p className="text-lg font-bold text-gray-900">

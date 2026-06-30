@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import axiosInstance from '../../utils/axiosInstance';
 import { ToastContext } from '../../context/ToastContext';
 import { CartContext } from '../../context/CartContext';
+import ImageUploadWithCamera from '../../components/ImageUploadWithCamera';
 
 const CustomOrdersTab = () => {
   const [requests, setRequests] = useState([]);
@@ -23,6 +24,7 @@ const CustomOrdersTab = () => {
     shape: ''
   });
   const [imageFile, setImageFile] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
 
   useEffect(() => {
     fetchRequests();
@@ -45,7 +47,9 @@ const CustomOrdersTab = () => {
 
   const handleImageChange = (e) => {
     if (e.target.files && e.target.files[0]) {
-      setImageFile(e.target.files[0]);
+      const file = e.target.files[0];
+      setImageFile(file);
+      setImagePreview(URL.createObjectURL(file));
     }
   };
 
@@ -58,9 +62,6 @@ const CustomOrdersTab = () => {
     }
 
     setIsSubmitting(true);
-    // Open window synchronously to bypass popup blocker
-    const newWindow = window.open('about:blank', '_blank');
-    
     try {
       const submitData = new FormData();
       Object.keys(formData).forEach(key => {
@@ -80,17 +81,16 @@ const CustomOrdersTab = () => {
       const rawText = `Hello sir/ Madam,\n\nI just submitted a custom cake request.\n\n*Details:*\n- Weight: ${formData.weight} kg\n- Flavour: ${formData.flavour || 'N/A'}\n- Shape: ${formData.shape || 'N/A'}\n- Color: ${formData.color || 'N/A'}\n- Date Required: ${formData.requestedDate}\n- Time Required: ${formData.requestedTime || 'N/A'}\n- Description: ${formData.description}${data.referenceImageUrl ? `\n- Image: ${data.referenceImageUrl}` : ''}`;
       const text = encodeURIComponent(rawText);
       
-      if (newWindow) {
-        newWindow.location.href = `https://wa.me/${waNumber}?text=${text}`;
-      } else {
-        window.location.href = `https://wa.me/${waNumber}?text=${text}`;
-      }
-      
       setFormData({ description: '', referenceImageUrl: '', weight: 1, requestedDate: '', requestedTime: '', flavour: '', color: '', shape: '' });
       setImageFile(null);
+      setImagePreview(null);
       addToast('Custom cake request submitted! Sending you to WhatsApp...', 'success');
+      
+      setTimeout(() => {
+        window.location.href = `https://wa.me/${waNumber}?text=${text}`;
+      }, 100);
+      
     } catch (error) {
-      if (newWindow) newWindow.close();
       addToast('Failed to submit request', 'error');
     } finally {
       setIsSubmitting(false);
@@ -198,12 +198,13 @@ const CustomOrdersTab = () => {
             
             <div className="mb-4">
               <label className="block text-sm font-medium text-gray-700 mb-1">Upload Reference Image *</label>
-              <input 
-                type="file"
-                accept="image/*"
-                onChange={handleImageChange}
-                required
-                className="w-full border border-gray-300 rounded-lg p-1.5 focus:ring-2 focus:ring-amber-500 focus:border-amber-500 bg-white"
+              <ImageUploadWithCamera 
+                onImageCaptured={(file) => {
+                  setImageFile(file);
+                  setImagePreview(URL.createObjectURL(file));
+                }}
+                imagePreview={imagePreview}
+                isRequired={true}
               />
             </div>
 
@@ -270,13 +271,19 @@ const CustomOrdersTab = () => {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Time Required By</label>
-                <input 
-                  type="time"
+                <select 
                   name="requestedTime"
                   value={formData.requestedTime}
                   onChange={handleChange}
-                  className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
-                />
+                  className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-amber-500 focus:border-amber-500 bg-white"
+                >
+                  <option value="" disabled>Select a time slot</option>
+                  <option value="10:00 AM - 12:00 PM">10:00 AM - 12:00 PM</option>
+                  <option value="12:00 PM - 02:00 PM">12:00 PM - 02:00 PM</option>
+                  <option value="02:00 PM - 04:00 PM">02:00 PM - 04:00 PM</option>
+                  <option value="04:00 PM - 06:00 PM">04:00 PM - 06:00 PM</option>
+                  <option value="06:00 PM - 08:00 PM">06:00 PM - 08:00 PM</option>
+                </select>
               </div>
             </div>
 

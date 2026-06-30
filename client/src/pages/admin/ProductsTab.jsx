@@ -4,6 +4,7 @@ import { ToastContext } from '../../context/ToastContext';
 import Loader from '../../components/Loader';
 import ErrorState from '../../components/ErrorState';
 import ProductCard from '../../components/ProductCard';
+import ImageUploadWithCamera from '../../components/ImageUploadWithCamera';
 
 const ProductsTab = () => {
   const [products, setProducts] = useState([]);
@@ -287,15 +288,9 @@ const ProductsTab = () => {
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-dark mb-1">Weight</label>
-                  <input type="text" name="weight" placeholder="e.g., 500g, 1kg" value={formData.weight} onChange={handleInputChange} className="input-field" />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-dark mb-1">Quantity in Stock</label>
-                  <input type="number" name="quantity" min="0" value={formData.quantity} onChange={handleInputChange} onWheel={(e) => e.target.blur()} className="input-field" />
-                </div>
+              <div>
+                <label className="block text-sm font-medium text-dark mb-1">Weight</label>
+                <input type="text" name="weight" placeholder="e.g., 500g, 1kg" value={formData.weight} onChange={handleInputChange} className="input-field" />
               </div>
 
               <div>
@@ -310,12 +305,13 @@ const ProductsTab = () => {
 
               <div>
                 <label className="block text-sm font-medium text-dark mb-1">Product Image</label>
-                <input type="file" accept="image/*" onChange={handleImageChange} className="input-field text-sm file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-amber-50 file:text-accent hover:file:bg-amber-100" />
-                {imagePreview && (
-                  <div className="mt-2 relative w-32 h-32 rounded-lg overflow-hidden border border-border">
-                    <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
-                  </div>
-                )}
+                <ImageUploadWithCamera 
+                  onImageCaptured={(file) => {
+                    setImageFile(file);
+                    setImagePreview(URL.createObjectURL(file));
+                  }}
+                  imagePreview={imagePreview}
+                />
               </div>
 
               <div className="flex items-center gap-2 mt-4">

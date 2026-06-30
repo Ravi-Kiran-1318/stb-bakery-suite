@@ -76,7 +76,7 @@ const DraggableMarker = ({ position, setPosition, setAddress }) => {
   );
 };
 
-const MapPicker = ({ shopLat, shopLng, onLocationSelect, isPickupMode = false }) => {
+const MapPicker = ({ shopLat, shopLng, onLocationSelect, isPickupMode = false, deliveryFee = 50 }) => {
   const [customerPos, setCustomerPos] = useState([shopLat, shopLng]);
   const [address, setAddress] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
@@ -242,7 +242,7 @@ const MapPicker = ({ shopLat, shopLng, onLocationSelect, isPickupMode = false })
         <div className="shrink-0 flex items-center">
           {isEligible ? (
             <span className="bg-green-100 text-green-800 text-xs font-bold px-3 py-1.5 rounded flex items-center gap-1">
-              ✅ Eligible for delivery — ₹50 fee ({distance.toFixed(1)} km)
+              ✅ Eligible for delivery — ₹{deliveryFee} fee ({distance.toFixed(1)} km)
             </span>
           ) : (
             <span className="bg-amber-100 text-amber-800 text-xs font-bold px-3 py-1.5 rounded flex items-center gap-1">

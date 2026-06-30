@@ -96,12 +96,8 @@ const Checkout = () => {
   const subtotal = items.reduce((acc, item) => acc + item.price * item.qty, 0);
   
   // Dynamic Delivery Fee Logic
-  const hasCake = items.some(item => 
-    item.isCustomCake || 
-    item.isGallery || 
-    (item.category && item.category.toLowerCase().includes('cake'))
-  );
-  const baseDeliveryFee = hasCake ? 30 : 20;
+  const hasCustomOrGalleryCake = items.some(item => item.isCustomCake || item.isGallery);
+  const baseDeliveryFee = hasCustomOrGalleryCake ? 30 : 20;
 
   const deliveryFee = deliveryType === 'Delivery' ? baseDeliveryFee : 0;
   const totalAmount = subtotal + deliveryFee;
@@ -389,7 +385,8 @@ const Checkout = () => {
                         <MapPicker 
                           shopLat={shopLat} 
                           shopLng={shopLng} 
-                          onLocationSelect={handleLocationSelect} 
+                          onLocationSelect={handleLocationSelect}
+                          deliveryFee={baseDeliveryFee}
                         />
                         
                         <div className="mt-6">

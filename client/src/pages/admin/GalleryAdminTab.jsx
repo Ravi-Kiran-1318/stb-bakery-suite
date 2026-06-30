@@ -3,6 +3,7 @@ import axiosInstance from '../../utils/axiosInstance';
 import { ToastContext } from '../../context/ToastContext';
 import Loader from '../../components/Loader';
 import ErrorState from '../../components/ErrorState';
+import ImageUploadWithCamera from '../../components/ImageUploadWithCamera';
 
 const CATEGORIES = [
   '1 Year Baby Cakes',
@@ -275,12 +276,14 @@ const GalleryAdminTab = () => {
 
               <div>
                 <label className="block text-sm font-medium text-dark mb-1">Image *</label>
-                <input type="file" accept="image/*" onChange={handleImageChange} className="input-field" required={!isEditing} />
-                {imagePreview && (
-                  <div className="mt-2 w-full h-40 rounded-lg overflow-hidden border border-border">
-                    <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
-                  </div>
-                )}
+                <ImageUploadWithCamera 
+                  onImageCaptured={(file) => {
+                    setImageFile(file);
+                    setImagePreview(URL.createObjectURL(file));
+                  }}
+                  imagePreview={imagePreview}
+                  isRequired={!isEditing}
+                />
               </div>
 
               <div className="flex items-center gap-2 mt-4">

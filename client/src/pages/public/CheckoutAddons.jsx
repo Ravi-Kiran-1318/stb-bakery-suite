@@ -181,17 +181,17 @@ const CheckoutAddons = () => {
                         </div>
                         <div className="p-4 flex flex-col flex-grow">
                           <h3 className="font-bold text-gray-900 mb-1 line-clamp-2">{name}</h3>
-                          <div className="mt-auto pt-2 flex justify-between items-center">
-                            <span className="font-bold text-[#c37e50]">{formatCurrency(product.price)}</span>
+                          <div className="mt-auto pt-2 flex flex-nowrap justify-between items-center gap-1 sm:gap-2">
+                            <span className="font-bold text-[#c37e50] text-sm sm:text-base truncate mr-1">{formatCurrency(product.price)}</span>
                             {isSelected ? (
-                              <div className="flex items-center bg-[#c37e50] text-white rounded-full overflow-hidden" onClick={e => e.stopPropagation()}>
-                                <button onClick={(e) => updateQuantity(product, -1, e)} className="px-3 py-1 hover:bg-[#a66840] font-bold">-</button>
-                                <span className="px-2 font-semibold text-sm">{qty}</span>
-                                <button onClick={(e) => updateQuantity(product, 1, e)} className="px-3 py-1 hover:bg-[#a66840] font-bold">+</button>
+                              <div className="flex items-center bg-[#c37e50] text-white rounded-full overflow-hidden shrink-0" onClick={e => e.stopPropagation()}>
+                                <button onClick={(e) => updateQuantity(product, -1, e)} className="px-2 sm:px-3 py-0.5 sm:py-1 hover:bg-[#a66840] font-bold text-sm">-</button>
+                                <span className="px-1.5 sm:px-2 font-semibold text-xs sm:text-sm">{qty}</span>
+                                <button onClick={(e) => updateQuantity(product, 1, e)} className="px-2 sm:px-3 py-0.5 sm:py-1 hover:bg-[#a66840] font-bold text-sm">+</button>
                               </div>
                             ) : (
                               <button 
-                                className="text-sm font-semibold px-4 py-1 rounded-full transition-colors bg-gray-100 text-gray-700 hover:bg-gray-200"
+                                className="text-xs sm:text-sm font-semibold px-3 sm:px-4 py-1 rounded-full transition-colors bg-gray-100 text-gray-700 hover:bg-gray-200 shrink-0"
                               >
                                 Add
                               </button>
@@ -207,20 +207,32 @@ const CheckoutAddons = () => {
           )}
 
           {/* Fixed Bottom Bar */}
-          <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] z-40">
-            <div className="max-w-5xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-4">
-              <div className="text-gray-600 font-medium">
-                {selectedAddons.length > 0 ? (
-                  <span>{selectedAddons.reduce((acc, curr) => acc + curr.qty, 0)} item(s) selected</span>
-                ) : (
-                  <span>No items selected</span>
-                )}
+          <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-3 sm:p-4 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] z-40">
+            <div className="max-w-5xl mx-auto flex flex-row justify-between items-center gap-3 sm:gap-4">
+              <div className="text-gray-600 font-medium text-sm sm:text-base whitespace-nowrap">
+                {(() => {
+                  const currentStepSelectedAddons = selectedAddons.filter(addon => 
+                    products.some(p => p._id === (addon.product?._id || addon._id))
+                  );
+                  const currentStepQty = currentStepSelectedAddons.reduce((acc, curr) => acc + curr.qty, 0);
+                  
+                  return currentStepQty > 0 ? (
+                    <span>{currentStepQty} items</span>
+                  ) : (
+                    <span>No items</span>
+                  );
+                })()}
               </div>
               <button 
                 onClick={handleNext}
-                className="w-full sm:w-auto bg-[#2d170a] hover:bg-[#1a0d06] text-white font-bold py-3 px-8 rounded-xl shadow-lg transition-transform active:scale-95"
+                className="flex-1 max-w-[200px] sm:max-w-none sm:w-auto bg-[#2d170a] hover:bg-[#1a0d06] text-white font-bold py-2.5 sm:py-3 px-4 sm:px-8 rounded-xl shadow-lg transition-transform active:scale-95 text-sm sm:text-base whitespace-nowrap"
               >
-                {selectedAddons.length > 0 ? 'Add Items & Continue' : 'Skip & Continue'}
+                {(() => {
+                  const currentStepSelectedAddons = selectedAddons.filter(addon => 
+                    products.some(p => p._id === (addon.product?._id || addon._id))
+                  );
+                  return currentStepSelectedAddons.length > 0 ? 'Add & Continue' : 'Skip & Continue';
+                })()}
               </button>
             </div>
           </div>

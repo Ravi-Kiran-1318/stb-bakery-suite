@@ -41,7 +41,9 @@ const createOrder = async (req, res) => {
         return res.status(400).json({ message: 'Your location is outside our 10km delivery zone. Switch to Pickup or choose a closer location.' });
       }
       
-      deliveryFee = 50; // Flat ₹50 for delivery
+      // Check if order contains custom cakes or gallery cakes
+      const hasCustomOrGalleryCake = items.some(item => item.isCustomCake || item.isGallery);
+      deliveryFee = hasCustomOrGalleryCake ? 30 : 20;
     }
 
     const subtotal = items.reduce((acc, item) => acc + (item.price * item.qty), 0);

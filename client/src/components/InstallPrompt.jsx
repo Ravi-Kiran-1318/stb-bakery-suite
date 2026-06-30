@@ -58,10 +58,10 @@ const InstallPrompt = () => {
     <AnimatePresence>
       {showPrompt && (
         <motion.div
-          initial={{ opacity: 0, y: 50 }}
+          initial={{ opacity: 0, y: -50 }}
           animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: 50 }}
-          className="fixed bottom-4 left-4 right-4 md:left-auto md:right-4 md:w-96 z-[9999] bg-white rounded-2xl shadow-2xl p-4 border border-amber-100 flex items-center gap-4"
+          exit={{ opacity: 0, y: -50 }}
+          className="fixed top-4 left-4 right-4 md:left-auto md:right-4 md:w-96 z-[9999] bg-white rounded-2xl shadow-2xl p-4 border border-amber-100 flex items-center gap-4"
         >
           <img src="/icon-192.png" alt="App Icon" className="w-14 h-14 rounded-xl shadow-sm object-cover" />
           <div className="flex-1">

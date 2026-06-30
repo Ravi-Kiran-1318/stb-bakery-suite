@@ -10,6 +10,10 @@ const MobileBottomNav = () => {
 
   const cartItemCount = cartItems.reduce((acc, item) => acc + item.qty, 0);
 
+  if (location.pathname.startsWith('/checkout')) {
+    return null;
+  }
+
   const navItems = [
     {
       id: 'home',

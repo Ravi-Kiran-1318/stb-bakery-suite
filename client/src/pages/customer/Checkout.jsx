@@ -7,6 +7,7 @@ import axiosInstance from '../../utils/axiosInstance';
 import { formatCurrency } from '../../utils/formatCurrency';
 import { ToastContext } from '../../context/ToastContext';
 import { useContext } from 'react';
+import { haversine } from '../../utils/haversine';
 import MapPicker from '../../components/MapPicker';
 import PageWrapper from '../../components/PageWrapper';
 
@@ -80,10 +81,29 @@ const Checkout = () => {
   const shopLng = parseFloat(import.meta.env.VITE_SHOP_LNG) || 79.4192;
   const shopAddress = "Sri Tirupati Venkatachalapathy Bakery, Tirupati";
 
+  useEffect(() => {
+    if (deliveryType === 'Delivery' && !isAddingNewAddress && selectedAddressId && savedAddresses.length > 0) {
+      const sAddr = savedAddresses.find(a => a._id === selectedAddressId);
+      if (sAddr && sAddr.lat && sAddr.lng) {
+        const dist = haversine(shopLat, shopLng, sAddr.lat, sAddr.lng);
+        setDistanceKm(dist);
+      } else {
+        setDistanceKm(9999); // Flag for missing coordinates
+      }
+    }
+  }, [deliveryType, isAddingNewAddress, selectedAddressId, savedAddresses, shopLat, shopLng]);
+
   const subtotal = items.reduce((acc, item) => acc + item.price * item.qty, 0);
-  const deliveryFee = deliveryType === 'Delivery' 
-    ? (!isAddingNewAddress && selectedAddressId ? 50 : (distanceKm <= 10 ? 50 : 0)) 
-    : 0;
+  
+  // Dynamic Delivery Fee Logic
+  const hasCake = items.some(item => 
+    item.isCustomCake || 
+    item.isGallery || 
+    (item.category && item.category.toLowerCase().includes('cake'))
+  );
+  const baseDeliveryFee = hasCake ? 30 : 20;
+
+  const deliveryFee = deliveryType === 'Delivery' ? baseDeliveryFee : 0;
   const totalAmount = subtotal + deliveryFee;
 
   const handleLocationSelect = useCallback((lat, lng, address, dist) => {
@@ -107,12 +127,12 @@ const Checkout = () => {
     if (!requestedDate) return false;
     if (!paymentMethod) return false;
     if (deliveryType === 'Delivery') {
+      if (distanceKm > 5) return false;
       if (!isAddingNewAddress && selectedAddressId) {
         return true;
       }
       if (isAddingNewAddress || savedAddresses.length === 0) {
         if (!location) return false;
-        if (distanceKm > 5) return false;
         if (!addressText.trim()) return false;
       }
     }
@@ -326,6 +346,24 @@ const Checkout = () => {
                             </div>
                           ))}
                         </div>
+                        {distanceKm <= 5 && distanceKm > 0 && distanceKm !== 9999 && (
+                          <div className="mt-4 bg-green-50 text-green-800 p-4 rounded-xl border border-green-200 flex items-start gap-3">
+                            <span className="text-xl">✅</span>
+                            <p className="font-medium mt-0.5">Eligible for delivery. Distance: {distanceKm.toFixed(1)} km</p>
+                          </div>
+                        )}
+                        {distanceKm > 5 && distanceKm !== 9999 && (
+                          <div className="mt-4 bg-red-50 text-red-700 p-4 rounded-xl border border-red-200 flex items-start gap-3">
+                            <span className="text-xl">⚠️</span>
+                            <p className="font-medium mt-0.5">This saved address is outside our 5km delivery zone ({distanceKm.toFixed(1)} km). Please choose a closer location or switch to Pickup.</p>
+                          </div>
+                        )}
+                        {distanceKm === 9999 && (
+                          <div className="mt-4 bg-amber-50 text-amber-800 p-4 rounded-xl border border-amber-200 flex items-start gap-3">
+                            <span className="text-xl">📍</span>
+                            <p className="font-medium mt-0.5">This address is missing exact map coordinates. Please click "+ Add a new address" below and physically drop the pin on the map so we can verify your delivery distance.</p>
+                          </div>
+                        )}
                         <button 
                           onClick={() => setIsAddingNewAddress(true)}
                           className="text-amber-600 font-bold hover:text-amber-700 flex items-center gap-1 mt-2"

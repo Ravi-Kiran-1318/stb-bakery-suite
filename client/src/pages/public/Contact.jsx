@@ -12,14 +12,17 @@ const Contact = () => {
 
   return (
     <PageWrapper>
-      <div className="bg-white min-h-screen pt-16 flex flex-col">
-        <div className="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 w-full">
+      <div 
+        className="min-h-screen pt-4 flex flex-col bg-cover bg-center bg-no-repeat bg-fixed"
+        style={{ backgroundImage: "url('/contact_bg.png')" }}
+      >
+        <div className="flex-grow max-w-[1200px] mx-auto px-4 sm:px-8 lg:px-12 py-8 w-full backdrop-blur-[1px] bg-white/70">
           
-          <div className="text-center mb-16">
+          <div className="text-center mb-8">
             <motion.h1 
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="text-4xl md:text-5xl font-serif font-bold text-gray-900 mb-4"
+              className="text-3xl md:text-4xl font-serif font-bold text-gray-900 mb-2"
             >
               Get in Touch
             </motion.h1>
@@ -40,13 +43,13 @@ const Contact = () => {
               initial={{ opacity: 0, x: -50 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.3 }}
-              className="space-y-10"
+              className="space-y-6"
             >
               <div>
-                <WhatsAppButton label="Contact Us on WhatsApp" className="!px-6 !py-3 !rounded-xl" />
+                <WhatsAppButton message="Hi! I have an inquiry." className="bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 px-6 rounded-full shadow-md flex items-center justify-center gap-2 w-max" label="Contact Us on WhatsApp" />
               </div>
-              <div>
-                <h2 className="text-3xl font-bold text-gray-900 mb-6">Find Us</h2>
+              <div className="mt-8">
+                <h2 className="text-2xl font-bold text-gray-900 mb-4">Find Us</h2>
                 
                 <div className="space-y-4 text-gray-700 text-lg">
                   <div className="flex items-start gap-4">
@@ -65,8 +68,8 @@ const Contact = () => {
                 </div>
               </div>
 
-              <div className="bg-amber-50 p-6 rounded-2xl border border-amber-100 shadow-sm">
-                <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+              <div className="bg-amber-50 p-5 rounded-2xl border border-amber-100 shadow-sm">
+                <h3 className="text-lg font-bold text-gray-900 mb-3 flex items-center gap-2">
                   <span>🕒</span> Opening Hours
                 </h3>
                 <ul className="space-y-2 text-gray-700">
@@ -76,10 +79,6 @@ const Contact = () => {
                   </li>
                 </ul>
               </div>
-
-              <div>
-                <WhatsAppButton message="Hi! I have an inquiry." />
-              </div>
             </motion.div>
 
             {/* Right: Map */}
@@ -87,17 +86,26 @@ const Contact = () => {
               initial={{ opacity: 0, x: 50 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.4 }}
-              className="w-full h-[400px] rounded-2xl overflow-hidden shadow-lg border border-gray-200 z-0 bg-gray-100 relative"
+              className="w-full h-[350px] rounded-3xl overflow-hidden shadow-xl border-4 border-amber-100 z-0 bg-gray-100 relative"
             >
               <iframe 
-                title="Google Maps Bakery Location"
+                src="https://maps.google.com/maps?q=Sri%20Tirupathi%20Venkatachalapathi%20Bakery,%20Yeleswaram&t=&z=16&ie=UTF8&iwloc=&output=embed" 
                 width="100%" 
                 height="100%" 
                 style={{ border: 0 }} 
+                allowFullScreen="" 
                 loading="lazy" 
-                allowFullScreen 
-                src="https://maps.google.com/maps?q=Sri%20Tirupathi%20Venkatachalapathi%20Bakery,%20Yeleswaram&t=&z=16&ie=UTF8&iwloc=&output=embed"
+                referrerPolicy="no-referrer-when-downgrade"
               ></iframe>
+              
+              <a 
+                href="https://www.google.com/maps/dir/?api=1&destination=13.6288,79.4184646"
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="absolute top-4 left-4 bg-white px-4 py-2.5 rounded-lg shadow-lg font-bold text-blue-600 flex items-center gap-2 hover:bg-gray-50 transition-colors z-10"
+              >
+                Open in Maps <span className="text-lg">↗</span>
+              </a>
             </motion.div>
 
           </div>

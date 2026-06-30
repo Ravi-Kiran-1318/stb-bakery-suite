@@ -106,7 +106,7 @@ const MapPicker = ({ shopLat, shopLng, onLocationSelect }) => {
         const bottom = shopLat - 0.09;
         const viewbox = `${left},${top},${right},${bottom}`;
         
-        const res = await axios.get(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(searchQuery)}&format=json&limit=5&addressdetails=1&viewbox=${viewbox}&bounded=1`);
+        const res = await axios.get(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(searchQuery)}&format=json&limit=5&addressdetails=1&viewbox=${viewbox}`);
         if (res.data) {
           setSuggestions(res.data);
         }
@@ -139,7 +139,7 @@ const MapPicker = ({ shopLat, shopLng, onLocationSelect }) => {
       const bottom = shopLat - 0.09;
       const viewbox = `${left},${top},${right},${bottom}`;
 
-      const res = await axios.get(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(searchQuery)}&format=json&limit=1&viewbox=${viewbox}&bounded=1`);
+      const res = await axios.get(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(searchQuery)}&format=json&limit=1&viewbox=${viewbox}`);
       if (res.data && res.data.length > 0) {
         const { lat, lon, display_name } = res.data[0];
         const newPos = [parseFloat(lat), parseFloat(lon)];
@@ -191,12 +191,12 @@ const MapPicker = ({ shopLat, shopLng, onLocationSelect }) => {
         )}
       </div>
 
-      <div className="h-[400px] w-full rounded-lg overflow-hidden border border-border shadow-sm z-0 relative">
+      <div className="h-[400px] w-full rounded-3xl overflow-hidden border-4 border-amber-100 shadow-xl z-0 relative">
         <MapContainer center={customerPos} zoom={13} scrollWheelZoom={true} style={{ height: '100%', width: '100%' }}>
           <ChangeView center={customerPos} zoom={14} />
           <TileLayer
-            attribution='&copy; <a href="https://www.esri.com/">Esri</a> &mdash; Source: Esri, DeLorme, NAVTEQ, USGS, Intermap, iPC, NRCAN, Esri Japan, METI, Esri China (Hong Kong), Esri (Thailand), TomTom, 2012'
-            url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}"
+            attribution='&copy; Google Maps'
+            url="https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}"
           />
           <Marker position={[shopLat, shopLng]} icon={shopIcon}>
             <Popup>

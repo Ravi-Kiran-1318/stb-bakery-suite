@@ -124,7 +124,7 @@ const Home = () => {
             }}
           />
 
-          <div className="relative z-10 w-full max-w-[1360px] mx-auto px-4 sm:px-8 lg:px-12 xl:px-20 flex flex-col lg:flex-row items-center lg:items-center min-h-[85svh] py-16 lg:py-0">
+          <div className="relative z-10 w-full max-w-[1360px] mx-auto px-4 sm:px-8 lg:px-12 xl:px-20 flex flex-col lg:flex-row items-center lg:items-center min-h-[85svh] py-16 lg:pt-4 lg:pb-0">
 
             {/* ────────────────────────────────────
                 LEFT / MAIN CONTENT

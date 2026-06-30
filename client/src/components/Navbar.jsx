@@ -1,16 +1,16 @@
 import React, { useContext, useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
 import { AuthContext } from '../context/AuthContext';
 import { CartContext } from '../context/CartContext';
 import NotificationBell from './NotificationBell';
 import { FaOm, FaStarAndCrescent, FaCross, FaSignOutAlt } from 'react-icons/fa';
+import logoImg from '../assets/adminT_cropped.png';
+import adminIcon from '../assets/admin1.png';
 
 const Navbar = () => {
   const { user, logout } = useContext(AuthContext);
   const { items: cart = [] } = useContext(CartContext);
-  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -20,10 +20,6 @@ const Navbar = () => {
   const currentAdminTab = searchParams.get('tab') || 'orders';
 
   const cartItemCount = cart.length;
-
-  const toggleLanguage = () => {
-    i18n.changeLanguage(i18n.language === 'en' ? 'te' : 'en');
-  };
 
   const handleLogout = async () => {
     await logout();
@@ -112,7 +108,7 @@ const Navbar = () => {
           {/* ── LOGO ── */}
           <Link to="/" className="flex items-center flex-shrink-0">
             <img 
-              src="/src/assets/adminT_cropped.png" 
+              src={logoImg} 
               alt="Sri Tirupathi Venkatachalapathi Bakery" 
               className="h-14 lg:h-14 object-contain"
             />
@@ -219,14 +215,6 @@ const Navbar = () => {
             {/* Notification Bell */}
             {user && <NotificationBell />}
 
-            {/* Language Toggle — desktop only */}
-            <button
-              onClick={toggleLanguage}
-              className="border border-gray-300 rounded-full w-8 h-8 items-center justify-center text-xs font-bold transition-colors hover:bg-gray-100 hidden sm:flex text-gray-800"
-            >
-              {i18n.language === 'en' ? 'తె' : 'EN'}
-            </button>
-
             {/* Auth — desktop only */}
             {!user ? (
               <div className="hidden lg:flex items-center gap-3 ml-2">
@@ -278,7 +266,7 @@ const Navbar = () => {
               <div className="hidden lg:flex items-center gap-3 ml-2">
                 <div className="relative group h-full flex items-center">
                   <div className="flex items-center gap-1 text-sm font-bold cursor-pointer h-full py-5 text-gray-800 hover:text-amber-600 transition-colors">
-                    <img src="/src/assets/admin1.png" alt="Admin" className="w-8 h-8 rounded-full border-2 border-amber-500 mr-1 object-cover object-top" />
+                    <img src={adminIcon} alt="Admin" className="w-8 h-8 rounded-full border-2 border-amber-500 mr-1 object-cover object-top" />
                     Admin Dashboard
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4">
                       <path fillRule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clipRule="evenodd" />
@@ -336,7 +324,7 @@ const Navbar = () => {
               className="fixed top-0 left-0 h-full w-[80%] max-w-sm bg-white z-[60] flex flex-col shadow-2xl lg:hidden overflow-y-auto"
             >
               <div className="flex items-center justify-between p-4 border-b border-gray-100">
-                <img src="/src/assets/adminT_cropped.png" alt="Logo" className="h-12 object-contain" />
+                <img src={logoImg} alt="Logo" className="h-12 object-contain" />
                 <button
                   onClick={() => setMobileMenuOpen(false)}
                   className="p-2 text-gray-500 hover:text-gray-800 rounded-full hover:bg-gray-100 transition-colors"
@@ -432,13 +420,6 @@ const Navbar = () => {
                 )}
 
                 <div className="my-4 border-t border-gray-100" />
-
-                <button
-                  onClick={toggleLanguage}
-                  className="w-full text-left px-4 py-3 rounded-xl text-base font-bold transition-colors hover:bg-amber-50 text-gray-800"
-                >
-                  Switch to: {i18n.language === 'en' ? 'తెలుగు' : 'English'}
-                </button>
 
                 {!user && (
                   <div className="flex flex-col gap-3 pt-4 border-t border-gray-100 mt-4">

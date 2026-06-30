@@ -135,10 +135,7 @@ const Footer = () => {
               </button>
             </form>
             
-            {/* Decorative Cake Illustration (Absolutely Positioned) */}
-            <div className="hidden lg:block absolute -bottom-10 right-0 w-48 h-48 pointer-events-none opacity-90 mix-blend-multiply z-10"
-                 style={{ backgroundImage: "url('/cake_illustration.png')", backgroundSize: 'contain', backgroundRepeat: 'no-repeat', backgroundPosition: 'bottom right' }}>
-            </div>
+
           </div>
 
         </div>

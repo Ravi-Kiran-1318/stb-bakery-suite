@@ -67,20 +67,11 @@ const server = http.createServer(app);
 const io = socketInit(server);
 app.set('io', io);
 
-// Custom strict CORS middleware to guarantee no wildcard fallbacks
-app.use((req, res, next) => {
-  const origin = req.headers.origin || process.env.CLIENT_URL || 'http://localhost:5173';
-  res.setHeader('Access-Control-Allow-Origin', origin);
-  res.setHeader('Access-Control-Allow-Credentials', 'true');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, Cookie, X-Requested-With');
-  res.setHeader('Access-Control-Expose-Headers', 'Set-Cookie');
-  
-  if (req.method === 'OPTIONS') {
-    return res.status(204).end();
-  }
-  next();
-});
+app.use(cors({
+  origin: process.env.CLIENT_URL || 'http://localhost:5173',
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS']
+}));
 app.use(express.json());
 app.use(cookieParser());
 

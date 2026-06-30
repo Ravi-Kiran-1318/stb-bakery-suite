@@ -11,6 +11,7 @@ import GalleryAdminTab from './GalleryAdminTab';
 import PartyDecorationAdminTab from './PartyDecorationAdminTab';
 import CustomOrdersAdminTab from './CustomOrdersAdminTab';
 import ProfileTab from '../customer/ProfileTab';
+import NotificationPrompt from '../../components/NotificationPrompt';
 
 const AdminDashboard = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -87,6 +88,7 @@ const AdminDashboard = () => {
         transition={{ duration: 0.5, delay: 0.2 }}
         className="flex-1 p-4 md:p-8 pb-32 md:pb-8"
       >
+        <NotificationPrompt />
         {renderContent()}
       </motion.main>
     </div>

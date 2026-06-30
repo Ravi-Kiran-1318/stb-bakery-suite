@@ -1,5 +1,5 @@
 const Product = require('../models/Product');
-const Notification = require('../models/Notification');
+const { dispatchNotification } = require('../utils/notificationService');
 
 // @desc    Get all available products (Public)
 // @route   GET /api/products
@@ -142,19 +142,15 @@ const toggleAvailability = async (req, res) => {
 
     // If marked unavailable, notify admin
     if (!product.isAvailable) {
-      const io = req.app.get('io');
       const message = `${product.nameEN} is now Out of Stock. Remember to restock!`;
       
-      const notification = await Notification.create({
-        userId: req.user.id, // The admin toggling it receives it
+      await dispatchNotification(req, {
+        userId: req.user.id,
         type: 'low_stock',
         message: message,
         actionTab: 'products',
+        recipientRole: 'admin' // Add role to ensure all admins are notified
       });
-
-      if (io) {
-        io.to('admin_room').emit('new_notification', notification);
-      }
     }
 
     res.json(product);

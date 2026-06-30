@@ -1,4 +1,5 @@
 const Order = require('../models/Order');
+const { dispatchNotification } = require('../utils/notificationService');
 const Notification = require('../models/Notification');
 const User = require('../models/User');
 const mongoose = require('mongoose');
@@ -74,8 +75,7 @@ const createOrder = async (req, res) => {
     });
 
     // Send Admin Notification
-    const notification = await Notification.create({
-      userId: null,
+    await dispatchNotification(req, {
       type: 'new_order',
       message: `New order from ${customerInfo?.name || req.user.name} — ₹${totalAmount}`,
       actionTab: 'orders',
@@ -83,16 +83,8 @@ const createOrder = async (req, res) => {
       recipientRole: 'admin'
     });
 
-    // Fetch admins and assign the notification
-    const admins = await User.find({ role: 'admin' });
-    for (const admin of admins) {
-      // In a real app we might duplicate notifications per admin, or have a shared admin pool
-      // For now, emit to admin_room
-    }
-
     const io = req.app.get('io');
     if (io) {
-      io.to('admin').emit('new_notification', notification);
       io.to('admin').emit('new_order', {
         orderId: newOrder._id,
         customerName: customerInfo?.name || req.user.name,
@@ -102,15 +94,14 @@ const createOrder = async (req, res) => {
 
     if (advancePaid) {
       const advanceAmount = Math.ceil(totalAmount * 0.2);
-      const paymentNotification = await Notification.create({
-        userId: null,
+      const paymentNotification = await dispatchNotification(req, {
         type: 'payment_received',
         message: `💳 Advance payment of ₹${advanceAmount} received from ${customerInfo?.name || req.user.name}`,
         actionTab: 'orders',
         referenceId: newOrder._id.toString(),
         recipientRole: 'admin'
       });
-      if (io) {
+      if (io && paymentNotification) {
         io.to('admin').emit('payment_received', paymentNotification);
       }
     }
@@ -232,7 +223,7 @@ const updateOrderStatus = async (req, res) => {
     };
 
     console.log("UPDATING ORDER STATUS:", status, "ORDER USER:", order.user);
-    const notification = await Notification.create({
+    await dispatchNotification(req, {
       userId: order.user,
       type: 'order_status',
       message: messageMap[status] || `Your order status is now ${status}`,
@@ -240,12 +231,10 @@ const updateOrderStatus = async (req, res) => {
       referenceId: order._id.toString(),
       recipientRole: 'customer'
     });
-    console.log("CREATED NOTIFICATION:", notification);
 
     // Emit to customer via Socket.io
     const io = req.app.get('io');
     if (io) {
-      io.to(`user_${order.user.toString()}`).emit('new_notification', notification);
       io.to(`user_${order.user.toString()}`).emit('order_status_update', order);
     }
 
@@ -273,7 +262,7 @@ const cancelOrder = async (req, res) => {
     const io = req.app.get('io');
 
     if (cancelledBy === 'admin') {
-      const notification = await Notification.create({
+      await dispatchNotification(req, {
         userId: order.user,
         type: 'order_cancelled',
         message: `Your order #${order._id.toString().slice(-6).toUpperCase()} was cancelled by the bakery. Reason: ${order.cancelReason}`,
@@ -281,27 +270,21 @@ const cancelOrder = async (req, res) => {
         referenceId: order._id.toString(),
         recipientRole: 'customer'
       });
-      console.log('CREATED NOTIFICATION (CANCEL):', notification);
       if (io) {
-        io.to(`user_${order.user.toString()}`).emit('new_notification', notification);
         io.to(`user_${order.user.toString()}`).emit('order_status_update', order);
       }
     } else {
       // Customer cancelled, notify admin
-      const adminUsers = await require('../models/User').find({ role: 'admin' });
-      adminUsers.forEach(async (admin) => {
-        const notification = await Notification.create({
-          userId: null,
-          type: 'order_cancelled',
-          message: `Order #${order._id.toString().slice(-6).toUpperCase()} was cancelled by customer. Reason: ${reason}`,
-          actionTab: 'orders',
-          referenceId: order._id.toString(),
-          recipientRole: 'admin'
-        });
-        if (io) {
-          io.to('admin').emit('new_notification', notification);
-        }
+      await dispatchNotification(req, {
+        type: 'order_cancelled',
+        message: `Order #${order._id.toString().slice(-6).toUpperCase()} was cancelled by customer. Reason: ${reason}`,
+        actionTab: 'orders',
+        referenceId: order._id.toString(),
+        recipientRole: 'admin'
       });
+      if (io) {
+        io.to('admin').emit('order_status_update', order);
+      }
     }
 
     res.json(order);

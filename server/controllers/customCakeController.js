@@ -1,4 +1,5 @@
 const CustomCakeRequest = require('../models/CustomCakeRequest');
+const { dispatchNotification } = require('../utils/notificationService');
 
 const createRequest = async (req, res) => {
   try {
@@ -23,22 +24,13 @@ const createRequest = async (req, res) => {
     });
 
     // Notify admin
-    const Notification = require('../models/Notification');
-    const { getIO } = require('../utils/socket');
-    const User = require('../models/User');
-
-    const adminNotification = await Notification.create({
+    await dispatchNotification(req, {
       message: `New custom cake request from ${req.user.name}`,
       type: 'custom_cake',
       actionTab: 'custom-cakes',
       referenceId: newRequest._id,
       recipientRole: 'admin'
     });
-
-    const io = getIO();
-    if (io) {
-      io.to('admin').emit('new_notification', adminNotification);
-    }
 
     res.status(201).json(newRequest);
   } catch (error) {
@@ -79,12 +71,8 @@ const updateRequestStatus = async (req, res) => {
     
     await request.save();
 
-    const Notification = require('../models/Notification');
-    const { getIO } = require('../utils/socket');
-    const io = getIO();
-
     if (status === 'Quoted' && oldStatus !== 'Quoted') {
-      const customerNotification = await Notification.create({
+      await dispatchNotification(req, {
         userId: request.user._id,
         message: 'Your custom cake request has a quote! 🍰',
         type: 'custom_cake',
@@ -92,31 +80,22 @@ const updateRequestStatus = async (req, res) => {
         referenceId: request._id,
         recipientRole: 'customer'
       });
-      if (io) {
-        io.to(`user_${request.user._id.toString()}`).emit('new_notification', customerNotification);
-      }
     } else if (status === 'Accepted' && oldStatus !== 'Accepted') {
-      const adminNotification = await Notification.create({
+      await dispatchNotification(req, {
         message: `${request.user.name} accepted the quote and added the custom cake to cart!`,
         type: 'custom_cake',
         actionTab: 'custom-cakes',
         referenceId: request._id,
         recipientRole: 'admin'
       });
-      if (io) {
-        io.to('admin').emit('new_notification', adminNotification);
-      }
     } else if (status === 'Cancelled' && oldStatus !== 'Cancelled') {
-      const adminNotification = await Notification.create({
+      await dispatchNotification(req, {
         message: `${request.user.name} cancelled their custom cake request.`,
         type: 'custom_cake',
         actionTab: 'custom-cakes',
         referenceId: request._id,
         recipientRole: 'admin'
       });
-      if (io) {
-        io.to('admin').emit('new_notification', adminNotification);
-      }
     }
 
     res.json(request);

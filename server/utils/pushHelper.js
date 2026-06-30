@@ -28,7 +28,12 @@ const sendPushNotification = async (userId, payload) => {
     const subscription = user.pushSubscription;
     const stringifiedPayload = JSON.stringify(payload);
 
-    await webpush.sendNotification(subscription, stringifiedPayload);
+    const options = {
+      urgency: 'high',
+      TTL: 86400
+    };
+
+    await webpush.sendNotification(subscription, stringifiedPayload, options);
     return true;
   } catch (error) {
     if (error.statusCode === 410) {
@@ -57,8 +62,13 @@ const notifyAdmins = async (payload) => {
     const stringifiedPayload = JSON.stringify(payload);
     
     for (const admin of admins) {
+      const options = {
+        urgency: 'high',
+        TTL: 86400
+      };
+
       try {
-        await webpush.sendNotification(admin.pushSubscription, stringifiedPayload);
+        await webpush.sendNotification(admin.pushSubscription, stringifiedPayload, options);
       } catch (err) {
         if (err.statusCode === 410) {
           await User.findByIdAndUpdate(admin._id, { $unset: { pushSubscription: 1 } });

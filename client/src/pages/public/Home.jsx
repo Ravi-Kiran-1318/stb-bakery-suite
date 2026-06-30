@@ -39,8 +39,7 @@ const Home = () => {
   };
 
   const sidebarCategories = [
-    { icon: '🎂', label: 'Cakes' },
-    { icon: '🍪', label: 'Cookies' },
+    { icon: '📷', label: 'Cake Gallery' },
     { icon: '🎉', label: 'Party items' },
     { icon: '🎈', label: 'Decoration items' },
   ];
@@ -282,9 +281,12 @@ const Home = () => {
             >
               {sidebarCategories.map((cat, i) => {
                 const slug = cat.label.toLowerCase().replace(/\s+/g, '-');
-                const linkPath = (slug === 'party-items' || slug === 'decoration-items') 
-                  ? `/party-decorations?category=${slug}` 
-                  : `/shop?category=${slug}`;
+                let linkPath = `/shop?category=${slug}`;
+                if (slug === 'party-items' || slug === 'decoration-items') {
+                  linkPath = `/party-decorations?category=${slug}`;
+                } else if (slug === 'cake-gallery') {
+                  linkPath = '/gallery';
+                }
                 
                 return (
                   <Link
@@ -323,16 +325,19 @@ const Home = () => {
                 }
               `}</style>
               <motion.div
-                className="flex flex-row gap-3 overflow-x-auto justify-start w-full hide-scrollbar snap-x px-4"
+                className="flex flex-row gap-3 overflow-x-auto justify-center w-full hide-scrollbar snap-x px-4"
                 initial={{ opacity: 0, y: 16 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.5 }}
               >
               {sidebarCategories.map((cat, i) => {
                 const slug = cat.label.toLowerCase().replace(/\s+/g, '-');
-                const linkPath = (slug === 'party-items' || slug === 'decoration-items') 
-                  ? `/party-decorations?category=${slug}` 
-                  : `/shop?category=${slug}`;
+                let linkPath = `/shop?category=${slug}`;
+                if (slug === 'party-items' || slug === 'decoration-items') {
+                  linkPath = `/party-decorations?category=${slug}`;
+                } else if (slug === 'cake-gallery') {
+                  linkPath = '/gallery';
+                }
                 
                 return (
                   <Link

@@ -60,6 +60,11 @@ const orderSchema = new mongoose.Schema(
       type: String,
       default: 'Pending',
     },
+    deliveryPaymentMethod: {
+      type: String,
+      enum: ['Cash', 'Online', null],
+      default: null,
+    },
     status: {
       type: String,
       enum: ['Received', 'Preparing', 'Ready', 'Out for Delivery', 'Delivered', 'Cancelled'],

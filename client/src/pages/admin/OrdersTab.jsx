@@ -32,6 +32,10 @@ const OrdersTab = () => {
   const [orderToCancel, setOrderToCancel] = useState(null);
   const [cancelReason, setCancelReason] = useState('');
 
+  // Payment Modal State
+  const [paymentModalOpen, setPaymentModalOpen] = useState(false);
+  const [orderToPay, setOrderToPay] = useState(null);
+
   const fetchOrders = async () => {
     setLoading(true);
     try {
@@ -73,6 +77,21 @@ const OrdersTab = () => {
       addToast(`Order marked as ${newStatus}`, 'success');
     } catch (err) {
       addToast('Failed to update status', 'error');
+    }
+  };
+
+  const handlePaymentUpdate = async (method) => {
+    if (!orderToPay) return;
+    try {
+      const { data } = await axiosInstance.patch(`/orders/${orderToPay}/payment-status`, {
+        deliveryPaymentMethod: method
+      });
+      setOrders(orders.map(o => o._id === orderToPay ? { ...o, paymentStatus: 'Paid', deliveryPaymentMethod: method } : o));
+      addToast('Payment marked as complete', 'success');
+      setPaymentModalOpen(false);
+      setOrderToPay(null);
+    } catch (err) {
+      addToast('Failed to update payment status', 'error');
     }
   };
 
@@ -283,20 +302,26 @@ const OrdersTab = () => {
         <div className="grid gap-8">
           {orders.map((order, index) => {
             const hasCustomCake = order.items?.some(item => item.isCustomCake);
+            const isCompleted = order.status === 'Delivered' && order.paymentStatus === 'Paid';
             return (
               <motion.div
                 key={order._id}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.1 }}
-                className={`relative bg-white border ${hasCustomCake ? 'border-amber-500 ring-4 ring-amber-500/20 shadow-amber-500/10' : 'border-gray-200'} rounded-2xl shadow-md overflow-hidden`}
+                className={`relative ${isCompleted ? 'bg-blue-50/10 border-blue-500 ring-4 ring-blue-500/20 shadow-blue-500/10' : hasCustomCake ? 'bg-white border-amber-500 ring-4 ring-amber-500/20 shadow-amber-500/10' : 'bg-white border-gray-200'} border rounded-2xl shadow-md overflow-hidden`}
               >
-                {hasCustomCake && (
+                {isCompleted && (
+                  <div className="absolute top-0 left-0 bg-blue-500 text-white text-[10px] md:text-xs font-bold px-4 py-1.5 rounded-br-2xl flex items-center gap-1.5 shadow-sm z-20">
+                    ✅ COMPLETED
+                  </div>
+                )}
+                {!isCompleted && hasCustomCake && (
                   <div className="absolute top-0 left-0 bg-amber-500 text-white text-[10px] md:text-xs font-bold px-4 py-1.5 rounded-br-2xl flex items-center gap-1.5 shadow-sm z-10">
                     🎂 CUSTOM CAKE
                   </div>
                 )}
-                <div className={`px-6 py-4 border-b border-gray-200 flex justify-between items-center bg-gray-50 ${hasCustomCake ? 'pt-8 md:pt-10' : ''}`}>
+                <div className={`px-6 py-4 border-b border-gray-200 flex justify-between items-center ${isCompleted ? 'bg-blue-50' : 'bg-gray-50'} ${(isCompleted || (!isCompleted && hasCustomCake)) ? 'pt-8 md:pt-10' : ''}`}>
                   <div>
                     <span className="font-bold text-gray-900 text-lg">#{order._id.slice(-6).toUpperCase()}</span>
                     <span className="text-sm text-gray-500 ml-3">{new Date(order.createdAt).toLocaleString()}</span>
@@ -410,11 +435,28 @@ const OrdersTab = () => {
                       </span>
                     </div>
                   )}
-                  <div className="mt-3 text-sm flex justify-between">
-                    <span>Method: {order.paymentMethod}</span>
-                    <span className={`font-semibold ${order.paymentStatus === 'Paid' || order.paymentStatus === 'Partial' ? 'text-green-600' : 'text-amber-600'}`}>
-                      {order.paymentStatus === 'Paid' ? 'Paid ✅' : order.paymentStatus === 'Partial' ? 'Partial ✅' : 'Pending ⏳'}
-                    </span>
+                  <div className="mt-3 text-sm flex justify-between items-center">
+                    <div>
+                      <span>Method: {order.paymentMethod}</span>
+                      {order.paymentStatus === 'Paid' && order.deliveryPaymentMethod && (
+                        <div className="text-[11px] text-gray-500 mt-0.5">
+                          Paid via {order.deliveryPaymentMethod}
+                        </div>
+                      )}
+                    </div>
+                    <div className="flex flex-col items-end gap-2">
+                      <span className={`font-semibold ${order.paymentStatus === 'Paid' || order.paymentStatus === 'Partial' ? 'text-green-600' : 'text-amber-600'}`}>
+                        {order.paymentStatus === 'Paid' ? 'Paid ✅' : order.paymentStatus === 'Partial' ? 'Partial ✅' : 'Pending ⏳'}
+                      </span>
+                      {(order.paymentStatus === 'Pending' || order.paymentStatus === 'Partial') && (
+                        <button
+                          onClick={() => { setOrderToPay(order._id); setPaymentModalOpen(true); }}
+                          className="bg-amber-100 hover:bg-amber-200 text-amber-800 text-xs font-bold py-1 px-3 rounded-full transition-colors"
+                        >
+                          Mark Paid
+                        </button>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -531,6 +573,38 @@ const OrdersTab = () => {
             <div className="flex justify-end gap-3">
               <button onClick={() => setCancelModalOpen(false)} className="btn-secondary">Close</button>
               <button onClick={handleCancelOrder} className="btn-primary bg-red-600 hover:bg-red-700 border-red-600">Confirm Cancel</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Payment Modal */}
+      {paymentModalOpen && (
+        <div className="modal-overlay">
+          <div className="modal-content p-6">
+            <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
+              <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+              Mark Payment Done
+            </h3>
+            <p className="text-muted mb-6">How was the due amount collected from the customer?</p>
+            <div className="flex flex-col gap-3 mb-6">
+              <button 
+                onClick={() => handlePaymentUpdate('Cash')}
+                className="w-full py-3 px-4 bg-gray-50 border border-gray-200 rounded-xl hover:bg-green-50 hover:border-green-300 transition-colors flex items-center justify-between font-bold text-gray-700"
+              >
+                <span>💵 Paid by Cash</span>
+                <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"></path></svg>
+              </button>
+              <button 
+                onClick={() => handlePaymentUpdate('Online')}
+                className="w-full py-3 px-4 bg-gray-50 border border-gray-200 rounded-xl hover:bg-blue-50 hover:border-blue-300 transition-colors flex items-center justify-between font-bold text-gray-700"
+              >
+                <span>📱 Paid Online (UPI/Card)</span>
+                <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"></path></svg>
+              </button>
+            </div>
+            <div className="flex justify-end">
+              <button onClick={() => { setPaymentModalOpen(false); setOrderToPay(null); }} className="btn-secondary">Cancel</button>
             </div>
           </div>
         </div>

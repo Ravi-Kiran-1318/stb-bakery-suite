@@ -20,7 +20,7 @@ if (process.env.VAPID_SUBJECT && process.env.VAPID_PUBLIC_KEY && process.env.VAP
 const sendPushNotification = async (userId, payload) => {
   try {
     const user = await User.findById(userId);
-    if (!user || !user.pushSubscription) {
+    if (!user || !user.pushSubscription || !user.pushSubscription.endpoint) {
       // User doesn't exist or hasn't subscribed to push notifications
       return false;
     }
@@ -62,6 +62,8 @@ const notifyAdmins = async (payload) => {
     const stringifiedPayload = JSON.stringify(payload);
     
     for (const admin of admins) {
+      if (!admin.pushSubscription || !admin.pushSubscription.endpoint) continue;
+
       const options = {
         urgency: 'high',
         TTL: 86400

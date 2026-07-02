@@ -8,6 +8,7 @@ const {
   createOrder,
   getMyOrders,
   getOrderById,
+  updatePaymentStatus,
 } = require('../controllers/orderController');
 const authMiddleware = require('../middleware/authMiddleware');
 const adminMiddleware = require('../middleware/adminMiddleware');
@@ -18,6 +19,7 @@ router.use(authMiddleware);
 router.get('/analytics', adminMiddleware, getAnalytics);
 router.get('/', adminMiddleware, getOrders);
 router.patch('/:id/status', adminMiddleware, updateOrderStatus);
+router.patch('/:id/payment-status', adminMiddleware, updatePaymentStatus);
 
 // Customer routes
 router.post('/', createOrder);

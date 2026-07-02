@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import OrdersTab from './OrdersTab';
 import ProductsTab from './ProductsTab';
 import RevenueTab from './RevenueTab';
+import PaymentsTab from './PaymentsTab';
 import CustomersTab from './CustomersTab';
 import NotificationsTab from './NotificationsTab';
 import GalleryAdminTab from './GalleryAdminTab';
@@ -24,6 +25,7 @@ const AdminDashboard = () => {
 
   const tabs = [
     { id: 'orders', label: 'Orders', icon: '📦' },
+    { id: 'payments', label: 'Order Payments', icon: '💳' },
     { id: 'custom-cakes', label: 'Custom Cakes', icon: '🎂' },
     { id: 'products', label: 'Products', icon: '🧁' },
     { id: 'gallery', label: 'Gallery', icon: '🖼️' },
@@ -37,6 +39,7 @@ const AdminDashboard = () => {
   const renderContent = () => {
     switch (activeTab) {
       case 'orders': return <OrdersTab />;
+      case 'payments': return <PaymentsTab />;
       case 'custom-cakes': return <CustomOrdersAdminTab />;
       case 'products': return <ProductsTab />;
       case 'revenue': return <RevenueTab />;

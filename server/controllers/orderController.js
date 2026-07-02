@@ -482,6 +482,27 @@ const getAnalytics = async (req, res) => {
   }
 };
 
+// @desc    Update order payment status (Admin)
+// @route   PATCH /api/orders/:id/payment-status
+const updatePaymentStatus = async (req, res) => {
+  try {
+    const { deliveryPaymentMethod } = req.body;
+    const order = await Order.findById(req.params.id);
+
+    if (!order) {
+      return res.status(404).json({ message: 'Order not found' });
+    }
+
+    order.paymentStatus = 'Paid';
+    order.deliveryPaymentMethod = deliveryPaymentMethod;
+    await order.save();
+
+    res.json(order);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 module.exports = {
   getOrders,
   updateOrderStatus,
@@ -490,4 +511,5 @@ module.exports = {
   createOrder,
   getMyOrders,
   getOrderById,
+  updatePaymentStatus,
 };

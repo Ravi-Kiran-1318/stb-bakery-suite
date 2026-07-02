@@ -68,6 +68,10 @@ const sendAdminNewOrderEmail = async (order, adminEmail) => {
       deliveryInfo = `Delivery to ${order.location.address || 'Location provided'}`;
     }
 
+    const hasCustomOrGalleryCake = order.items && order.items.some(item => item.isCustomCake || item.isGallery);
+    const deliveryFee = order.deliveryType === 'Delivery' ? (hasCustomOrGalleryCake ? 30 : 20) : 0;
+    const subtotal = order.totalAmount - deliveryFee;
+
     const html = `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e5e7eb; border-radius: 8px; overflow: hidden;">
         <div style="background-color: #F59E0B; padding: 20px; text-align: center;">
@@ -83,8 +87,8 @@ const sendAdminNewOrderEmail = async (order, adminEmail) => {
           ${getItemsTableHTML(order.items)}
           
           <div style="margin-top: 20px; text-align: right;">
-            <p style="margin: 5px 0;">Subtotal: ₹${order.totalAmount - (order.deliveryType === 'Delivery' ? 50 : 0)}</p>
-            ${order.deliveryType === 'Delivery' ? `<p style="margin: 5px 0;">Delivery Fee: ₹50</p>` : ''}
+            <p style="margin: 5px 0;">Subtotal: ₹${subtotal}</p>
+            ${order.deliveryType === 'Delivery' ? `<p style="margin: 5px 0;">Delivery Fee: ₹${deliveryFee}</p>` : ''}
             <h3 style="margin: 5px 0; color: #111827; font-size: 20px;">Total: ₹${order.totalAmount}</h3>
           </div>
           
@@ -128,6 +132,10 @@ const sendCustomerConfirmationEmail = async (order) => {
       deliveryInfo = `Delivery to ${order.location.address || 'Location provided'}`;
     }
 
+    const hasCustomOrGalleryCake = order.items && order.items.some(item => item.isCustomCake || item.isGallery);
+    const deliveryFee = order.deliveryType === 'Delivery' ? (hasCustomOrGalleryCake ? 30 : 20) : 0;
+    const subtotal = order.totalAmount - deliveryFee;
+
     const html = `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e5e7eb; border-radius: 8px; overflow: hidden;">
         <div style="background-color: #111827; padding: 20px; text-align: center;">
@@ -141,8 +149,8 @@ const sendCustomerConfirmationEmail = async (order) => {
           ${getItemsTableHTML(order.items)}
           
           <div style="margin-top: 20px; text-align: right;">
-            <p style="margin: 5px 0;">Subtotal: ₹${order.totalAmount - (order.deliveryType === 'Delivery' ? 50 : 0)}</p>
-            ${order.deliveryType === 'Delivery' ? `<p style="margin: 5px 0;">Delivery Fee: ₹50</p>` : ''}
+            <p style="margin: 5px 0;">Subtotal: ₹${subtotal}</p>
+            ${order.deliveryType === 'Delivery' ? `<p style="margin: 5px 0;">Delivery Fee: ₹${deliveryFee}</p>` : ''}
             <h3 style="margin: 5px 0; color: #111827; font-size: 20px;">Total: ₹${order.totalAmount}</h3>
           </div>
           

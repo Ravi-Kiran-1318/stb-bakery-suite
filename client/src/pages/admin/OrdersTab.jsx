@@ -23,6 +23,9 @@ const OrdersTab = () => {
   const [range, setRange] = useState('All');
   const [statusFilter, setStatusFilter] = useState('All');
   const [search, setSearch] = useState(initialSearch);
+  const [deliveryTypeFilter, setDeliveryTypeFilter] = useState('All');
+  const [paymentMethodFilter, setPaymentMethodFilter] = useState('All');
+  const [dueTodayFilter, setDueTodayFilter] = useState(false);
 
   // Cancel Modal State
   const [cancelModalOpen, setCancelModalOpen] = useState(false);
@@ -33,7 +36,14 @@ const OrdersTab = () => {
     setLoading(true);
     try {
       const { data } = await axiosInstance.get(`/orders`, {
-        params: { range, status: statusFilter, search }
+        params: { 
+          range, 
+          status: statusFilter, 
+          search,
+          deliveryType: deliveryTypeFilter,
+          paymentMethod: paymentMethodFilter,
+          dueToday: dueTodayFilter
+        }
       });
       setOrders(data);
       setError('');
@@ -46,7 +56,7 @@ const OrdersTab = () => {
 
   useEffect(() => {
     fetchOrders();
-  }, [range, statusFilter, search]);
+  }, [range, statusFilter, search, deliveryTypeFilter, paymentMethodFilter, dueTodayFilter]);
 
   useEffect(() => {
     const params = new URLSearchParams(location.search);
@@ -64,6 +74,57 @@ const OrdersTab = () => {
     } catch (err) {
       addToast('Failed to update status', 'error');
     }
+  };
+
+  const handlePrintKOT = (order) => {
+    const printWindow = window.open('', '_blank');
+    const hasCustomCake = order.items?.some(i => i.isCustomCake);
+    
+    let itemsHtml = (order.items || order.orderItems || []).map(item => `
+      <div style="display: flex; justify-content: space-between; margin-bottom: 8px; border-bottom: 1px dashed #ccc; padding-bottom: 4px;">
+        <div>
+          <strong>${item.qty}x</strong> ${item.isCustomCake ? 'Custom Cake' : (item.nameEN || item.name)}
+          ${item.isCustomCake && item.customCakeId ? `<br/><small style="color: #666;">W: ${item.customCakeId.weight}kg, F: ${item.customCakeId.flavour}, S: ${item.customCakeId.shape}</small>` : ''}
+        </div>
+      </div>
+    `).join('');
+
+    printWindow.document.write(`
+      <html>
+        <head>
+          <title>KOT - #${order._id.slice(-6).toUpperCase()}</title>
+          <style>
+            body { font-family: monospace; padding: 20px; max-width: 400px; margin: 0 auto; color: #000; }
+            h2 { text-align: center; border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 10px; }
+            .meta { margin-bottom: 15px; font-size: 14px; }
+            .meta p { margin: 4px 0; }
+            .total { font-weight: bold; font-size: 18px; text-align: right; margin-top: 15px; border-top: 2px solid #000; padding-top: 10px; }
+            @media print { body { padding: 0; } }
+          </style>
+        </head>
+        <body>
+          <h2>KOT / RECEIPT</h2>
+          <div class="meta">
+            <p><strong>Order ID:</strong> #${order._id.slice(-6).toUpperCase()}</p>
+            <p><strong>Customer:</strong> ${order.customerInfo?.name || order.user?.name || 'Walk-in'} (${order.customerInfo?.mobile || ''})</p>
+            <p><strong>Type:</strong> ${order.deliveryType ? order.deliveryType.toUpperCase() : 'N/A'}</p>
+            <p><strong>Requested:</strong> ${order.requestedDate ? new Date(order.requestedDate).toLocaleDateString() : 'ASAP'} ${order.requestedTime || ''}</p>
+            <p><strong>Payment:</strong> ${order.paymentMethod} (${order.paymentStatus})</p>
+            ${hasCustomCake ? '<p style="border: 1px solid #000; padding: 4px; text-align: center; font-weight: bold;">CONTAINS CUSTOM CAKE</p>' : ''}
+          </div>
+          <div class="items">
+            ${itemsHtml}
+          </div>
+          <div class="total">
+            Total: ₹${order.totalAmount}
+          </div>
+          <script>
+            window.onload = () => { window.print(); setTimeout(() => window.close(), 500); }
+          </script>
+        </body>
+      </html>
+    `);
+    printWindow.document.close();
   };
 
   const handleCancelOrder = async () => {
@@ -101,6 +162,43 @@ const OrdersTab = () => {
     <div className="space-y-6">
       <h2 className="text-2xl font-bold text-gray-800">Orders</h2>
       
+      {/* Scrollable Filters Row */}
+      <div className="flex overflow-x-auto pb-2 mb-2 gap-2 hide-scrollbar whitespace-nowrap items-center">
+        {/* Due Today */}
+        <button 
+          onClick={() => setDueTodayFilter(!dueTodayFilter)}
+          className={`px-4 py-1.5 rounded-full text-sm font-bold border transition-colors flex-shrink-0 ${dueTodayFilter ? 'bg-red-500 text-white border-red-500 shadow-md' : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'}`}
+        >
+          🚨 Due Today
+        </button>
+
+        {/* Delivery Type */}
+        <div className="flex bg-gray-100 p-1 rounded-full flex-shrink-0">
+          {['All', 'Delivery', 'Pickup'].map(type => (
+            <button
+              key={type}
+              onClick={() => setDeliveryTypeFilter(type)}
+              className={`px-3 py-1 rounded-full text-xs font-bold transition-all ${deliveryTypeFilter === type ? 'bg-white shadow-sm text-amber-600' : 'text-gray-500 hover:text-gray-700'}`}
+            >
+              {type === 'All' ? '🚚 All Types' : type}
+            </button>
+          ))}
+        </div>
+
+        {/* Payment Method */}
+        <div className="flex bg-gray-100 p-1 rounded-full flex-shrink-0">
+          {[{v: 'All', l: '💳 All Payments'}, {v: 'Online', l: 'Online'}, {v: 'Cash on Delivery', l: 'COD'}].map(method => (
+            <button
+              key={method.v}
+              onClick={() => setPaymentMethodFilter(method.v)}
+              className={`px-3 py-1 rounded-full text-xs font-bold transition-all ${paymentMethodFilter === method.v ? 'bg-white shadow-sm text-green-600' : 'text-gray-500 hover:text-gray-700'}`}
+            >
+              {method.l}
+            </button>
+          ))}
+        </div>
+      </div>
+
       {/* Filter Bar */}
       <div className="flex flex-col md:flex-row items-center gap-4 mb-8 bg-white p-3 rounded-2xl shadow-sm border border-gray-100">
         <div className="flex gap-1 p-1">
@@ -202,10 +300,19 @@ const OrdersTab = () => {
                   <div>
                     <span className="font-bold text-gray-900 text-lg">#{order._id.slice(-6).toUpperCase()}</span>
                     <span className="text-sm text-gray-500 ml-3">{new Date(order.createdAt).toLocaleString()}</span>
-                </div>
-                <span className={`px-3 py-1 rounded-full text-xs font-bold shadow-sm ${getStatusColor(order.status)}`}>
-                  {order.status}
-                </span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <button 
+                      onClick={() => handlePrintKOT(order)}
+                      className="text-gray-500 hover:text-amber-600 transition-colors p-1.5 rounded-full hover:bg-amber-50"
+                      title="Print KOT"
+                    >
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
+                    </button>
+                    <span className={`px-3 py-1 rounded-full text-xs font-bold shadow-sm ${getStatusColor(order.status)}`}>
+                      {order.status}
+                    </span>
+                  </div>
               </div>
               
               <div className="grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-gray-100">

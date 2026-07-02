@@ -167,13 +167,29 @@ const getOrderById = async (req, res) => {
 // @route   GET /api/orders
 const getOrders = async (req, res) => {
   try {
-    const { range, status, search } = req.query;
+    const { range, status, search, deliveryType, paymentMethod, dueToday } = req.query;
     
     let query = {};
     
     // Status filter
     if (status && status !== 'All') {
       query.status = status;
+    }
+
+    // Delivery Type filter
+    if (deliveryType && deliveryType !== 'All') {
+      query.deliveryType = deliveryType;
+    }
+
+    // Payment Method filter
+    if (paymentMethod && paymentMethod !== 'All') {
+      query.paymentMethod = paymentMethod;
+    }
+
+    // Due Today filter
+    if (dueToday === 'true') {
+      const todayString = new Date().toISOString().slice(0, 10);
+      query.requestedDate = { $regex: `^${todayString}` };
     }
 
     // Time range filter

@@ -86,7 +86,7 @@ const CustomOrdersAdminTab = () => {
     >
       <div className="p-4 sm:p-6 border-b border-slate-200 bg-slate-50/50 flex justify-between items-center">
         <div>
-          <h2 className="text-xl font-bold text-slate-800">Custom Cake Requests</h2>
+          <h2 className="text-xl font-bold text-slate-800">Cake Quote Requests</h2>
           <p className="text-sm text-slate-500 mt-1">Review and provide quotes for customer requests.</p>
         </div>
       </div>
@@ -109,7 +109,7 @@ const CustomOrdersAdminTab = () => {
                 <td colSpan="6" className="px-6 py-12 text-center text-slate-500">
                   <div className="flex flex-col items-center justify-center">
                     <span className="text-4xl mb-3">🎂</span>
-                    <p>No custom cake requests found.</p>
+                    <p>No cake requests found.</p>
                   </div>
                 </td>
               </tr>
@@ -121,7 +121,11 @@ const CustomOrdersAdminTab = () => {
                     <div className="text-xs text-slate-500">{req.user?.mobile}</div>
                   </td>
                   <td className="px-6 py-4 align-top max-w-xs">
-                    <p className="text-slate-800 font-medium mb-1 line-clamp-2">{req.description}</p>
+                    <div className="flex items-center gap-2 mb-1">
+                      {req.isGalleryRequest && <span className="bg-blue-100 text-blue-700 text-[10px] px-1.5 py-0.5 rounded font-bold uppercase tracking-wider">Gallery</span>}
+                      {!req.isGalleryRequest && <span className="bg-amber-100 text-amber-700 text-[10px] px-1.5 py-0.5 rounded font-bold uppercase tracking-wider">Custom</span>}
+                    </div>
+                    <p className="text-slate-800 font-medium mb-1 line-clamp-2">{req.description || (req.isGalleryRequest ? 'Gallery Cake Request' : 'No description')}</p>
                     <div className="text-xs text-slate-500 space-y-0.5">
                       <div>Weight: {req.weight} kg</div>
                       {req.flavour && <div>Flavour: {req.flavour}</div>}
@@ -130,10 +134,10 @@ const CustomOrdersAdminTab = () => {
                     </div>
                   </td>
                   <td className="px-6 py-4 align-top">
-                    {req.referenceImageUrl ? (
-                      <a href={req.referenceImageUrl} target="_blank" rel="noopener noreferrer">
+                    {req.referenceImageUrl || (req.isGalleryRequest && req.galleryCakeId?.imageUrl) ? (
+                      <a href={req.referenceImageUrl || req.galleryCakeId.imageUrl} target="_blank" rel="noopener noreferrer">
                         <img
-                          src={req.referenceImageUrl}
+                          src={req.referenceImageUrl || req.galleryCakeId.imageUrl}
                           alt="Reference"
                           className="w-16 h-16 object-cover rounded-lg border border-slate-200 hover:opacity-80 transition-opacity cursor-pointer"
                           onError={(e) => { e.target.style.display = 'none'; }}
@@ -161,16 +165,18 @@ const CustomOrdersAdminTab = () => {
                     >
                       {req.status}
                     </span>
-                    {req.quotePrice && (
-                      <div className="text-xs font-medium text-slate-600 mt-1">₹{req.quotePrice}</div>
-                    )}
+                    {req.quotePrice ? (
+                      <div className="text-xs font-medium text-slate-600 mt-1">Quoted: ₹{req.quotePrice}</div>
+                    ) : req.basePrice ? (
+                      <div className="text-xs font-medium text-slate-400 mt-1">Base: ₹{req.basePrice}</div>
+                    ) : null}
                   </td>
                   <td className="px-6 py-4 align-top text-right space-x-2">
                     {req.status === 'Pending' && (
                       <button
                         onClick={() => {
                           setSelectedRequest(req);
-                          setQuotePrice('');
+                          setQuotePrice(req.basePrice ? req.basePrice.toString() : '');
                           setAdminNotes('');
                           setQuoteModalOpen(true);
                         }}

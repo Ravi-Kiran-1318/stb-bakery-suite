@@ -6,6 +6,7 @@ import PageWrapper from '../../components/PageWrapper';
 import Footer from '../../components/Footer';
 import { CartContext } from '../../context/CartContext';
 import { ToastContext } from '../../context/ToastContext';
+import { useAuth } from '../../context/AuthContext';
 
 const Gallery = () => {
   const [items, setItems] = useState([]);
@@ -17,7 +18,20 @@ const Gallery = () => {
   
   const { addToCart } = useContext(CartContext);
   const { addToast } = useContext(ToastContext);
+  const { user } = useAuth();
   const navigate = useNavigate();
+
+  const [requestModalOpen, setRequestModalOpen] = useState(false);
+  const [selectedCake, setSelectedCake] = useState(null);
+  const [requestData, setRequestData] = useState({
+    requestedDate: '',
+    requestedTime: '',
+    weight: '',
+    flavour: '',
+    color: '',
+    description: '',
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     const fetchGalleryCakes = async () => {
@@ -61,9 +75,68 @@ const Gallery = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const handleAddToCart = (cake) => {
-    addToCart({ ...cake, isGallery: true });
-    addToast(`${cake.nameEN} added to cart!`, 'success');
+  const openRequestModal = (cake) => {
+    // Check if user is logged in
+    if (!user) {
+      addToast('Please login to request a quote', 'error');
+      navigate('/login', { state: { from: '/gallery' } });
+      return;
+    }
+
+    setSelectedCake(cake);
+    setRequestData({
+      requestedDate: '',
+      requestedTime: '',
+      weight: cake.weight || '',
+      flavour: cake.flavour || '',
+      color: cake.color || '',
+      description: 'Gallery Cake Request',
+    });
+    setRequestModalOpen(true);
+  };
+
+  const handleRequestChange = (e) => {
+    const { name, value } = e.target;
+    setRequestData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleRequestSubmit = async (e) => {
+    e.preventDefault();
+    if (!requestData.requestedDate) {
+      addToast('Please select a required date', 'error');
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      const { data } = await axiosInstance.post('/custom-cakes', {
+        ...requestData,
+        isGalleryRequest: true,
+        galleryCakeId: selectedCake._id,
+        basePrice: selectedCake.price
+      });
+      
+      // WhatsApp redirection
+      let waNumber = import.meta.env.VITE_SHOP_WHATSAPP || '0000000000';
+      if (waNumber.length === 10) waNumber = '91' + waNumber;
+      const rawText = `Hello sir/ Madam,\n\nI just submitted a quote request for a Gallery Cake.\n\n*Cake Name:* ${selectedCake.nameEN}\n*Base Price:* ₹${selectedCake.price}\n*Image:* ${selectedCake.imageUrl}\n\n*My Details:*\n- Weight: ${requestData.weight}\n- Flavour: ${requestData.flavour || 'N/A'}\n- Color: ${requestData.color || 'N/A'}\n- Date Required: ${requestData.requestedDate}\n- Time Required: ${requestData.requestedTime || 'N/A'}\n- Notes: ${requestData.description || 'N/A'}\n\nPlease check my request in the dashboard and provide a quote!`;
+      const text = encodeURIComponent(rawText);
+      
+      addToast('Request sent successfully! Opening WhatsApp...', 'success');
+      
+      setRequestModalOpen(false);
+      setSelectedCake(null);
+      
+      setTimeout(() => {
+        window.open(`https://wa.me/${waNumber}?text=${text}`, '_blank');
+        navigate('/customer/dashboard?tab=customcakes');
+      }, 300);
+      
+    } catch (error) {
+      addToast(error.response?.data?.message || 'Failed to submit request', 'error');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -172,11 +245,10 @@ const Gallery = () => {
                           <div className="flex items-center justify-between mt-auto pt-2 sm:pt-4 border-t border-gray-100">
                             <span className="text-base sm:text-xl font-bold text-[#c37e50]">₹{cake.price}</span>
                             <button 
-                              onClick={() => handleAddToCart(cake)}
-                              className="bg-[#c37e50] hover:bg-[#a0633b] text-white p-1.5 sm:p-2 rounded-full shadow-md transition-colors transform hover:scale-105 active:scale-95"
-                              title="Add to Cart"
+                              onClick={() => openRequestModal(cake)}
+                              className="bg-[#c37e50] hover:bg-[#a0633b] text-white px-3 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm font-bold rounded-lg shadow-sm transition-colors transform hover:scale-105 active:scale-95 whitespace-nowrap"
                             >
-                              <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4"></path></svg>
+                              Request Quote
                             </button>
                           </div>
                         </div>
@@ -186,6 +258,78 @@ const Gallery = () => {
                 </motion.div>
               )}
             </AnimatePresence>
+          )}
+
+          {/* Request Modal */}
+          {requestModalOpen && selectedCake && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm overflow-y-auto pt-20 pb-10">
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="bg-white rounded-2xl shadow-xl w-full max-w-lg overflow-hidden my-auto"
+              >
+                <div className="p-4 sm:p-6 bg-[#fefaf3] border-b border-[#f3e8d6] flex justify-between items-center">
+                  <h3 className="text-xl sm:text-2xl font-serif font-bold text-[#2d170a]">Request Gallery Cake</h3>
+                  <button onClick={() => setRequestModalOpen(false)} className="text-[#a0633b] hover:text-[#2d170a]">
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                  </button>
+                </div>
+                
+                <div className="p-4 sm:p-6 max-h-[70vh] overflow-y-auto">
+                  <div className="flex gap-4 mb-6 p-3 bg-amber-50 rounded-xl border border-amber-100">
+                    <img src={selectedCake.imageUrl} alt={selectedCake.nameEN} className="w-20 h-20 object-cover rounded-lg shadow-sm" />
+                    <div>
+                      <h4 className="font-bold text-[#2d170a]">{selectedCake.nameEN}</h4>
+                      <p className="text-sm text-amber-800 font-semibold mt-1">Base Price: ₹{selectedCake.price}</p>
+                      <p className="text-xs text-amber-700/70 mt-1">Submit this request for the admin to provide a final quote based on your requirements.</p>
+                    </div>
+                  </div>
+
+                  <form onSubmit={handleRequestSubmit} className="space-y-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-semibold text-[#5c4033] mb-1">Required Date *</label>
+                        <input type="date" name="requestedDate" required value={requestData.requestedDate} onChange={handleRequestChange} min={new Date().toISOString().split('T')[0]} className="w-full border border-gray-200 rounded-lg p-2.5 focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none" />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-semibold text-[#5c4033] mb-1">Time (Optional)</label>
+                        <input type="time" name="requestedTime" value={requestData.requestedTime} onChange={handleRequestChange} className="w-full border border-gray-200 rounded-lg p-2.5 focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none" />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-semibold text-[#5c4033] mb-1">Weight (e.g. 1kg) *</label>
+                        <input type="text" name="weight" required value={requestData.weight} onChange={handleRequestChange} className="w-full border border-gray-200 rounded-lg p-2.5 focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none" placeholder="1 Kg" />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-semibold text-[#5c4033] mb-1">Flavour (Optional)</label>
+                        <input type="text" name="flavour" value={requestData.flavour} onChange={handleRequestChange} className="w-full border border-gray-200 rounded-lg p-2.5 focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none" placeholder="e.g. Chocolate" />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-semibold text-[#5c4033] mb-1">Color Theme (Optional)</label>
+                      <input type="text" name="color" value={requestData.color} onChange={handleRequestChange} className="w-full border border-gray-200 rounded-lg p-2.5 focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none" placeholder="e.g. Pink and White" />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-semibold text-[#5c4033] mb-1">Notes / Text on Cake (Optional)</label>
+                      <textarea name="description" value={requestData.description} onChange={handleRequestChange} rows="3" className="w-full border border-gray-200 rounded-lg p-2.5 focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none resize-none" placeholder="Any specific instructions or text to write on the cake..."></textarea>
+                    </div>
+
+                    <div className="pt-4 border-t border-gray-100 flex gap-3">
+                      <button type="button" onClick={() => setRequestModalOpen(false)} className="flex-1 py-3 px-4 bg-gray-100 text-gray-700 rounded-xl font-bold hover:bg-gray-200 transition-colors">
+                        Cancel
+                      </button>
+                      <button type="submit" disabled={isSubmitting} className="flex-1 py-3 px-4 bg-[#c37e50] text-white rounded-xl font-bold hover:bg-[#a0633b] transition-colors shadow-md disabled:opacity-50">
+                        {isSubmitting ? 'Sending...' : 'Send Request'}
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              </motion.div>
+            </div>
           )}
 
         </div>

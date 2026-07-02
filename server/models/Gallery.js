@@ -39,6 +39,10 @@ const gallerySchema = new mongoose.Schema(
       type: Boolean,
       default: true,
     },
+    basePrice: {
+      type: Number,
+      default: 0,
+    },
   },
   { timestamps: true }
 );

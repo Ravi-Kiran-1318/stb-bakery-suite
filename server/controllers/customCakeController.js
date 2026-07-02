@@ -3,7 +3,7 @@ const { dispatchNotification } = require('../utils/notificationService');
 
 const createRequest = async (req, res) => {
   try {
-    const { description, weight, requestedDate, flavour, color, shape, requestedTime } = req.body;
+    const { description, weight, requestedDate, flavour, color, shape, requestedTime, isGalleryRequest, galleryCakeId, basePrice } = req.body;
     let referenceImageUrl = req.body.referenceImageUrl;
 
     // Handle file upload if present
@@ -20,7 +20,10 @@ const createRequest = async (req, res) => {
       flavour,
       color,
       shape,
-      requestedTime
+      requestedTime,
+      isGalleryRequest,
+      galleryCakeId,
+      basePrice
     });
 
     // Notify admin
@@ -40,7 +43,7 @@ const createRequest = async (req, res) => {
 
 const getMyRequests = async (req, res) => { console.log('getMyRequests called for user:', req.user._id);
   try {
-    const requests = await CustomCakeRequest.find({ user: req.user._id }).sort({ createdAt: -1 });
+    const requests = await CustomCakeRequest.find({ user: req.user._id }).populate('galleryCakeId').sort({ createdAt: -1 });
     res.json(requests);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -49,7 +52,7 @@ const getMyRequests = async (req, res) => { console.log('getMyRequests called fo
 
 const getAllRequests = async (req, res) => {
   try {
-    const requests = await CustomCakeRequest.find().populate('user', 'name mobile email').sort({ createdAt: -1 });
+    const requests = await CustomCakeRequest.find().populate('user', 'name mobile email').populate('galleryCakeId').sort({ createdAt: -1 });
     res.json(requests);
   } catch (error) {
     res.status(500).json({ message: error.message });

@@ -11,6 +11,7 @@ const CustomOrdersTab = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [activeFilter, setActiveFilter] = useState('All');
   const { addToast } = useContext(ToastContext);
 
   const [formData, setFormData] = useState({
@@ -157,6 +158,13 @@ const CustomOrdersTab = () => {
     return <div className="text-center py-10">Loading your requests...</div>;
   }
 
+  const filteredRequests = requests.filter(req => {
+    if (activeFilter === 'All') return true;
+    if (activeFilter === 'Custom Cakes') return !req.isGalleryRequest;
+    if (activeFilter === 'Gallery Cakes') return req.isGalleryRequest;
+    return true;
+  });
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 10 }}
@@ -178,6 +186,24 @@ const CustomOrdersTab = () => {
           </button>
         )}
       </div>
+
+      {!showForm && (
+        <div className="flex gap-2 sm:gap-3 overflow-x-auto pb-2 scrollbar-hide">
+          {['All', 'Custom Cakes', 'Gallery Cakes'].map(filter => (
+            <button
+              key={filter}
+              onClick={() => setActiveFilter(filter)}
+              className={`px-4 sm:px-5 py-2 rounded-full font-bold text-sm whitespace-nowrap transition-colors border-2 ${
+                activeFilter === filter 
+                  ? 'bg-amber-500 border-amber-500 text-white shadow-sm' 
+                  : 'bg-white border-gray-200 text-gray-600 hover:border-amber-300 hover:text-amber-600'
+              }`}
+            >
+              {filter}
+            </button>
+          ))}
+        </div>
+      )}
 
       {showForm && (
         <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200 mb-8">
@@ -306,25 +332,28 @@ const CustomOrdersTab = () => {
         </div>
       )}
 
-      {!showForm && requests.length === 0 ? (
+      {!showForm && filteredRequests.length === 0 ? (
         <div className="text-center py-12 bg-white rounded-2xl shadow-sm border border-gray-100">
           <div className="text-gray-400 text-6xl mb-4">🎂</div>
-          <h3 className="text-xl font-medium text-gray-700">No requests yet</h3>
+          <h3 className="text-xl font-medium text-gray-700">No requests found</h3>
           <p className="text-gray-500 mt-2">Have a dream cake in mind? Get a custom quote from us.</p>
         </div>
       ) : (
         <div className="space-y-4">
-          {requests.map(req => (
+          {filteredRequests.map(req => (
             <div key={req._id} className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm flex flex-col md:flex-row gap-6">
-              {req.referenceImageUrl && (
+              {(req.referenceImageUrl || (req.isGalleryRequest && req.galleryCakeId?.imageUrl)) && (
                 <div className="w-full md:w-32 h-32 flex-shrink-0 bg-gray-100 rounded-lg overflow-hidden border border-gray-200">
-                  <img src={req.referenceImageUrl} alt="Reference" className="w-full h-full object-cover" onError={(e) => { e.target.style.display = 'none' }} />
+                  <img src={req.referenceImageUrl || req.galleryCakeId.imageUrl} alt="Reference" className="w-full h-full object-cover" onError={(e) => { e.target.style.display = 'none' }} />
                 </div>
               )}
               
               <div className="flex-grow">
                 <div className="flex justify-between items-start mb-2">
-                  <h4 className="font-semibold text-lg text-gray-800">Custom Cake Request</h4>
+                  <div className="flex items-center gap-2">
+                    <h4 className="font-semibold text-lg text-gray-800">{req.isGalleryRequest ? 'Gallery Cake Quote Request' : 'Custom Cake Quote Request'}</h4>
+                    {req.isGalleryRequest && <span className="bg-blue-50 text-blue-700 text-xs px-2 py-0.5 rounded-full font-bold">Gallery</span>}
+                  </div>
                   {getStatusBadge(req.status)}
                 </div>
                 

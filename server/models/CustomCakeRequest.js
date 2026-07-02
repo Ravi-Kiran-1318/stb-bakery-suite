@@ -15,7 +15,7 @@ const customCakeSchema = new mongoose.Schema(
       type: String, // Link to an image
     },
     weight: {
-      type: Number, // In kg
+      type: String, // e.g. "1 Kg", "500g"
       required: true,
     },
     flavour: {
@@ -44,6 +44,17 @@ const customCakeSchema = new mongoose.Schema(
     },
     adminNotes: {
       type: String,
+    },
+    isGalleryRequest: {
+      type: Boolean,
+      default: false,
+    },
+    galleryCakeId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Product',
+    },
+    basePrice: {
+      type: Number,
     }
   },
   { timestamps: true }

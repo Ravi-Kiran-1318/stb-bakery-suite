@@ -127,7 +127,7 @@ const CustomOrdersAdminTab = () => {
                     </div>
                     <p className="text-slate-800 font-medium mb-1 line-clamp-2">{req.description || (req.isGalleryRequest ? 'Gallery Cake Request' : 'No description')}</p>
                     <div className="text-xs text-slate-500 space-y-0.5">
-                      <div>Weight: {req.weight} kg</div>
+                      <div>Weight: {req.weight}{/[a-zA-Z]/.test(String(req.weight)) ? '' : ' kg'}</div>
                       {req.flavour && <div>Flavour: {req.flavour}</div>}
                       {req.shape && <div>Shape: {req.shape}</div>}
                       {req.color && <div>Color: {req.color}</div>}

@@ -361,7 +361,7 @@ const CustomOrdersTab = () => {
                 
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-y-2 gap-x-4 text-sm mb-4">
                   <div>
-                    <span className="text-gray-500">Weight:</span> <span className="font-medium">{req.weight} kg</span>
+                    <span className="text-gray-500">Weight:</span> <span className="font-medium">{req.weight}{/[a-zA-Z]/.test(String(req.weight)) ? '' : ' kg'}</span>
                   </div>
                   {req.flavour && (
                     <div>

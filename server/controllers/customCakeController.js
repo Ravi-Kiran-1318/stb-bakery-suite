@@ -112,6 +112,15 @@ const updateRequestStatus = async (req, res) => {
           recipientRole: 'admin'
         });
       }
+    } else if (status === 'Rejected' && oldStatus !== 'Rejected') {
+      await dispatchNotification(req, {
+        userId: request.user._id,
+        message: `Your custom cake request was declined. Reason: ${adminNotes || 'Not specified'}`,
+        type: 'custom_cake',
+        actionTab: 'customcakes',
+        referenceId: request._id,
+        recipientRole: 'customer'
+      });
     }
 
     res.json(request);

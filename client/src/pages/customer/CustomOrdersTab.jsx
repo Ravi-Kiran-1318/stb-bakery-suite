@@ -419,6 +419,18 @@ const CustomOrdersTab = () => {
                     </button>
                   </div>
                 )}
+
+                {req.status === 'Rejected' && (
+                  <div className="bg-red-50 border border-red-100 rounded-lg p-4 mt-2">
+                    <p className="text-sm text-red-700 font-medium flex items-start gap-2">
+                      <span className="text-lg mt-0.5">❌</span>
+                      <span>
+                        <strong className="block mb-1 text-red-800">Request Declined</strong>
+                        {req.adminNotes ? req.adminNotes : 'No reason provided.'}
+                      </span>
+                    </p>
+                  </div>
+                )}
               </div>
             </div>
           ))}

@@ -27,6 +27,9 @@ const OrdersTab = () => {
   const [paymentMethodFilter, setPaymentMethodFilter] = useState('All');
   const [dueTodayFilter, setDueTodayFilter] = useState(false);
 
+  // Settings
+  const [isDeliveryAvailable, setIsDeliveryAvailable] = useState(true);
+
   // Cancel Modal State
   const [cancelModalOpen, setCancelModalOpen] = useState(false);
   const [orderToCancel, setOrderToCancel] = useState(null);
@@ -39,17 +42,23 @@ const OrdersTab = () => {
   const fetchOrders = async () => {
     setLoading(true);
     try {
-      const { data } = await axiosInstance.get(`/orders`, {
-        params: { 
-          range, 
-          status: statusFilter, 
-          search,
-          deliveryType: deliveryTypeFilter,
-          paymentMethod: paymentMethodFilter,
-          dueToday: dueTodayFilter
-        }
-      });
-      setOrders(data);
+      const [ordersRes, settingsRes] = await Promise.all([
+        axiosInstance.get(`/orders`, {
+          params: { 
+            range, 
+            status: statusFilter, 
+            search,
+            deliveryType: deliveryTypeFilter,
+            paymentMethod: paymentMethodFilter,
+            dueToday: dueTodayFilter
+          }
+        }),
+        axiosInstance.get('/settings')
+      ]);
+      setOrders(ordersRes.data);
+      if (settingsRes.data) {
+        setIsDeliveryAvailable(settingsRes.data.isDeliveryAvailable);
+      }
       setError('');
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to load orders');
@@ -163,6 +172,18 @@ const OrdersTab = () => {
     }
   };
 
+  const handleToggleDelivery = async () => {
+    try {
+      const newStatus = !isDeliveryAvailable;
+      setIsDeliveryAvailable(newStatus); // Optimistic update
+      await axiosInstance.put('/settings', { isDeliveryAvailable: newStatus });
+      addToast(`Delivery is now ${newStatus ? 'ON' : 'OFF'}`, 'success');
+    } catch (error) {
+      setIsDeliveryAvailable(!isDeliveryAvailable); // Revert on failure
+      addToast('Failed to update delivery status', 'error');
+    }
+  };
+
   const statusOptions = ['Received', 'Preparing', 'Ready', 'Out for Delivery', 'Delivered', 'Cancelled'];
 
   const getStatusColor = (status) => {
@@ -179,7 +200,21 @@ const OrdersTab = () => {
 
   return (
     <div className="space-y-6">
-      <h2 className="text-2xl font-bold text-gray-800">Orders</h2>
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <h2 className="text-2xl font-bold text-gray-800">Orders</h2>
+        <div className="flex items-center gap-3 bg-white p-2 px-4 rounded-xl shadow-sm border border-gray-100">
+          <span className="text-sm font-bold text-gray-700">Delivery Status:</span>
+          <button
+            onClick={handleToggleDelivery}
+            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${isDeliveryAvailable ? 'bg-amber-500' : 'bg-gray-300'}`}
+          >
+            <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${isDeliveryAvailable ? 'translate-x-6' : 'translate-x-1'}`} />
+          </button>
+          <span className={`text-sm font-bold ${isDeliveryAvailable ? 'text-amber-600' : 'text-gray-500'}`}>
+            {isDeliveryAvailable ? 'ON' : 'OFF'}
+          </span>
+        </div>
+      </div>
       
       {/* Scrollable Filters Row */}
       <div className="flex overflow-x-auto pb-2 mb-2 gap-2 hide-scrollbar whitespace-nowrap items-center">
@@ -425,10 +460,10 @@ const OrdersTab = () => {
                     <span>Total</span>
                     <span className="text-accent">{formatCurrency(order.totalAmount || 0)}</span>
                   </div>
-                  {order.paymentStatus === 'Partial' && (
+                  {order.paymentMethod === 'Online' && (
                     <div className="mt-2 flex flex-col items-end text-[10px] sm:text-xs font-semibold gap-1">
-                      <span className="text-green-600 bg-green-50 px-2 py-1 rounded-full">
-                        Advance Paid: {formatCurrency(Math.ceil((order.totalAmount || 0) * 0.2))}
+                      <span className={`px-2 py-1 rounded-full ${order.paymentStatus === 'Partial' || order.paymentStatus === 'Paid' ? 'text-green-600 bg-green-50' : 'text-amber-600 bg-amber-50'}`}>
+                        Advance (20%): {formatCurrency(Math.ceil((order.totalAmount || 0) * 0.2))} {order.paymentStatus === 'Partial' || order.paymentStatus === 'Paid' ? '(Paid)' : '(Pending)'}
                       </span>
                       <span className="text-red-600 bg-red-50 px-2 py-1 rounded-full">
                         Due on Delivery: {formatCurrency((order.totalAmount || 0) - Math.ceil((order.totalAmount || 0) * 0.2))}
@@ -448,7 +483,7 @@ const OrdersTab = () => {
                       <span className={`font-semibold ${order.paymentStatus === 'Paid' || order.paymentStatus === 'Partial' ? 'text-green-600' : 'text-amber-600'}`}>
                         {order.paymentStatus === 'Paid' ? 'Paid ✅' : order.paymentStatus === 'Partial' ? 'Partial ✅' : 'Pending ⏳'}
                       </span>
-                      {(order.paymentStatus === 'Pending' || order.paymentStatus === 'Partial') && (
+                      {(order.paymentStatus === 'Pending' || order.paymentStatus === 'Partial') && order.status === 'Delivered' && (
                         <button
                           onClick={() => { setOrderToPay(order._id); setPaymentModalOpen(true); }}
                           className="bg-amber-100 hover:bg-amber-200 text-amber-800 text-xs font-bold py-1 px-3 rounded-full transition-colors"

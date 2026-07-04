@@ -86,6 +86,12 @@ app.use('/api/payments', require('./routes/payments'));
 app.use('/api/gallery', require('./routes/galleryRoutes'));
 app.use('/api/events', require('./routes/eventRoutes'));
 app.use('/api/push', require('./routes/pushRoutes'));
+app.use('/api/settings', require('./routes/settingsRoutes'));
+
+// Fix for Razorpay redirecting back to /checkout using POST on mobile Intent flow
+app.post('/checkout', (req, res) => {
+  res.redirect(303, '/customer/dashboard?tab=orders');
+});
 // app.use('/api/users', require('./routes/users'));
 
 const PORT = process.env.PORT || 5000;

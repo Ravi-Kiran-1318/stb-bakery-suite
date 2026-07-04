@@ -66,6 +66,8 @@ const Navbar = () => {
 
   const adminNavLinks = [
     { id: 'orders', label: 'Orders', icon: '📦' },
+    { id: 'payments', label: 'Order Payments', icon: '💳' },
+    { id: 'custom-cakes', label: 'Custom Cakes', icon: '🎂' },
     { id: 'products', label: 'Products', icon: '🥐' },
     { id: 'revenue', label: 'Revenue', icon: '📊' },
     { id: 'customers', label: 'Customers', icon: '👥' },
@@ -344,6 +346,14 @@ const Navbar = () => {
                   </div>
                 )}
                 {/* Admin Nav Links or Customer Nav Links */}
+                {user && user.role !== 'customer' && (
+                  <div className="mb-4">
+                    <Link to="/admin/dashboard" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-4 py-3 rounded-xl text-base font-bold transition-colors hover:bg-amber-50 text-gray-800">
+                      <span className="text-xl">⚙️</span>
+                      <span>Admin Dashboard</span>
+                    </Link>
+                  </div>
+                )}
                 {location.pathname.startsWith('/admin/dashboard') && user?.role === 'admin' ? (
                   <>
                     {adminNavLinks.map((item) => (
@@ -407,15 +417,6 @@ const Navbar = () => {
                       </>
                     )}
 
-                    {user && user.role !== 'customer' && !location.pathname.startsWith('/admin/dashboard') && (
-                      <>
-                        <div className="my-2 border-t border-gray-100" />
-                        <Link to="/admin/dashboard" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-4 py-3 rounded-xl text-base font-bold hover:bg-amber-50 text-gray-800">
-                          <span className="text-xl">⚙️</span>
-                          <span>Admin Dashboard</span>
-                        </Link>
-                      </>
-                    )}
 
                     {user && (
                       <button onClick={handleLogout} className="flex w-full items-center gap-3 px-4 py-3 rounded-xl text-base font-bold transition-colors hover:bg-red-50 text-red-500 mt-2">

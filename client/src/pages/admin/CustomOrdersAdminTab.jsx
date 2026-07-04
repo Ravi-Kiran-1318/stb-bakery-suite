@@ -16,6 +16,10 @@ const CustomOrdersAdminTab = () => {
   const [quotePrice, setQuotePrice] = useState('');
   const [adminNotes, setAdminNotes] = useState('');
 
+  // Reject Modal State
+  const [rejectModalOpen, setRejectModalOpen] = useState(false);
+  const [rejectReason, setRejectReason] = useState('');
+
   const fetchRequests = async () => {
     setLoading(true);
     try {
@@ -33,16 +37,31 @@ const CustomOrdersAdminTab = () => {
     fetchRequests();
   }, []);
 
-  const handleUpdateStatus = async (id, status) => {
+  const handleUpdateStatus = async (id, status, notes = '') => {
     try {
-      await axiosInstance.put(`/custom-cakes/${id}`, { status });
+      const payload = { status };
+      if (notes) payload.adminNotes = notes;
+
+      await axiosInstance.put(`/custom-cakes/${id}`, payload);
       setRequests((prev) =>
-        prev.map((r) => (r._id === id ? { ...r, status } : r))
+        prev.map((r) => (r._id === id ? { ...r, status, ...(notes && { adminNotes: notes }) } : r))
       );
       addToast(`Status updated to ${status}`, 'success');
     } catch (error) {
       addToast('Failed to update status', 'error');
     }
+  };
+
+  const handleReject = async (e) => {
+    e.preventDefault();
+    if (!rejectReason) {
+      addToast('Please provide a reason for rejection', 'error');
+      return;
+    }
+    await handleUpdateStatus(selectedRequest._id, 'Rejected', rejectReason);
+    setRejectModalOpen(false);
+    setSelectedRequest(null);
+    setRejectReason('');
   };
 
   const submitQuote = async (e) => {
@@ -187,7 +206,11 @@ const CustomOrdersAdminTab = () => {
                     )}
                     {(req.status === 'Pending' || req.status === 'Quoted') && (
                       <button
-                        onClick={() => handleUpdateStatus(req._id, 'Rejected')}
+                        onClick={() => {
+                          setSelectedRequest(req);
+                          setRejectReason('');
+                          setRejectModalOpen(true);
+                        }}
                         className="text-red-600 hover:text-red-700 font-medium text-sm bg-red-50 hover:bg-red-100 px-3 py-1.5 rounded transition-colors"
                       >
                         Reject
@@ -251,6 +274,56 @@ const CustomOrdersAdminTab = () => {
                     className="flex-1 py-2.5 px-4 bg-amber-500 text-white rounded-lg font-bold hover:bg-amber-600 transition-colors shadow-sm"
                   >
                     Send Quote
+                  </button>
+                </div>
+              </form>
+            </div>
+          </motion.div>
+        </div>
+      )}
+
+      {/* Reject Modal */}
+      {rejectModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden"
+          >
+            <div className="p-6">
+              <h3 className="text-xl font-bold text-red-600 mb-4 flex items-center gap-2">
+                <span className="text-2xl">❌</span> Reject Request
+              </h3>
+              
+              <form onSubmit={handleReject} className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">Reason for Rejection *</label>
+                  <textarea
+                    required
+                    value={rejectReason}
+                    onChange={(e) => setRejectReason(e.target.value)}
+                    rows="3"
+                    className="w-full border border-slate-300 rounded-lg p-2.5 focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none resize-none"
+                    placeholder="Provide a reason for the customer..."
+                  />
+                </div>
+                
+                <div className="flex gap-3 pt-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setRejectModalOpen(false);
+                      setSelectedRequest(null);
+                    }}
+                    className="flex-1 py-2.5 px-4 bg-slate-100 text-slate-700 rounded-lg font-medium hover:bg-slate-200 transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="flex-1 py-2.5 px-4 bg-red-600 text-white rounded-lg font-bold hover:bg-red-700 transition-colors shadow-sm"
+                  >
+                    Confirm Reject
                   </button>
                 </div>
               </form>

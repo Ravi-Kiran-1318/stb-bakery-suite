@@ -59,6 +59,8 @@ const Checkout = () => {
     }
   }, [items, navigate]);
 
+  const [isDeliveryAvailable, setIsDeliveryAvailable] = useState(true);
+
   useEffect(() => {
     const fetchAddresses = async () => {
       try {
@@ -74,7 +76,23 @@ const Checkout = () => {
         console.error("Failed to load addresses", error);
       }
     };
-    if (user) fetchAddresses();
+    const fetchSettings = async () => {
+      try {
+        const { data } = await axiosInstance.get('/settings');
+        if (data) {
+          setIsDeliveryAvailable(data.isDeliveryAvailable);
+          if (!data.isDeliveryAvailable) {
+            setDeliveryType('Pickup'); // Fallback to Pickup if delivery is disabled
+          }
+        }
+      } catch (error) {
+        console.error("Failed to load settings", error);
+      }
+    };
+    if (user) {
+      fetchAddresses();
+      fetchSettings();
+    }
   }, [user]);
 
   const shopLat = parseFloat(import.meta.env.VITE_SHOP_LAT) || 13.6288;
@@ -156,7 +174,12 @@ const Checkout = () => {
       }
     });
 
-    const rawText = `Hello sir/ Madam,\n\nI just placed a new order!\n\n*Order ID:* ${orderId}\n*Delivery Type:* ${deliveryType}\n*Date:* ${requestedDate}\n*Time:* ${requestedTime}\n*Total Amount:* ₹${totalAmount}\n*Payment:* ${paymentMethod}\n\n*Items:*\n${itemsText}`;
+    let paymentDetails = `*Payment:* ${paymentMethod}`;
+    if (paymentMethod === 'Online') {
+      paymentDetails += `\n*Advance Paid (20%):* ₹${Math.ceil(totalAmount * 0.2)}\n*Remaining Due:* ₹${totalAmount - Math.ceil(totalAmount * 0.2)}`;
+    }
+
+    const rawText = `Hello sir/ Madam,\n\nI just placed a new order!\n\n*Order ID:* ${orderId}\n*Delivery Type:* ${deliveryType}\n*Date:* ${requestedDate}\n*Time:* ${requestedTime}\n*Total Amount:* ₹${totalAmount}\n${paymentDetails}\n\n*Items:*\n${itemsText}`;
     const text = encodeURIComponent(rawText);
     
     // Navigate before redirecting so when user returns, they are on dashboard
@@ -289,14 +312,24 @@ const Checkout = () => {
                 <h2 className="text-xl font-bold text-gray-900 mb-6">How would you like to receive your order?</h2>
                 <div className="grid grid-cols-2 gap-4">
                   <button 
-                    onClick={() => setDeliveryType('Delivery')}
-                    className={`p-4 rounded-xl text-lg font-bold transition-all ${
+                    onClick={() => {
+                      if (isDeliveryAvailable) setDeliveryType('Delivery');
+                    }}
+                    disabled={!isDeliveryAvailable}
+                    className={`p-4 rounded-xl text-lg font-bold transition-all relative ${
                       deliveryType === 'Delivery' 
                         ? 'bg-amber-500 text-white shadow-md border-transparent' 
-                        : 'bg-white text-gray-600 border-2 border-gray-200 hover:border-amber-500'
+                        : !isDeliveryAvailable
+                          ? 'bg-gray-100 text-gray-400 border-2 border-gray-200 cursor-not-allowed'
+                          : 'bg-white text-gray-600 border-2 border-gray-200 hover:border-amber-500'
                     }`}
                   >
                     🚚 Delivery
+                    {!isDeliveryAvailable && (
+                      <span className="absolute -bottom-6 left-1/2 -translate-x-1/2 text-xs font-bold text-red-500 whitespace-nowrap">
+                        Today delivery is not available
+                      </span>
+                    )}
                   </button>
                   <button 
                     onClick={() => setDeliveryType('Pickup')}

@@ -340,12 +340,12 @@ Order ID: #${shortOrderId}`;
                       <div className="text-left md:text-right">
                         <div className="text-xl font-bold text-gray-900 mb-1">{formatCurrency(order.totalAmount)}</div>
                         
-                        {order.paymentMethod === 'Online' && order.paymentStatus === 'Partial' && (
+                        {order.paymentMethod === 'Online' && (
                           <div className="mt-1 mb-2 text-xs font-medium">
-                            <span className="text-green-600 bg-green-50 px-2 py-0.5 rounded border border-green-200">
-                              Advance Paid: ₹{Math.ceil(order.totalAmount * 0.2)}
+                            <span className={`${order.paymentStatus === 'Partial' || order.paymentStatus === 'Paid' ? 'text-green-600 bg-green-50 border-green-200' : 'text-amber-600 bg-amber-50 border-amber-200'} px-2 py-0.5 rounded border`}>
+                              Advance (20%): ₹{Math.ceil(order.totalAmount * 0.2)} {order.paymentStatus === 'Partial' || order.paymentStatus === 'Paid' ? '(Paid)' : '(Pending)'}
                             </span>
-                            <div className="text-red-600 mt-1">
+                            <div className="text-red-600 mt-1 font-semibold">
                               Due on Delivery: ₹{order.totalAmount - Math.ceil(order.totalAmount * 0.2)}
                             </div>
                           </div>

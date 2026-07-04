@@ -112,10 +112,11 @@ const CustomOrdersTab = () => {
       const exists = items.find(i => i.customCakeId === req._id);
       if (!exists) {
         // Add to local CartContext
+        const cleanWeight = /[a-zA-Z]/.test(String(req.weight)) ? req.weight : `${req.weight}kg`;
         addToCart({
           _id: req._id,
-          nameEN: `Custom Cake Request - ${req.weight}kg`,
-          nameTe: `Custom Cake Request - ${req.weight}kg`,
+          nameEN: `Custom Cake Request - ${cleanWeight}`,
+          nameTe: `Custom Cake Request - ${cleanWeight}`,
           imageUrl: req.referenceImageUrl || '/bg3.png',
           price: req.quotePrice,
           isCustomCake: true,

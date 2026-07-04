@@ -163,14 +163,26 @@ const Checkout = () => {
       if (item.flavour) extraDetails += ` | ${item.flavour}`;
       if (item.color) extraDetails += ` | ${item.color}`;
       if (item.shape) extraDetails += ` | ${item.shape}`;
-      if (item.imageUrl) extraDetails += `\n  Image: ${item.imageUrl}`;
+      
+      // Format image URL
+      if (item.imageUrl && item.imageUrl !== '/bg3.png' && item.imageUrl !== '/placeholder.jpg') {
+        let fullImageUrl = item.imageUrl;
+        if (!fullImageUrl.startsWith('http')) {
+          const baseUrl = import.meta.env.VITE_API_URL ? import.meta.env.VITE_API_URL.replace('/api', '') : 'http://localhost:5000';
+          fullImageUrl = fullImageUrl.startsWith('/') ? `${baseUrl}${fullImageUrl}` : `${baseUrl}/${fullImageUrl}`;
+        }
+        extraDetails += `\n  Image: ${fullImageUrl}`;
+      }
+
+      // Fix double kg bug if present
+      const cleanName = item.nameEN.replace(/kgkg/gi, 'kg').replace(/gkg/gi, 'g');
 
       if (item.isCustomCake) {
-        itemsText += `- [Custom Request] ${item.nameEN} (Qty: ${item.qty})${extraDetails}\n`;
+        itemsText += `- [Custom Request] ${cleanName} (Qty: ${item.qty})${extraDetails}\n`;
       } else if (item.isGallery) {
-        itemsText += `- [Cake Gallery] ${item.nameEN} (Qty: ${item.qty})${extraDetails}\n`;
+        itemsText += `- [Cake Gallery] ${cleanName} (Qty: ${item.qty})${extraDetails}\n`;
       } else {
-        itemsText += `- ${item.nameEN} (Qty: ${item.qty})${extraDetails}\n`;
+        itemsText += `- ${cleanName} (Qty: ${item.qty})${extraDetails}\n`;
       }
     });
 

@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { FaCamera, FaUpload, FaRedo, FaCheck, FaTimes } from 'react-icons/fa';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const ImageUploadWithCamera = ({ onImageCaptured, imagePreview, isRequired = false }) => {
   const [isCameraOpen, setIsCameraOpen] = useState(false);
@@ -120,11 +121,19 @@ const ImageUploadWithCamera = ({ onImageCaptured, imagePreview, isRequired = fal
             </button>
           </div>
           
-          {imagePreview && (
-            <div className="mt-2 relative w-32 h-32 rounded-lg overflow-hidden border border-border">
-              <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
-            </div>
-          )}
+          <AnimatePresence>
+            {imagePreview && (
+              <motion.div 
+                initial={{ opacity: 0, scale: 0.8, y: 10 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.8 }}
+                transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                className="mt-3 relative w-32 h-32 rounded-xl overflow-hidden border-2 border-amber-500 shadow-md"
+              >
+                <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       ) : (
         <div className="bg-slate-900 rounded-xl overflow-hidden shadow-lg border border-slate-700 relative flex flex-col">

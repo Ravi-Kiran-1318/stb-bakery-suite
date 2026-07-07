@@ -332,10 +332,18 @@ const CustomOrdersTab = () => {
       )}
 
       {!showForm && filteredRequests.length === 0 ? (
-        <div className="text-center py-12 bg-white rounded-2xl shadow-sm border border-gray-100">
-          <div className="text-gray-400 text-6xl mb-4">🎂</div>
-          <h3 className="text-xl font-medium text-gray-700">No requests found</h3>
-          <p className="text-gray-500 mt-2">Have a dream cake in mind? Get a custom quote from us.</p>
+        <div className="text-center py-16 bg-white rounded-2xl shadow-sm border border-gray-100 flex flex-col items-center justify-center">
+          <div className="w-20 h-20 mb-4 bg-amber-50 rounded-full flex items-center justify-center">
+            <span className="text-5xl">🎂</span>
+          </div>
+          <h3 className="text-2xl font-bold text-gray-800 mb-2">No custom requests yet</h3>
+          <p className="text-gray-500 mb-6 max-w-sm">Have a dream cake in mind? Upload a photo and get a custom quote from our bakers today!</p>
+          <button 
+            onClick={() => setShowForm(true)} 
+            className="bg-amber-500 hover:bg-amber-600 text-white px-8 py-3 rounded-full font-bold shadow-md transition-transform transform hover:scale-105 active:scale-95"
+          >
+            Start Your First Request
+          </button>
         </div>
       ) : (
         <div className="space-y-4">

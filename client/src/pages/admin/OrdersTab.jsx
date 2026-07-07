@@ -45,12 +45,13 @@ const OrdersTab = () => {
       const [ordersRes, settingsRes] = await Promise.all([
         axiosInstance.get(`/orders`, {
           params: { 
-            range, 
-            status: statusFilter, 
+            range,
+            status: statusFilter,
             search,
             deliveryType: deliveryTypeFilter,
             paymentMethod: paymentMethodFilter,
-            dueToday: dueTodayFilter
+            dueToday: dueTodayFilter,
+            t: Date.now()
           }
         }),
         axiosInstance.get('/settings')
@@ -69,7 +70,7 @@ const OrdersTab = () => {
 
   useEffect(() => {
     fetchOrders();
-  }, [range, statusFilter, search, deliveryTypeFilter, paymentMethodFilter, dueTodayFilter]);
+  }, [range, statusFilter, search, deliveryTypeFilter, paymentMethodFilter, dueTodayFilter, location.search]);
 
   useEffect(() => {
     const params = new URLSearchParams(location.search);
@@ -336,7 +337,8 @@ const OrdersTab = () => {
       ) : (
         <div className="grid gap-8">
           {orders.map((order, index) => {
-            const hasCustomCake = order.items?.some(item => item.isCustomCake);
+            const hasCustomCake = order.items?.some(item => item.isCustomCake && (!item.customCakeId || !item.customCakeId.isGalleryRequest));
+            const hasGalleryCake = order.items?.some(item => item.isCustomCake && item.customCakeId?.isGalleryRequest);
             const isCompleted = order.status === 'Delivered' && order.paymentStatus === 'Paid';
             return (
               <motion.div
@@ -344,19 +346,19 @@ const OrdersTab = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.1 }}
-                className={`relative ${isCompleted ? 'bg-blue-50/10 border-blue-500 ring-4 ring-blue-500/20 shadow-blue-500/10' : hasCustomCake ? 'bg-white border-amber-500 ring-4 ring-amber-500/20 shadow-amber-500/10' : 'bg-white border-gray-200'} border rounded-2xl shadow-md overflow-hidden`}
+                className={`relative ${isCompleted ? 'bg-blue-50/10 border-blue-500 ring-4 ring-blue-500/20 shadow-blue-500/10' : (hasCustomCake || hasGalleryCake) ? 'bg-white border-amber-500 ring-4 ring-amber-500/20 shadow-amber-500/10' : 'bg-white border-gray-200'} border rounded-2xl shadow-md overflow-hidden`}
               >
                 {isCompleted && (
                   <div className="absolute top-0 left-0 bg-blue-500 text-white text-[10px] md:text-xs font-bold px-4 py-1.5 rounded-br-2xl flex items-center gap-1.5 shadow-sm z-20">
                     ✅ COMPLETED
                   </div>
                 )}
-                {!isCompleted && hasCustomCake && (
-                  <div className="absolute top-0 left-0 bg-amber-500 text-white text-[10px] md:text-xs font-bold px-4 py-1.5 rounded-br-2xl flex items-center gap-1.5 shadow-sm z-10">
-                    🎂 CUSTOM CAKE
+                {!isCompleted && (hasCustomCake || hasGalleryCake) && (
+                  <div className={`absolute top-0 left-0 text-white text-[10px] md:text-xs font-bold px-4 py-1.5 rounded-br-2xl flex items-center gap-1.5 shadow-sm z-10 ${hasGalleryCake && !hasCustomCake ? 'bg-green-600' : 'bg-amber-500'}`}>
+                    {hasGalleryCake && !hasCustomCake ? '🍰 GALLERY CAKE' : '🎂 CUSTOM CAKE'}
                   </div>
                 )}
-                <div className={`px-6 py-4 border-b border-gray-200 flex justify-between items-center ${isCompleted ? 'bg-blue-50' : 'bg-gray-50'} ${(isCompleted || (!isCompleted && hasCustomCake)) ? 'pt-8 md:pt-10' : ''}`}>
+                <div className={`px-6 py-4 border-b border-gray-200 flex justify-between items-center ${isCompleted ? 'bg-blue-50' : 'bg-gray-50'} ${(isCompleted || (!isCompleted && (hasCustomCake || hasGalleryCake))) ? 'pt-8 md:pt-10' : ''}`}>
                   <div>
                     <span className="font-bold text-gray-900 text-lg">#{order._id.slice(-6).toUpperCase()}</span>
                     <span className="text-sm text-gray-500 ml-3">{new Date(order.createdAt).toLocaleString()}</span>
@@ -433,16 +435,16 @@ const OrdersTab = () => {
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="font-semibold text-dark flex items-center flex-wrap gap-2">
-                            <span className="truncate">{item.isCustomCake && item.customCakeId ? 'Custom Cake' : (item.nameEN || item.name)}</span>
+                            <span className="truncate">{(item.isCustomCake && item.customCakeId && !item.customCakeId.isGalleryRequest) ? 'Custom Cake' : (item.nameEN || item.name)}</span>
                             {item.isCustomCake && (
-                              <span className="bg-amber-100 text-amber-800 text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wide">
-                                Custom Cake
+                              <span className={`${item.customCakeId?.isGalleryRequest ? 'bg-green-100 text-green-800' : 'bg-amber-100 text-amber-800'} text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wide`}>
+                                {item.customCakeId?.isGalleryRequest ? 'Gallery Cake' : 'Custom Cake'}
                               </span>
                             )}
                           </div>
                           {item.isCustomCake && item.customCakeId && (
                             <div className="text-[11px] text-gray-600 mt-1 flex flex-wrap gap-x-2 gap-y-1">
-                              {item.customCakeId.weight && <span><span className="text-gray-400">Weight:</span> {item.customCakeId.weight}kg</span>}
+                              {item.customCakeId.weight && <span><span className="text-gray-400">Weight:</span> {String(item.customCakeId.weight).toLowerCase().includes('kg') || String(item.customCakeId.weight).toLowerCase().includes('g') ? item.customCakeId.weight : `${item.customCakeId.weight}kg`}</span>}
                               {item.customCakeId.flavour && <span><span className="text-gray-400">Flavour:</span> {item.customCakeId.flavour}</span>}
                               {item.customCakeId.shape && <span><span className="text-gray-400">Shape:</span> {item.customCakeId.shape}</span>}
                               {item.customCakeId.color && <span><span className="text-gray-400">Color:</span> {item.customCakeId.color}</span>}

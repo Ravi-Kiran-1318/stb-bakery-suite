@@ -71,14 +71,16 @@ const NotificationBell = () => {
       if (recipientRole === 'admin') basePath = '/admin/dashboard';
       if (recipientRole === 'customer') basePath = '/customer/dashboard';
 
+      const timestamp = Date.now();
+
       if (actionTab) {
         if (referenceId && actionTab === 'orders') {
-          navigate(`${basePath}?tab=${actionTab}&search=${referenceId}`);
+          navigate(`${basePath}?tab=${actionTab}&search=${referenceId}&t=${timestamp}`);
         } else {
-          navigate(`${basePath}?tab=${actionTab}`);
+          navigate(`${basePath}?tab=${actionTab}&t=${timestamp}`);
         }
       } else if (basePath === '/admin/dashboard') {
-        navigate(`/admin/dashboard?tab=notifications`);
+        navigate(`/admin/dashboard?tab=notifications&t=${timestamp}`);
       }
     }
   };

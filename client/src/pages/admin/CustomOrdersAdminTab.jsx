@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { motion } from 'framer-motion';
+import { useLocation } from 'react-router-dom';
 import axiosInstance from '../../utils/axiosInstance';
 import { ToastContext } from '../../context/ToastContext';
 import Loader from '../../components/Loader';
@@ -10,6 +11,7 @@ const CustomOrdersAdminTab = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const { addToast } = useContext(ToastContext);
+  const location = useLocation();
 
   const [quoteModalOpen, setQuoteModalOpen] = useState(false);
   const [selectedRequest, setSelectedRequest] = useState(null);
@@ -23,7 +25,7 @@ const CustomOrdersAdminTab = () => {
   const fetchRequests = async () => {
     setLoading(true);
     try {
-      const { data } = await axiosInstance.get('/custom-cakes');
+      const { data } = await axiosInstance.get(`/custom-cakes?t=${Date.now()}`);
       setRequests(data);
       setError('');
     } catch (err) {
@@ -35,7 +37,7 @@ const CustomOrdersAdminTab = () => {
 
   useEffect(() => {
     fetchRequests();
-  }, []);
+  }, [location.search]);
 
   const handleUpdateStatus = async (id, status, notes = '') => {
     try {

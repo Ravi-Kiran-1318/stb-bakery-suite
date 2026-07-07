@@ -35,13 +35,29 @@ export const AuthProvider = ({ children }) => {
     return data;
   };
 
+  const firebaseLoginAction = async (idToken) => {
+    // Note: This might return a 206 status if a mobile number is required
+    const response = await api.post('/auth/firebase-login', { idToken });
+    if (response.status === 206) {
+      return response.data; // Return the { requireMobile: true } object without setting user
+    }
+    setUser(response.data);
+    return response.data;
+  };
+
+  const completeGoogleSignupAction = async (idToken, mobile) => {
+    const { data } = await api.post('/auth/complete-google-signup', { idToken, mobile });
+    setUser(data);
+    return data;
+  };
+
   const logout = async () => {
     await api.post('/auth/logout');
     setUser(null);
   };
 
   return (
-    <AuthContext.Provider value={{ user, setUser, loading, login, signup, logout }}>
+    <AuthContext.Provider value={{ user, setUser, loading, login, signup, firebaseLoginAction, completeGoogleSignupAction, logout }}>
       {children}
     </AuthContext.Provider>
   );

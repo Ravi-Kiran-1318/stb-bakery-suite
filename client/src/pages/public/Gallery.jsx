@@ -32,6 +32,7 @@ const Gallery = () => {
     description: '',
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isTimeDropdownOpen, setIsTimeDropdownOpen] = useState(false);
 
   useEffect(() => {
     const fetchGalleryCakes = async () => {
@@ -90,7 +91,7 @@ const Gallery = () => {
       weight: cake.weight || '',
       flavour: cake.flavour || '',
       color: cake.color || '',
-      description: 'Gallery Cake Request',
+      description: cake.nameEN || 'Gallery Cake Request',
     });
     setRequestModalOpen(true);
   };
@@ -293,7 +294,39 @@ const Gallery = () => {
                       </div>
                       <div>
                         <label className="block text-sm font-semibold text-[#5c4033] mb-1">Time (Optional)</label>
-                        <input type="time" name="requestedTime" value={requestData.requestedTime} onChange={handleRequestChange} className="w-full border border-gray-200 rounded-lg p-2.5 focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none" />
+                        <div className="relative">
+                          <div 
+                            onClick={() => setIsTimeDropdownOpen(!isTimeDropdownOpen)}
+                            className={`w-full border rounded-lg p-2.5 bg-white flex justify-between items-center cursor-pointer select-none transition-all ${isTimeDropdownOpen ? 'border-amber-500 ring-2 ring-amber-500/30' : 'border-gray-200 hover:border-amber-300'}`}
+                          >
+                            <span className={requestData.requestedTime ? "text-gray-900 font-medium" : "text-gray-500"}>
+                              {requestData.requestedTime || "Select a time slot"}
+                            </span>
+                            <svg className={`w-4 h-4 transition-transform ${isTimeDropdownOpen ? 'rotate-180 text-amber-600' : 'text-gray-400'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
+                          </div>
+                          
+                          {/* Invisible overlay to close dropdown when clicking outside */}
+                          {isTimeDropdownOpen && (
+                            <div className="fixed inset-0 z-40" onClick={() => setIsTimeDropdownOpen(false)}></div>
+                          )}
+                          
+                          {isTimeDropdownOpen && (
+                            <div className="absolute z-50 w-full mt-2 bg-white border border-amber-100 rounded-xl shadow-xl overflow-hidden ring-1 ring-amber-900/5">
+                              {['10:00 AM - 12:00 PM', '12:00 PM - 02:00 PM', '02:00 PM - 04:00 PM', '04:00 PM - 06:00 PM', '06:00 PM - 08:00 PM'].map(time => (
+                                <div 
+                                  key={time}
+                                  className={`px-4 py-3 sm:py-2.5 cursor-pointer text-sm sm:text-base border-b border-amber-50 last:border-0 transition-colors ${requestData.requestedTime === time ? 'bg-amber-100 text-amber-900 font-bold' : 'text-[#5c4033] hover:bg-amber-50 active:bg-amber-100'}`}
+                                  onClick={() => {
+                                    handleRequestChange({ target: { name: 'requestedTime', value: time } });
+                                    setIsTimeDropdownOpen(false);
+                                  }}
+                                >
+                                  {time}
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
                       </div>
                     </div>
 

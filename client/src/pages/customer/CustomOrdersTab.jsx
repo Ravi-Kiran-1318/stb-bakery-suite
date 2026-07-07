@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { motion } from 'framer-motion';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import axiosInstance from '../../utils/axiosInstance';
 import { ToastContext } from '../../context/ToastContext';
 import { CartContext } from '../../context/CartContext';
@@ -13,6 +13,7 @@ const CustomOrdersTab = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [activeFilter, setActiveFilter] = useState('All');
   const { addToast } = useContext(ToastContext);
+  const location = useLocation();
 
   const [formData, setFormData] = useState({
     description: '',
@@ -29,11 +30,11 @@ const CustomOrdersTab = () => {
 
   useEffect(() => {
     fetchRequests();
-  }, []);
+  }, [location.search]);
 
   const fetchRequests = async () => {
     try {
-      const { data } = await axiosInstance.get('/custom-cakes/my-requests');
+      const { data } = await axiosInstance.get(`/custom-cakes/my-requests?t=${Date.now()}`);
       setRequests(data);
     } catch (error) {
       addToast('Failed to load custom cake requests', 'error');
@@ -115,12 +116,13 @@ const CustomOrdersTab = () => {
         const cleanWeight = /[a-zA-Z]/.test(String(req.weight)) ? req.weight : `${req.weight}kg`;
         addToCart({
           _id: req._id,
-          nameEN: `Custom Cake Request - ${cleanWeight}`,
-          nameTe: `Custom Cake Request - ${cleanWeight}`,
-          imageUrl: req.referenceImageUrl || '/bg3.png',
+          nameEN: req.isGalleryRequest ? req.description : `Custom Cake Request - ${cleanWeight}`,
+          nameTe: req.isGalleryRequest ? req.description : `Custom Cake Request - ${cleanWeight}`,
+          imageUrl: req.referenceImageUrl || req.galleryCakeId?.imageUrl || '/bg3.png',
           price: req.quotePrice,
           isCustomCake: true,
           customCakeId: req._id,
+          isGalleryRequest: req.isGalleryRequest || false,
           requestedDate: req.requestedDate,
           requestedTime: req.requestedTime
         });

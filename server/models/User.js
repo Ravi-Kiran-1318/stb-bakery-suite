@@ -15,9 +15,15 @@ const userSchema = new mongoose.Schema(
     email: {
       type: String,
     },
+    firebaseUid: {
+      type: String,
+    },
     passwordHash: {
       type: String,
-      required: true,
+      required: function() {
+        // Password is required if firebaseUid is not present
+        return !this.firebaseUid;
+      },
     },
     role: {
       type: String,

@@ -127,4 +127,162 @@ const getMe = async (req, res) => {
   }
 };
 
-module.exports = { signup, login, logout, getMe };
+const admin = require('../config/firebaseAdmin');
+
+const firebaseLogin = async (req, res) => {
+  try {
+    const { idToken } = req.body;
+    if (!idToken) {
+      return res.status(400).json({ message: 'Firebase ID token is required' });
+    }
+
+    // Verify the Firebase token
+    const decodedToken = await admin.auth().verifyIdToken(idToken);
+    
+    // Check if it's a phone login or Google login
+    const isGoogleLogin = decodedToken.firebase.sign_in_provider === 'google.com';
+    
+    if (isGoogleLogin) {
+      const email = decodedToken.email;
+      if (!email) {
+        return res.status(400).json({ message: 'Email not found in Google token' });
+      }
+
+      let user = await User.findOne({ email });
+
+      if (!user) {
+        // User does not exist. They must provide a mobile number (Option B).
+        return res.status(206).json({ 
+          requireMobile: true,
+          message: 'Please provide a mobile number to complete registration'
+        });
+      } else {
+        // User exists, just log them in
+        if (!user.firebaseUid) {
+          user.firebaseUid = decodedToken.uid;
+          await user.save();
+        }
+        
+        const token = generateToken(user._id, user.role);
+        res.cookie('token', token, {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === 'production',
+          sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+          maxAge: 7 * 24 * 60 * 60 * 1000,
+        });
+
+        return res.json({
+          id: user._id,
+          name: user.name,
+          mobile: user.mobile,
+          role: user.role,
+        });
+      }
+    } else {
+      // It's a phone login (OTP)
+      let mobile = decodedToken.phone_number;
+
+      if (!mobile) {
+        return res.status(400).json({ message: 'Phone number not found in Firebase token' });
+      }
+
+      if (mobile.startsWith('+91')) {
+        mobile = mobile.replace('+91', '');
+      } else if (mobile.startsWith('+')) {
+        mobile = mobile.slice(-10);
+      }
+
+      let user = await User.findOne({ mobile });
+
+      if (!user) {
+        user = await User.create({
+          name: `User_${mobile.slice(-4)}`,
+          mobile: mobile,
+          firebaseUid: decodedToken.uid,
+          role: 'customer'
+        });
+      } else if (!user.firebaseUid) {
+        user.firebaseUid = decodedToken.uid;
+        await user.save();
+      }
+
+      const token = generateToken(user._id, user.role);
+
+      res.cookie('token', token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+        maxAge: 7 * 24 * 60 * 60 * 1000,
+      });
+
+      return res.json({
+        id: user._id,
+        name: user.name,
+        mobile: user.mobile,
+        role: user.role,
+      });
+    }
+  } catch (error) {
+    console.error('Firebase Login Error:', error);
+    res.status(401).json({ message: 'Invalid or expired Firebase token' });
+  }
+};
+
+const completeGoogleSignup = async (req, res) => {
+  try {
+    const { idToken, mobile } = req.body;
+    
+    if (!idToken || !mobile) {
+      return res.status(400).json({ message: 'ID token and mobile number are required' });
+    }
+    
+    if (!/^[0-9]{10}$/.test(mobile)) {
+      return res.status(400).json({ message: 'Invalid mobile number format' });
+    }
+
+    // Verify token again for security
+    const decodedToken = await admin.auth().verifyIdToken(idToken);
+    const email = decodedToken.email;
+    const name = decodedToken.name || `User_${mobile.slice(-4)}`;
+    
+    if (!email) {
+      return res.status(400).json({ message: 'Invalid Google token' });
+    }
+
+    // Ensure mobile is not already in use
+    const existingUser = await User.findOne({ mobile });
+    if (existingUser) {
+      return res.status(400).json({ message: 'This mobile number is already registered to another account' });
+    }
+
+    // Create the user
+    const user = await User.create({
+      name,
+      email,
+      mobile,
+      firebaseUid: decodedToken.uid,
+      role: 'customer'
+    });
+
+    const token = generateToken(user._id, user.role);
+
+    res.cookie('token', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
+
+    return res.status(201).json({
+      id: user._id,
+      name: user.name,
+      mobile: user.mobile,
+      role: user.role,
+    });
+  } catch (error) {
+    console.error('Complete Google Signup Error:', error);
+    res.status(500).json({ message: 'Failed to complete registration' });
+  }
+};
+
+module.exports = { signup, login, logout, getMe, firebaseLogin, completeGoogleSignup };

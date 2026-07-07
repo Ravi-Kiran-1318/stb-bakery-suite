@@ -67,60 +67,71 @@ const updateRequestStatus = async (req, res) => {
     if (!request) return res.status(404).json({ message: 'Request not found' });
     
     const oldStatus = request.status;
+    let isStatusChanged = false;
+
+    if (status && request.status !== status) {
+      request.status = status;
+      isStatusChanged = true;
+    }
     
-    if (status) request.status = status;
-    if (quotePrice !== undefined) request.quotePrice = quotePrice;
-    if (adminNotes !== undefined) request.adminNotes = adminNotes;
+    if (quotePrice !== undefined && quotePrice !== null) {
+      request.quotePrice = Number(quotePrice);
+    }
+    
+    if (adminNotes !== undefined) {
+      request.adminNotes = adminNotes;
+    }
     
     await request.save();
 
-    if (status === 'Quoted' && oldStatus !== 'Quoted') {
-      await dispatchNotification(req, {
-        userId: request.user._id,
-        message: 'Your custom cake request has a quote! 🍰',
-        type: 'custom_cake',
-        actionTab: 'customcakes',
-        referenceId: request._id,
-        recipientRole: 'customer'
-      });
-    } else if (status === 'Accepted' && oldStatus !== 'Accepted') {
-      await dispatchNotification(req, {
-        message: `${request.user.name} accepted the quote and added the custom cake to cart!`,
-        type: 'custom_cake',
-        actionTab: 'custom-cakes',
-        referenceId: request._id,
-        recipientRole: 'admin'
-      });
-    } else if (status === 'Cancelled' && oldStatus !== 'Cancelled') {
-      if (req.user.role === 'admin') {
-        // Admin cancelled it -> Notify customer
+    // Only send notification if the status actually changed to a new state
+    if (isStatusChanged) {
+      if (status === 'Quoted') {
         await dispatchNotification(req, {
           userId: request.user._id,
-          message: `Your custom cake request was cancelled by the bakery.`,
+          message: 'Your custom cake request has a quote! 🍰',
           type: 'custom_cake',
           actionTab: 'customcakes',
           referenceId: request._id,
           recipientRole: 'customer'
         });
-      } else {
-        // Customer cancelled it -> Notify admin
+      } else if (status === 'Accepted') {
         await dispatchNotification(req, {
-          message: `${request.user.name} cancelled their custom cake request.`,
+          message: `${request.user.name} accepted the quote and added the custom cake to cart!`,
           type: 'custom_cake',
           actionTab: 'custom-cakes',
           referenceId: request._id,
           recipientRole: 'admin'
         });
+      } else if (status === 'Cancelled') {
+        if (req.user.role === 'admin') {
+          await dispatchNotification(req, {
+            userId: request.user._id,
+            message: `Your custom cake request was cancelled by the bakery.`,
+            type: 'custom_cake',
+            actionTab: 'customcakes',
+            referenceId: request._id,
+            recipientRole: 'customer'
+          });
+        } else {
+          await dispatchNotification(req, {
+            message: `${request.user.name} cancelled their custom cake request.`,
+            type: 'custom_cake',
+            actionTab: 'custom-cakes',
+            referenceId: request._id,
+            recipientRole: 'admin'
+          });
+        }
+      } else if (status === 'Rejected') {
+        await dispatchNotification(req, {
+          userId: request.user._id,
+          message: `Your custom cake request was declined. Reason: ${adminNotes || 'Not specified'}`,
+          type: 'custom_cake',
+          actionTab: 'customcakes',
+          referenceId: request._id,
+          recipientRole: 'customer'
+        });
       }
-    } else if (status === 'Rejected' && oldStatus !== 'Rejected') {
-      await dispatchNotification(req, {
-        userId: request.user._id,
-        message: `Your custom cake request was declined. Reason: ${adminNotes || 'Not specified'}`,
-        type: 'custom_cake',
-        actionTab: 'customcakes',
-        referenceId: request._id,
-        recipientRole: 'customer'
-      });
     }
 
     res.json(request);

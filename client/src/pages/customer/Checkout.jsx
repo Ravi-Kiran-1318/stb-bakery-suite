@@ -178,7 +178,11 @@ const Checkout = () => {
       const cleanName = item.nameEN.replace(/kgkg/gi, 'kg').replace(/gkg/gi, 'g');
 
       if (item.isCustomCake) {
-        itemsText += `- [Custom Request] ${cleanName} (Qty: ${item.qty})${extraDetails}\n`;
+        if (item.isGalleryRequest) {
+          itemsText += `- [Cake Gallery] ${cleanName} (Qty: ${item.qty})${extraDetails}\n`;
+        } else {
+          itemsText += `- [Custom Request] ${cleanName} (Qty: ${item.qty})${extraDetails}\n`;
+        }
       } else if (item.isGallery) {
         itemsText += `- [Cake Gallery] ${cleanName} (Qty: ${item.qty})${extraDetails}\n`;
       } else {

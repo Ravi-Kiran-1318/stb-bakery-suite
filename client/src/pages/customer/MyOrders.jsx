@@ -24,9 +24,9 @@ const MyOrders = () => {
   const queryParams = new URLSearchParams(location.search);
   const highlightOrderId = queryParams.get('highlightOrderId');
 
-  const fetchOrders = async () => {
+  const fetchOrders = async (silent = false) => {
     try {
-      setLoading(true);
+      if (!silent) setLoading(true);
       setError('');
       const { data } = await axiosInstance.get(`/orders/my?t=${Date.now()}`);
       setOrders(data);
@@ -34,7 +34,7 @@ const MyOrders = () => {
       console.error('Failed to fetch orders', err);
       setError(err.response?.data?.message || 'Failed to fetch your orders. Please try again.');
     } finally {
-      setLoading(false);
+      if (!silent) setLoading(false);
     }
   };
 
@@ -42,7 +42,18 @@ const MyOrders = () => {
 
   useEffect(() => {
     fetchOrders();
-  }, []);
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        fetchOrders(true); // silent fetch to avoid loading spinner
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [location.search]);
 
   useEffect(() => {
     const handleStatusUpdate = (updatedOrder) => {
@@ -271,7 +282,8 @@ Order ID: #${shortOrderId}`;
                 itemsSummary = order.items.length > 1 ? `${firstItem} and ${order.items.length - 1} more items` : firstItem;
               }
 
-              const hasCustomCake = order.items?.some(item => item.isCustomCake);
+              const hasCustomCake = order.items?.some(item => item.isCustomCake && (!item.customCakeId || !item.customCakeId.isGalleryRequest));
+              const hasGalleryCake = order.items?.some(item => item.isCustomCake && item.customCakeId?.isGalleryRequest);
 
               return (
                 <motion.div 
@@ -287,12 +299,12 @@ Order ID: #${shortOrderId}`;
                       : 'border-gray-200'
                   }`}
                 >
-                  {hasCustomCake && (
-                    <div className="absolute top-0 left-0 bg-amber-500 text-white text-[10px] md:text-xs font-bold px-4 py-1.5 rounded-br-2xl flex items-center gap-1.5 shadow-sm z-10">
-                      🎂 CUSTOM CAKE
+                  {(hasCustomCake || hasGalleryCake) && (
+                    <div className={`absolute top-0 left-0 text-white text-[10px] md:text-xs font-bold px-4 py-1.5 rounded-br-2xl flex items-center gap-1.5 shadow-sm z-10 ${hasGalleryCake && !hasCustomCake ? 'bg-green-600' : 'bg-amber-500'}`}>
+                      {hasGalleryCake && !hasCustomCake ? '🍰 GALLERY CAKE' : '🎂 CUSTOM CAKE'}
                     </div>
                   )}
-                  <div className={`p-6 ${hasCustomCake ? 'pt-10' : ''}`}>
+                  <div className={`p-6 ${(hasCustomCake || hasGalleryCake) ? 'pt-10' : ''}`}>
                     <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
                       <div>
                         <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
@@ -316,16 +328,16 @@ Order ID: #${shortOrderId}`;
                               </div>
                               <div className="flex-1 min-w-0">
                                 <div className="font-semibold text-dark flex items-center flex-wrap gap-2">
-                                  <span className="truncate">{item.isCustomCake && item.customCakeId ? 'Custom Cake' : (item.nameEN || item.name)}</span>
+                                  <span className="truncate">{(item.isCustomCake && item.customCakeId && !item.customCakeId.isGalleryRequest) ? 'Custom Cake' : (item.nameEN || item.name)}</span>
                                   {item.isCustomCake && (
-                                    <span className="bg-amber-100 text-amber-800 text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wide">
-                                      Custom Cake
+                                    <span className={`${item.customCakeId?.isGalleryRequest ? 'bg-green-100 text-green-800' : 'bg-amber-100 text-amber-800'} text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wide`}>
+                                      {item.customCakeId?.isGalleryRequest ? 'Gallery Cake' : 'Custom Cake'}
                                     </span>
                                   )}
                                 </div>
                                 {item.isCustomCake && item.customCakeId && (
                                   <div className="text-xs text-gray-600 mt-1 flex flex-wrap gap-x-3 gap-y-1">
-                                    {item.customCakeId.weight && <span><span className="text-gray-400">Weight:</span> {item.customCakeId.weight}kg</span>}
+                                    {item.customCakeId.weight && <span><span className="text-gray-400">Weight:</span> {String(item.customCakeId.weight).toLowerCase().includes('kg') || String(item.customCakeId.weight).toLowerCase().includes('g') ? item.customCakeId.weight : `${item.customCakeId.weight}kg`}</span>}
                                     {item.customCakeId.flavour && <span><span className="text-gray-400">Flavour:</span> {item.customCakeId.flavour}</span>}
                                     {item.customCakeId.shape && <span><span className="text-gray-400">Shape:</span> {item.customCakeId.shape}</span>}
                                     {item.customCakeId.color && <span><span className="text-gray-400">Color:</span> {item.customCakeId.color}</span>}

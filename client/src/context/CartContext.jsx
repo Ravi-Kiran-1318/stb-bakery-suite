@@ -42,6 +42,7 @@ export const CartProvider = ({ children }) => {
           isGallery: product.isGallery || false,
           isCustomCake: product.isCustomCake || false,
           customCakeId: product.customCakeId || null,
+          isGalleryRequest: product.isGalleryRequest || false,
           requestedDate: product.requestedDate || null,
           requestedTime: product.requestedTime || null
         },

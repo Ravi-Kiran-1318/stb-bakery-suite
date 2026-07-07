@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import axiosInstance from '../../utils/axiosInstance';
 import PageWrapper from '../../components/PageWrapper';
 import Footer from '../../components/Footer';
+import HowItWorksStepper from '../../components/HowItWorksStepper';
 import { CartContext } from '../../context/CartContext';
 import { ToastContext } from '../../context/ToastContext';
 import { useAuth } from '../../context/AuthContext';
@@ -142,8 +143,8 @@ const Gallery = () => {
 
   return (
     <PageWrapper>
-      <div className="bg-[#fefaf3] min-h-screen pt-16 sm:pt-20 flex flex-col">
-        <div className="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-12 w-full">
+      <div className="bg-[#fefaf3] min-h-screen pt-14 sm:pt-16 flex flex-col">
+        <div className="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-0 pb-6 sm:pb-12 w-full">
           
           <div className="text-center mb-6 sm:mb-12">
             <h1 className="text-3xl sm:text-4xl md:text-5xl font-serif font-bold text-[#2d170a] mb-3 sm:mb-4">
@@ -155,6 +156,12 @@ const Gallery = () => {
                 : 'Browse our beautiful designs and add your favorite to the cart.'}
             </p>
           </div>
+
+          {viewState === 'categories' && (
+            <div className="mb-12">
+              <HowItWorksStepper hideCTA={true} />
+            </div>
+          )}
 
           {loading ? (
             <div className="flex justify-center items-center h-64">

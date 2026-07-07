@@ -18,7 +18,7 @@ const CustomerDashboard = () => {
 
   useEffect(() => {
     // Redirect if invalid tab
-    if (!['orders', 'profile', 'reminders', 'favorites', 'addresses', 'customcakes'].includes(activeTab)) {
+    if (!['orders', 'profile', 'reminders', 'favorites', 'addresses'].includes(activeTab)) {
       navigate('/customer/dashboard?tab=orders', { replace: true });
     }
   }, [activeTab, navigate]);
@@ -35,8 +35,6 @@ const CustomerDashboard = () => {
         return <RemindersTab />;
       case 'addresses':
         return <AddressesTab />;
-      case 'customcakes':
-        return <CustomOrdersTab />;
       default:
         return <MyOrders />;
     }
@@ -45,7 +43,6 @@ const CustomerDashboard = () => {
   const tabs = [
     { id: 'orders', label: '📦 My Orders' },
     { id: 'favorites', label: '❤️ Favorites' },
-    { id: 'customcakes', label: '🎂 Custom Cakes' },
     { id: 'addresses', label: '📍 Addresses' },
     { id: 'reminders', label: '📅 Reminders' },
     { id: 'profile', label: '👤 Profile' },

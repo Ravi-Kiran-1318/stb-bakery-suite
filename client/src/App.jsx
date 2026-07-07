@@ -16,6 +16,7 @@ import Checkout from './pages/customer/Checkout';
 import CheckoutAddons from './pages/public/CheckoutAddons';
 import OrderConfirmation from './pages/customer/OrderConfirmation';
 import CustomerDashboard from './pages/customer/CustomerDashboard';
+import CustomCakesPage from './pages/customer/CustomCakesPage';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import PrivateRoute from './components/PrivateRoute';
 import Navbar from './components/Navbar';
@@ -90,6 +91,14 @@ const AnimatedRoutes = () => {
           element={
             <PrivateRoute role="customer">
               <PageWrapper><CustomerDashboard /></PageWrapper>
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/custom-cakes"
+          element={
+            <PrivateRoute role="customer">
+              <PageWrapper><CustomCakesPage /></PageWrapper>
             </PrivateRoute>
           }
         />

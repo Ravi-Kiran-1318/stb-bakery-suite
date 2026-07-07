@@ -11,7 +11,7 @@ const CustomOrdersTab = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [activeFilter, setActiveFilter] = useState('All');
+  const [activeFilter, setActiveFilter] = useState('Custom Cakes');
   const { addToast } = useContext(ToastContext);
   const location = useLocation();
 
@@ -175,11 +175,7 @@ const CustomOrdersTab = () => {
       transition={{ duration: 0.4 }}
       className="space-y-6"
     >
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end border-b border-gray-200 pb-4 gap-4">
-        <div>
-          <h2 className="text-2xl font-bold text-gray-800">Custom Cake Requests</h2>
-          <p className="text-gray-500 mt-1 text-sm sm:text-base">Upload an image and request a quote for your dream cake.</p>
-        </div>
+      <div className="flex justify-end pb-2">
         {!showForm && (
           <button 
             onClick={() => setShowForm(true)} 

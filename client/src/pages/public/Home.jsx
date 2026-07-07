@@ -5,6 +5,7 @@ import ProductCard from '../../components/ProductCard';
 import WhatsAppButton from '../../components/WhatsAppButton';
 import Footer from '../../components/Footer';
 import PageWrapper from '../../components/PageWrapper';
+import HowItWorksStepper from '../../components/HowItWorksStepper';
 import axiosInstance from '../../utils/axiosInstance';
 import { useTranslation } from 'react-i18next';
 
@@ -40,6 +41,7 @@ const Home = () => {
 
   const sidebarCategories = [
     { icon: '📷', label: 'Cake Gallery' },
+    { icon: '🎂', label: 'Custom Cakes' },
     { icon: '🎉', label: 'Party items' },
     { icon: '🎈', label: 'Decoration items' },
   ];
@@ -220,7 +222,7 @@ const Home = () => {
                 </button>
 
                 <Link
-                  to="/customer/dashboard?tab=customcakes"
+                  to="/custom-cakes"
                   className="w-full sm:w-auto flex items-center justify-center gap-2 font-medium rounded-[2rem] transition-all duration-200 hover:scale-105 active:scale-95 shadow-sm"
                   style={{
                     padding: '9px 28px',
@@ -286,6 +288,8 @@ const Home = () => {
                   linkPath = `/party-decorations?category=${slug}`;
                 } else if (slug === 'cake-gallery') {
                   linkPath = '/gallery';
+                } else if (slug === 'custom-cakes') {
+                  linkPath = '/custom-cakes';
                 }
                 
                 return (
@@ -337,6 +341,8 @@ const Home = () => {
                   linkPath = `/party-decorations?category=${slug}`;
                 } else if (slug === 'cake-gallery') {
                   linkPath = '/gallery';
+                } else if (slug === 'custom-cakes') {
+                  linkPath = '/custom-cakes';
                 }
                 
                 return (
@@ -370,6 +376,13 @@ const Home = () => {
 
           </div>
         </div>
+
+        {/* ═══════════════════════════════════════════════════════
+            HOW IT WORKS SECTION
+        ═══════════════════════════════════════════════════════ */}
+        <section className="py-8 md:py-12 bg-white border-t border-[#f1e6da]">
+          <HowItWorksStepper />
+        </section>
 
         {/* ═══════════════════════════════════════════════════════
             LOVED BY EVERYONE SECTION

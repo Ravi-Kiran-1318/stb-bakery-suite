@@ -29,7 +29,35 @@
 
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <style>
+        #pwa-splash {
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100vw;
+          height: 100vh;
+          background-color: #ffffff; /* Match manifest background_color */
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          z-index: 999999;
+        }
+        @media (prefers-color-scheme: dark) {
+          #pwa-splash {
+            background-color: #121212; /* Dark mode fallback if manifest respects it */
+          }
+        }
+        #pwa-splash img {
+          width: 192px;
+          height: 192px;
+          border-radius: 20%;
+        }
+      </style>
+      <div id="pwa-splash">
+        <img src="/icon-192.png" alt="Sri Tirupati Bakery" />
+      </div>
+    </div>
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
     <script type="module" src="/src/main.jsx"></script>
     <script>

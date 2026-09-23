@@ -192,7 +192,10 @@ const CustomOrdersTab = () => {
           {['All', 'Custom Cakes', 'Gallery Cakes'].map(filter => (
             <button
               key={filter}
-              onClick={() => setActiveFilter(filter)}
+              onClick={() => {
+                setActiveFilter(filter);
+                navigate(`/custom-cakes?tab=${encodeURIComponent(filter)}`, { replace: true });
+              }}
               className={`px-4 sm:px-5 py-2 rounded-full font-bold text-sm whitespace-nowrap transition-colors border-2 ${
                 activeFilter === filter 
                   ? 'bg-amber-500 border-amber-500 text-white shadow-sm' 

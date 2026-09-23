@@ -1,5 +1,5 @@
-import React from 'react';
-import { motion } from 'framer-motion';
+import React, { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Link, useNavigate } from 'react-router-dom';
 import PageWrapper from '../../components/PageWrapper';
 import Footer from '../../components/Footer';
@@ -14,6 +14,8 @@ const Cart = () => {
   const navigate = useNavigate();
   const { i18n } = useTranslation();
   const lang = i18n.language === 'te' ? 'te' : 'en';
+  
+  const [showClearConfirm, setShowClearConfirm] = useState(false);
 
   const subtotal = items.reduce((acc, item) => acc + item.price * item.qty, 0);
 
@@ -31,9 +33,12 @@ const Cart = () => {
   };
 
   const handleClearCart = () => {
-    if (window.confirm('Are you sure you want to clear your cart?')) {
-      clearCart();
-    }
+    setShowClearConfirm(true);
+  };
+
+  const confirmClear = () => {
+    clearCart();
+    setShowClearConfirm(false);
   };
 
   return (
@@ -197,6 +202,47 @@ const Cart = () => {
         </div>
         <Footer />
       </div>
+
+      <AnimatePresence>
+        {showClearConfirm && (
+          <>
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowClearConfirm(false)}
+              className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50"
+            />
+            <div className="fixed inset-0 flex items-center justify-center z-50 p-4 pointer-events-none">
+              <motion.div 
+                initial={{ opacity: 0, scale: 0.95, y: 10 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.95, y: 10 }}
+                className="bg-white rounded-2xl shadow-xl w-full max-w-sm overflow-hidden pointer-events-auto"
+              >
+                <div className="p-6">
+                  <h3 className="text-xl font-bold text-gray-900 mb-2">Clear Cart?</h3>
+                  <p className="text-gray-600">Are you sure you want to remove all items from your cart? This action cannot be undone.</p>
+                </div>
+                <div className="px-6 py-4 bg-gray-50 flex justify-end gap-3 border-t border-gray-100">
+                  <button 
+                    onClick={() => setShowClearConfirm(false)}
+                    className="px-4 py-2 rounded-xl text-gray-600 font-semibold hover:bg-gray-200 transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button 
+                    onClick={confirmClear}
+                    className="px-4 py-2 rounded-xl bg-red-500 hover:bg-red-600 text-white font-semibold shadow-sm transition-colors"
+                  >
+                    Clear Cart
+                  </button>
+                </div>
+              </motion.div>
+            </div>
+          </>
+        )}
+      </AnimatePresence>
     </PageWrapper>
   );
 };

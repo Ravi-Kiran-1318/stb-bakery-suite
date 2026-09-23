@@ -25,10 +25,14 @@ import PageWrapper from './components/PageWrapper';
 import FloatingHomeButton from './components/FloatingHomeButton';
 import MobileBottomNav from './components/MobileBottomNav';
 import InstallPrompt from './components/InstallPrompt';
+import { usePushNotifications } from './hooks/usePushNotifications';
 
 // A helper component to handle route transitions
 const AnimatedRoutes = () => {
   const location = useLocation();
+  
+  // Initialize Push Notifications (requests permission and registers foreground listener)
+  usePushNotifications();
   
   // Automatically scroll to the top when navigating, or scroll to hash if present
   React.useEffect(() => {

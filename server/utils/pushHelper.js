@@ -1,16 +1,5 @@
-const webpush = require('web-push');
+const admin = require('../config/firebaseAdmin');
 const User = require('../models/User');
-
-// Configure VAPID details only if env vars are present
-if (process.env.VAPID_SUBJECT && process.env.VAPID_PUBLIC_KEY && process.env.VAPID_PRIVATE_KEY) {
-  webpush.setVapidDetails(
-    process.env.VAPID_SUBJECT,
-    process.env.VAPID_PUBLIC_KEY,
-    process.env.VAPID_PRIVATE_KEY
-  );
-} else {
-  console.warn('⚠️ WARNING: VAPID keys are missing from environment variables. Push notifications will not work.');
-}
 
 /**
  * Send a push notification to a specific user
@@ -20,33 +9,41 @@ if (process.env.VAPID_SUBJECT && process.env.VAPID_PUBLIC_KEY && process.env.VAP
 const sendPushNotification = async (userId, payload) => {
   try {
     const user = await User.findById(userId);
-    if (!user || !user.pushSubscription || !user.pushSubscription.endpoint) {
-      // User doesn't exist or hasn't subscribed to push notifications
+    if (!user || !user.fcmTokens || user.fcmTokens.length === 0) {
       return false;
     }
 
-    const subscription = user.pushSubscription;
-    const stringifiedPayload = JSON.stringify(payload);
-
-    const options = {
-      urgency: 'high',
-      TTL: 86400
+    const message = {
+      notification: {
+        title: payload.title,
+        body: payload.body,
+      },
+      data: {
+        url: payload.url,
+        type: payload.type,
+      },
+      tokens: user.fcmTokens,
     };
 
-    await webpush.sendNotification(subscription, stringifiedPayload, options);
+    const response = await admin.messaging().sendEachForMulticast(message);
+    
+    // Clean up invalid tokens
+    if (response.failureCount > 0) {
+      const failedTokens = [];
+      response.responses.forEach((resp, idx) => {
+        if (!resp.success) {
+          failedTokens.push(user.fcmTokens[idx]);
+        }
+      });
+      if (failedTokens.length > 0) {
+        await User.findByIdAndUpdate(userId, {
+          $pull: { fcmTokens: { $in: failedTokens } }
+        });
+      }
+    }
     return true;
   } catch (error) {
-    if (error.statusCode === 410) {
-      // 410 Gone means the subscription is no longer valid (e.g. user revoked permission)
-      // We should remove it from the database
-      try {
-        await User.findByIdAndUpdate(userId, { $unset: { pushSubscription: 1 } });
-      } catch (err) {
-        console.error('Failed to remove invalid push subscription:', err);
-      }
-    } else {
-      console.error('Error sending push notification:', error);
-    }
+    console.error('Error sending push notification:', error);
     return false;
   }
 };
@@ -57,26 +54,31 @@ const sendPushNotification = async (userId, payload) => {
  */
 const notifyAdmins = async (payload) => {
   try {
-    const admins = await User.find({ role: 'admin', pushSubscription: { $exists: true, $ne: null } });
+    const admins = await User.find({ role: 'admin', fcmTokens: { $exists: true, $not: { $size: 0 } } });
     
-    const stringifiedPayload = JSON.stringify(payload);
+    let allTokens = [];
+    admins.forEach(admin => {
+      allTokens = allTokens.concat(admin.fcmTokens);
+    });
+
+    if (allTokens.length === 0) return;
+
+    const message = {
+      notification: {
+        title: payload.title,
+        body: payload.body,
+      },
+      data: {
+        url: payload.url,
+        type: payload.type,
+      },
+      tokens: allTokens,
+    };
+
+    const response = await admin.messaging().sendEachForMulticast(message);
     
-    for (const admin of admins) {
-      if (!admin.pushSubscription || !admin.pushSubscription.endpoint) continue;
-
-      const options = {
-        urgency: 'high',
-        TTL: 86400
-      };
-
-      try {
-        await webpush.sendNotification(admin.pushSubscription, stringifiedPayload, options);
-      } catch (err) {
-        if (err.statusCode === 410) {
-          await User.findByIdAndUpdate(admin._id, { $unset: { pushSubscription: 1 } });
-        }
-      }
-    }
+    // We could clean up invalid tokens here similarly, but it requires mapping tokens back to users.
+    // For admins, it's less critical as there are few admins, but let's keep it simple.
   } catch (error) {
     console.error('Error notifying admins:', error);
   }

@@ -59,13 +59,9 @@ const userSchema = new mongoose.Schema(
         lng: { type: Number, required: true }
       }
     ],
-    pushSubscription: {
-      endpoint: String,
-      keys: {
-        p256dh: String,
-        auth: String
-      }
-    },
+    fcmTokens: [{
+      type: String
+    }],
   },
   { timestamps: true }
 );

@@ -3,34 +3,50 @@ const router = express.Router();
 const authMiddleware = require('../middleware/authMiddleware');
 const User = require('../models/User');
 
-// GET /api/push/vapid-public-key
-router.get('/vapid-public-key', (req, res) => {
-  res.status(200).json({ publicKey: process.env.VAPID_PUBLIC_KEY });
-});
-
-// POST /api/push/subscribe
-router.post('/subscribe', authMiddleware, async (req, res) => {
+// POST /api/push/fcm-token
+router.post('/fcm-token', authMiddleware, async (req, res) => {
   try {
-    const subscription = req.body;
+    const { token } = req.body;
     
-    // Validate subscription object
-    if (!subscription || !subscription.endpoint) {
-      return res.status(400).json({ message: 'Invalid subscription object' });
+    if (!token) {
+      return res.status(400).json({ message: 'Token is required' });
     }
 
-    // Save to user
     const user = await User.findById(req.user._id);
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
 
-    user.pushSubscription = subscription;
-    await user.save();
+    // Add token if not already in array
+    if (!user.fcmTokens) user.fcmTokens = [];
+    if (!user.fcmTokens.includes(token)) {
+      user.fcmTokens.push(token);
+      await user.save();
+    }
 
-    res.status(201).json({ message: 'Subscription saved successfully' });
+    res.status(200).json({ message: 'FCM token saved successfully' });
   } catch (error) {
-    console.error('Push subscribe error:', error);
-    res.status(500).json({ message: 'Failed to save subscription' });
+    console.error('FCM token save error:', error);
+    res.status(500).json({ message: 'Failed to save FCM token' });
+  }
+});
+
+// DELETE /api/push/fcm-token
+router.delete('/fcm-token', authMiddleware, async (req, res) => {
+  try {
+    const { token } = req.body;
+    if (!token) {
+      return res.status(400).json({ message: 'Token is required' });
+    }
+
+    await User.findByIdAndUpdate(req.user._id, {
+      $pull: { fcmTokens: token }
+    });
+
+    res.status(200).json({ message: 'FCM token removed successfully' });
+  } catch (error) {
+    console.error('FCM token remove error:', error);
+    res.status(500).json({ message: 'Failed to remove FCM token' });
   }
 });
 

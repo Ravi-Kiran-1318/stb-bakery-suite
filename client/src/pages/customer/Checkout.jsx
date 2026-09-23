@@ -331,15 +331,15 @@ const Checkout = () => {
             <div className="flex-grow w-full space-y-8">
               
               {/* Delivery Type Toggle */}
-              <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100">
-                <h2 className="text-xl font-bold text-gray-900 mb-6">How would you like to receive your order?</h2>
+              <div className="bg-white p-4 sm:p-6 rounded-2xl sm:rounded-3xl shadow-sm border border-gray-100">
+                <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-4 sm:mb-6">How would you like to receive your order?</h2>
                 <div className="grid grid-cols-2 gap-4">
                   <button 
                     onClick={() => {
                       if (isDeliveryAvailable) setDeliveryType('Delivery');
                     }}
                     disabled={!isDeliveryAvailable}
-                    className={`p-4 rounded-xl text-lg font-bold transition-all relative ${
+                    className={`p-3 sm:p-4 rounded-xl text-base sm:text-lg font-bold transition-all relative ${
                       deliveryType === 'Delivery' 
                         ? 'bg-amber-500 text-white shadow-md border-transparent' 
                         : !isDeliveryAvailable
@@ -356,7 +356,7 @@ const Checkout = () => {
                   </button>
                   <button 
                     onClick={() => setDeliveryType('Pickup')}
-                    className={`p-4 rounded-xl text-lg font-bold transition-all ${
+                    className={`p-3 sm:p-4 rounded-xl text-base sm:text-lg font-bold transition-all ${
                       deliveryType === 'Pickup' 
                         ? 'bg-amber-500 text-white shadow-md border-transparent' 
                         : 'bg-white text-gray-600 border-2 border-gray-200 hover:border-amber-500'
@@ -375,9 +375,9 @@ const Checkout = () => {
                     initial={{ opacity: 0, height: 0 }}
                     animate={{ opacity: 1, height: 'auto' }}
                     exit={{ opacity: 0, height: 0 }}
-                    className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 overflow-hidden space-y-6"
+                    className="bg-white p-4 sm:p-6 rounded-2xl sm:rounded-3xl shadow-sm border border-gray-100 overflow-hidden space-y-4 sm:space-y-6"
                   >
-                    <h2 className="text-xl font-bold text-gray-900">Delivery Location</h2>
+                    <h2 className="text-lg sm:text-xl font-bold text-gray-900">Delivery Location</h2>
                     
                     {!isAddingNewAddress && savedAddresses.length > 0 && (
                       <div className="space-y-4">
@@ -472,9 +472,9 @@ const Checkout = () => {
                     initial={{ opacity: 0, height: 0 }}
                     animate={{ opacity: 1, height: 'auto' }}
                     exit={{ opacity: 0, height: 0 }}
-                    className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 overflow-hidden"
+                    className="bg-white p-4 sm:p-6 rounded-2xl sm:rounded-3xl shadow-sm border border-gray-100 overflow-hidden"
                   >
-                    <h2 className="text-xl font-bold text-gray-900 mb-4">Pickup Location</h2>
+                    <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-3 sm:mb-4">Pickup Location</h2>
                     
                     <div className="bg-amber-50 p-4 rounded-xl border border-amber-100 flex items-start gap-3">
                       <span className="text-2xl mt-0.5">🏪</span>
@@ -488,8 +488,8 @@ const Checkout = () => {
               </AnimatePresence>
 
               {/* Date & Time */}
-              <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100">
-                <h2 className="text-xl font-bold text-gray-900 mb-6">Requested Date & Time</h2>
+              <div className="bg-white p-4 sm:p-6 rounded-2xl sm:rounded-3xl shadow-sm border border-gray-100">
+                <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-4 sm:mb-6">Requested Date & Time</h2>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-semibold text-gray-700 mb-2">
@@ -525,15 +525,15 @@ const Checkout = () => {
               </div>
 
               {/* Payment Method */}
-              <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100">
-                <h2 className="text-xl font-bold text-gray-900 mb-6">
+              <div className="bg-white p-4 sm:p-6 rounded-2xl sm:rounded-3xl shadow-sm border border-gray-100">
+                <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-4 sm:mb-6">
                   Payment Method <span className="text-red-500">*</span>
                 </h2>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div 
                     onClick={() => setPaymentMethod('Online')}
-                    className={`cursor-pointer p-5 rounded-2xl border-2 transition-all ${
+                    className={`p-4 sm:p-5 rounded-2xl border-2 transition-all ${
                       paymentMethod === 'Online' 
                         ? 'border-amber-500 bg-amber-50 shadow-md' 
                         : 'border-gray-200 hover:border-amber-300 hover:bg-gray-50'
@@ -550,7 +550,7 @@ const Checkout = () => {
                     onClick={() => {
                       if (!hasCustomOrGalleryCake) setPaymentMethod('COD');
                     }}
-                    className={`p-5 rounded-2xl border-2 transition-all ${
+                    className={`p-4 sm:p-5 rounded-2xl border-2 transition-all ${
                       hasCustomOrGalleryCake ? 'opacity-50 cursor-not-allowed bg-gray-50 border-gray-200' :
                       paymentMethod === 'COD' 
                         ? 'border-amber-500 bg-amber-50 shadow-md cursor-pointer' 
@@ -587,8 +587,8 @@ const Checkout = () => {
               </div>
 
               {/* Notes */}
-              <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100">
-                <h2 className="text-xl font-bold text-gray-900 mb-6">Additional Notes (Optional)</h2>
+              <div className="bg-white p-4 sm:p-6 rounded-2xl sm:rounded-3xl shadow-sm border border-gray-100">
+                <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-4 sm:mb-6">Additional Notes (Optional)</h2>
                 <textarea 
                   className="input-field w-full h-24 resize-none"
                   value={notes}
@@ -601,8 +601,8 @@ const Checkout = () => {
 
             {/* Right: Sticky Summary */}
             <div className="w-full lg:w-96 flex-shrink-0 sticky top-24">
-              <div className="bg-white p-6 rounded-3xl shadow-lg border border-gray-100">
-                <h2 className="text-xl font-bold text-gray-900 mb-6">Order Summary</h2>
+              <div className="bg-white p-4 sm:p-6 rounded-2xl sm:rounded-3xl shadow-lg border border-gray-100">
+                <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-4 sm:mb-6">Order Summary</h2>
                 
                 <div className="space-y-4 mb-6 max-h-60 overflow-y-auto pr-2">
                   {items.map(item => (

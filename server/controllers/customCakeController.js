@@ -30,7 +30,7 @@ const createRequest = async (req, res) => {
     await dispatchNotification(req, {
       message: `New custom cake request from ${req.user.name}`,
       type: 'custom_cake',
-      actionTab: 'custom-cakes',
+      actionTab: isGalleryRequest ? 'gallery-cakes' : 'custom-cakes',
       referenceId: newRequest._id,
       recipientRole: 'admin'
     });
@@ -91,7 +91,7 @@ const updateRequestStatus = async (req, res) => {
           userId: request.user._id,
           message: 'Your custom cake request has a quote! 🍰',
           type: 'custom_cake',
-          actionTab: 'customcakes',
+          actionTab: request.isGalleryRequest ? 'gallery-cakes' : 'custom-cakes',
           referenceId: request._id,
           recipientRole: 'customer'
         });
@@ -99,7 +99,7 @@ const updateRequestStatus = async (req, res) => {
         await dispatchNotification(req, {
           message: `${request.user.name} accepted the quote and added the custom cake to cart!`,
           type: 'custom_cake',
-          actionTab: 'custom-cakes',
+          actionTab: request.isGalleryRequest ? 'gallery-cakes' : 'custom-cakes',
           referenceId: request._id,
           recipientRole: 'admin'
         });
@@ -109,7 +109,7 @@ const updateRequestStatus = async (req, res) => {
             userId: request.user._id,
             message: `Your custom cake request was cancelled by the bakery.`,
             type: 'custom_cake',
-            actionTab: 'customcakes',
+            actionTab: request.isGalleryRequest ? 'gallery-cakes' : 'custom-cakes',
             referenceId: request._id,
             recipientRole: 'customer'
           });
@@ -117,7 +117,7 @@ const updateRequestStatus = async (req, res) => {
           await dispatchNotification(req, {
             message: `${request.user.name} cancelled their custom cake request.`,
             type: 'custom_cake',
-            actionTab: 'custom-cakes',
+            actionTab: request.isGalleryRequest ? 'gallery-cakes' : 'custom-cakes',
             referenceId: request._id,
             recipientRole: 'admin'
           });
@@ -127,7 +127,7 @@ const updateRequestStatus = async (req, res) => {
           userId: request.user._id,
           message: `Your custom cake request was declined. Reason: ${adminNotes || 'Not specified'}`,
           type: 'custom_cake',
-          actionTab: 'customcakes',
+          actionTab: request.isGalleryRequest ? 'gallery-cakes' : 'custom-cakes',
           referenceId: request._id,
           recipientRole: 'customer'
         });

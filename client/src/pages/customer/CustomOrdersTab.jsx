@@ -11,9 +11,11 @@ const CustomOrdersTab = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [, setIsSubmitting] = useState(false);
-  const [activeFilter, setActiveFilter] = useState('Custom Cakes');
-  const { addToast } = useContext(ToastContext);
   const location = useLocation();
+  const queryParams = new URLSearchParams(location.search);
+  const defaultTab = queryParams.get('tab') || 'All';
+  const [activeFilter, setActiveFilter] = useState(defaultTab);
+  const { addToast } = useContext(ToastContext);
 
   const [formData, setFormData] = useState({
     description: '',
@@ -30,6 +32,12 @@ const CustomOrdersTab = () => {
 
   useEffect(() => {
     fetchRequests();
+    
+    // Sync activeFilter with URL tab param
+    const currentTab = new URLSearchParams(location.search).get('tab');
+    if (currentTab) {
+      setActiveFilter(currentTab);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [location.search]);
 

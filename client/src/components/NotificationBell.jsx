@@ -74,7 +74,13 @@ const NotificationBell = () => {
       const timestamp = Date.now();
 
       if (actionTab) {
-        if (referenceId && actionTab === 'orders') {
+        if (basePath === '/customer/dashboard' && (actionTab === 'gallery-cakes' || actionTab === 'custom-cakes')) {
+          const tabName = actionTab === 'gallery-cakes' ? 'Gallery Cakes' : 'Custom Cakes';
+          navigate(`/custom-cakes?tab=${encodeURIComponent(tabName)}&t=${timestamp}`);
+        } else if (basePath === '/admin/dashboard' && (actionTab === 'gallery-cakes' || actionTab === 'custom-cakes')) {
+          // Admin handles both under the custom-cakes tab
+          navigate(`/admin/dashboard?tab=custom-cakes&t=${timestamp}`);
+        } else if (referenceId && actionTab === 'orders') {
           navigate(`${basePath}?tab=${actionTab}&search=${referenceId}&t=${timestamp}`);
         } else {
           navigate(`${basePath}?tab=${actionTab}&t=${timestamp}`);

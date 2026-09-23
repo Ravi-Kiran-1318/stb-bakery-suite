@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import axiosInstance from '../utils/axiosInstance';
 import { SocketContext } from '../context/SocketContext';
 import { AuthContext } from '../context/AuthContext';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const NotificationBell = () => {
   const [notifications, setNotifications] = useState([]);
@@ -145,39 +146,70 @@ const NotificationBell = () => {
         )}
       </button>
 
-      {isOpen && (
-        <>
-          <div className="absolute -right-16 sm:right-0 mt-2 w-80 max-w-[90vw] bg-white rounded-lg shadow-md z-50 border border-border overflow-hidden">
-            <div className="flex justify-between items-center p-3 border-b border-border bg-surface">
-              <h3 className="font-semibold text-dark">Notifications</h3>
-              <div className="flex gap-2">
-                <button onClick={handleMarkAllRead} className="text-xs text-accent hover:underline">Mark All Read</button>
-                <button onClick={handleClearAll} className="text-xs text-muted hover:text-red-500 hover:underline">Clear All</button>
-              </div>
-            </div>
-            
-            <div className="max-h-[300px] overflow-y-auto">
-              {notifications.length === 0 ? (
-                <div className="p-8 text-center border-b border-border">
-                  <div className="text-3xl mb-2">🔔</div>
-                  <p className="text-sm font-medium text-dark">No notifications yet.</p>
+      <AnimatePresence>
+        {isOpen && (
+          <>
+            {/* Backdrop overlay */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.3 }}
+              className="fixed inset-0 z-[100] bg-black/50 backdrop-blur-sm"
+              onClick={() => setIsOpen(false)}
+            />
+
+            {/* Sidebar drawer */}
+            <motion.div
+              initial={{ x: '100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '100%' }}
+              transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+              className="fixed top-0 right-0 h-[100dvh] w-[90%] sm:w-[400px] bg-white z-[110] shadow-2xl flex flex-col"
+            >
+              <div className="flex justify-between items-center p-4 border-b border-gray-100 bg-white">
+                <h3 className="text-lg font-bold text-gray-900">Notifications</h3>
+                <div className="flex items-center gap-3">
+                  <button onClick={handleMarkAllRead} className="text-xs font-semibold text-amber-600 hover:text-amber-700 transition-colors">Mark All Read</button>
+                  <button onClick={handleClearAll} className="text-xs font-semibold text-red-500 hover:text-red-600 transition-colors">Clear All</button>
+                  <button onClick={() => setIsOpen(false)} className="p-1 rounded-full hover:bg-gray-100 transition-colors text-gray-500 ml-1">
+                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
                 </div>
-              ) : (
-                notifications.map((n) => (
-                  <div 
-                    key={n._id} 
-                    onClick={() => handleMarkAsRead(n._id, n.actionTab, n.referenceId, n.recipientRole)}
-                    className={`p-3 border-b border-border hover:bg-surface cursor-pointer transition-colors ${!n.read ? 'border-l-4 border-l-accent bg-amber-50/30' : ''}`}
-                  >
-                    <p className="text-sm text-dark">{n.message}</p>
-                    <p className="text-xs text-muted mt-1">{getRelativeTime(n.createdAt)}</p>
+              </div>
+              
+              <div className="flex-1 overflow-y-auto pb-safe">
+                {notifications.length === 0 ? (
+                  <div className="p-8 text-center flex flex-col items-center justify-center h-full opacity-60">
+                    <div className="text-4xl mb-3">🔔</div>
+                    <p className="text-base font-medium text-gray-700">No notifications yet.</p>
                   </div>
-                ))
-              )}
-            </div>
-          </div>
-        </>
-      )}
+                ) : (
+                  notifications.map((n) => (
+                    <div 
+                      key={n._id} 
+                      onClick={() => handleMarkAsRead(n._id, n.actionTab, n.referenceId, n.recipientRole)}
+                      className={`p-4 border-b border-gray-100 hover:bg-gray-50 cursor-pointer transition-colors ${!n.read ? 'border-l-4 border-l-amber-500 bg-amber-50/30' : ''}`}
+                    >
+                      <div className="flex gap-3">
+                        <div className="flex-shrink-0 mt-0.5 text-xl">
+                          {n.message.includes('quote') ? '🍰' : n.message.includes('success') ? '🎉' : '🔔'}
+                        </div>
+                        <div>
+                          <p className={`text-sm ${!n.read ? 'font-semibold text-gray-900' : 'text-gray-700'}`}>{n.message}</p>
+                          <p className="text-xs text-gray-500 mt-1.5 font-medium">{getRelativeTime(n.createdAt)}</p>
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
 
       <style>{`
         @keyframes rock {

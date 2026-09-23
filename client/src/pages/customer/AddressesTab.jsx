@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext, useCallback } from 'react';
+import { useState, useEffect, useContext, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import axiosInstance from '../../utils/axiosInstance';
 import { ToastContext } from '../../context/ToastContext';
@@ -34,19 +34,19 @@ const AddressesTab = () => {
   }, []);
 
   useEffect(() => {
-    fetchAddresses();
-  }, []);
+    const fetchAddresses = async () => {
+      try {
+        const { data } = await axiosInstance.get('/users/addresses');
+        setAddresses(data);
+      } catch (error) {
+        addToast('Failed to load addresses', 'error');
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
-  const fetchAddresses = async () => {
-    try {
-      const { data } = await axiosInstance.get('/users/addresses');
-      setAddresses(data);
-    } catch (error) {
-      addToast('Failed to load addresses', 'error');
-    } finally {
-      setIsLoading(false);
-    }
-  };
+    fetchAddresses();
+  }, [addToast]);
 
   const handleDelete = async (id) => {
     if (!window.confirm('Are you sure you want to delete this address?')) return;

@@ -51,7 +51,7 @@ const AnimatedRoutes = () => {
   }, [location.pathname, location.hash]);
 
   return (
-    <AnimatePresence mode="wait">
+    <>
       <Routes location={location} key={location.pathname}>
         <Route path="/" element={<PageWrapper><Home /></PageWrapper>} />
         <Route path="/shop" element={<PageWrapper><Shop /></PageWrapper>} />
@@ -112,7 +112,7 @@ const AnimatedRoutes = () => {
         />
         <Route path="*" element={<PageWrapper><div>404 Not Found</div></PageWrapper>} />
       </Routes>
-    </AnimatePresence>
+    </>
   );
 };
 

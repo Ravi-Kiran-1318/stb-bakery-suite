@@ -26,6 +26,16 @@ const NotificationBell = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  const fetchNotifications = useCallback(async () => {
+    try {
+      const roleParam = user?.role === 'admin' ? '?role=admin' : '?role=customer';
+      const { data } = await axiosInstance.get(`/notifications${roleParam}`);
+      setNotifications(data);
+    } catch (error) {
+      console.error('Failed to fetch notifications', error);
+    }
+  }, [user]);
+
   useEffect(() => {
     if (user) {
       fetchNotifications();
@@ -43,16 +53,6 @@ const NotificationBell = () => {
       };
     }
   }, [socket]);
-
-  const fetchNotifications = useCallback(async () => {
-    try {
-      const roleParam = user?.role === 'admin' ? '?role=admin' : '?role=customer';
-      const { data } = await axiosInstance.get(`/notifications${roleParam}`);
-      setNotifications(data);
-    } catch (error) {
-      console.error('Failed to fetch notifications', error);
-    }
-  }, [user]);
 
   const unreadCount = notifications.filter((n) => !n.read).length;
 

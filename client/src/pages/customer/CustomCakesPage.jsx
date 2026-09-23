@@ -1,4 +1,4 @@
-import React from 'react';
+
 import PageWrapper from '../../components/PageWrapper';
 import Footer from '../../components/Footer';
 import CustomOrdersTab from './CustomOrdersTab';

@@ -1,4 +1,6 @@
-import React, { createContext, useState, useEffect, useContext } from 'react';
+/* eslint-disable react-refresh/only-export-components */
+import { createContext, useState, useEffect, useContext } from 'react';
+import PropTypes from 'prop-types';
 import { AuthContext } from './AuthContext';
 
 export const CartContext = createContext();
@@ -79,4 +81,8 @@ export const CartProvider = ({ children }) => {
       {children}
     </CartContext.Provider>
   );
+};
+
+CartProvider.propTypes = {
+  children: PropTypes.node.isRequired
 };

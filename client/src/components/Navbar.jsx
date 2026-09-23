@@ -1,10 +1,10 @@
-import React, { useContext, useState } from 'react';
+import { useContext, useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { AuthContext } from '../context/AuthContext';
 import { CartContext } from '../context/CartContext';
 import NotificationBell from './NotificationBell';
-import { FaOm, FaStarAndCrescent, FaCross, FaSignOutAlt } from 'react-icons/fa';
+import { FaSignOutAlt } from 'react-icons/fa';
 import logoImg from '../assets/adminT_cropped.png';
 import adminIcon from '../assets/admin1.png';
 

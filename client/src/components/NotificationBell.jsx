@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext, useRef } from 'react';
+import { useState, useEffect, useContext, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axiosInstance from '../utils/axiosInstance';
 import { SocketContext } from '../context/SocketContext';
@@ -30,7 +30,7 @@ const NotificationBell = () => {
     if (user) {
       fetchNotifications();
     }
-  }, [user]);
+  }, [user, fetchNotifications]);
 
   useEffect(() => {
     if (socket) {
@@ -44,7 +44,7 @@ const NotificationBell = () => {
     }
   }, [socket]);
 
-  const fetchNotifications = async () => {
+  const fetchNotifications = useCallback(async () => {
     try {
       const roleParam = user?.role === 'admin' ? '?role=admin' : '?role=customer';
       const { data } = await axiosInstance.get(`/notifications${roleParam}`);
@@ -52,7 +52,7 @@ const NotificationBell = () => {
     } catch (error) {
       console.error('Failed to fetch notifications', error);
     }
-  };
+  }, [user]);
 
   const unreadCount = notifications.filter((n) => !n.read).length;
 

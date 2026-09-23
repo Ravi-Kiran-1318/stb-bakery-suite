@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import PageWrapper from '../../components/PageWrapper';
@@ -23,7 +23,7 @@ const Login = () => {
   const [googleIdToken, setGoogleIdToken] = useState('');
   const [googleMobile, setGoogleMobile] = useState('');
   // Phone auth states
-  const [isPhoneLogin, setIsPhoneLogin] = useState(false);
+  const [isPhoneLogin] = useState(false);
   const [phoneNumber, setPhoneNumber] = useState('');
   const [otp, setOtp] = useState('');
   const [showOtpInput, setShowOtpInput] = useState(false);
@@ -74,7 +74,7 @@ const Login = () => {
     if (!window.recaptchaVerifier) {
       window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
         size: 'invisible',
-        callback: (response) => {
+        callback: () => {
           // reCAPTCHA solved
         }
       });
@@ -332,7 +332,7 @@ const Login = () => {
           </div>
 
           <div className="text-center text-sm text-gray-600 mt-6">
-            Don't have an account? <Link to="/signup" className="text-amber-600 hover:text-amber-700 font-semibold">Sign up</Link>
+            Don&apos;t have an account? <Link to="/signup" className="text-amber-600 hover:text-amber-700 font-semibold">Sign up</Link>
           </div>
         </motion.div>
       </div>

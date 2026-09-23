@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import ProductCard from '../../components/ProductCard';
@@ -7,10 +7,8 @@ import Footer from '../../components/Footer';
 import PageWrapper from '../../components/PageWrapper';
 import HowItWorksStepper from '../../components/HowItWorksStepper';
 import axiosInstance from '../../utils/axiosInstance';
-import { useTranslation } from 'react-i18next';
 
 const Home = () => {
-  const { t } = useTranslation();
   const [lovedProducts, setLovedProducts] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -408,7 +406,7 @@ const Home = () => {
                 Loved by Everyone
               </h2>
               <p className="text-sm font-medium text-[#6e4f3a]">
-                Handpicked favorites that our customers can't get enough of.
+                Handpicked favorites that our customers can&apos;t get enough of.
               </p>
             </div>
 
@@ -498,7 +496,7 @@ const Home = () => {
                 </h2>
 
                 <p className="text-[1rem] leading-[1.8] text-[#6e4f3a] mb-5 font-medium">
-                  At Sri Tirupathi Venkatachalapathi Bakery, baking isn't just a business—it's a devotion. For over a decade, we have been a part of your daily celebrations, combining timeless traditional recipes with the finest ingredients to create treats that warm the heart.
+                  At Sri Tirupathi Venkatachalapathi Bakery, baking isn&apos;t just a business—it&apos;s a devotion. For over a decade, we have been a part of your daily celebrations, combining timeless traditional recipes with the finest ingredients to create treats that warm the heart.
                 </p>
                 <p className="text-[1rem] leading-[1.8] text-[#6e4f3a] mb-8 font-medium">
                   Every pastry, cake, and sweet is prepared fresh every single day. We pride ourselves on our uncompromising quality, hygienic standards, and the love we fold into every single batch. Thank you for making us a part of your family.

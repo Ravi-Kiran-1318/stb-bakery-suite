@@ -1,4 +1,6 @@
-import React, { createContext, useState, useEffect, useContext } from 'react';
+/* eslint-disable react-refresh/only-export-components */
+import { createContext, useState, useEffect, useContext } from 'react';
+import PropTypes from 'prop-types';
 import api from '../utils/axiosInstance';
 
 export const AuthContext = createContext();
@@ -61,4 +63,8 @@ export const AuthProvider = ({ children }) => {
       {children}
     </AuthContext.Provider>
   );
+};
+
+AuthProvider.propTypes = {
+  children: PropTypes.node.isRequired
 };

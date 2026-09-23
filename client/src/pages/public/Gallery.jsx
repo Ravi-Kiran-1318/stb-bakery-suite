@@ -1,11 +1,10 @@
-import React, { useState, useEffect, useContext } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import axiosInstance from '../../utils/axiosInstance';
 import PageWrapper from '../../components/PageWrapper';
 import Footer from '../../components/Footer';
 import HowItWorksStepper from '../../components/HowItWorksStepper';
-import { CartContext } from '../../context/CartContext';
 import { ToastContext } from '../../context/ToastContext';
 import { useAuth } from '../../context/AuthContext';
 
@@ -17,7 +16,6 @@ const Gallery = () => {
   const [viewState, setViewState] = useState('categories');
   const [selectedCategory, setSelectedCategory] = useState(null);
   
-  const { addToCart } = useContext(CartContext);
   const { addToast } = useContext(ToastContext);
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -111,7 +109,7 @@ const Gallery = () => {
 
     setIsSubmitting(true);
     try {
-      const { data } = await axiosInstance.post('/custom-cakes', {
+      await axiosInstance.post('/custom-cakes', {
         ...requestData,
         isGalleryRequest: true,
         galleryCakeId: selectedCake._id,

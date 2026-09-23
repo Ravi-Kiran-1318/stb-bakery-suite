@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import jsPDF from 'jspdf';
 import PageWrapper from '../../components/PageWrapper';
 import axiosInstance from '../../utils/axiosInstance';
@@ -10,7 +10,7 @@ const OrderConfirmation = () => {
   const { orderId } = useParams();
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [showConfetti, setShowConfetti] = useState(true);
+  const [, setShowConfetti] = useState(true);
 
   useEffect(() => {
     const fetchOrder = async () => {
@@ -89,14 +89,16 @@ const OrderConfirmation = () => {
     
     // Totals
     y += 5;
-    const subtotal = order.totalAmount - (order.deliveryType === 'Delivery' ? 50 : 0);
+    const subtotal = order.items.reduce((sum, item) => sum + (item.price * item.qty), 0);
+    const deliveryFee = order.totalAmount - subtotal;
+    
     doc.text(`Subtotal:`, 135, y + 5);
     doc.text(`Rs ${subtotal}`, 170, y + 5);
     
-    if (order.deliveryType === 'Delivery') {
+    if (order.deliveryType === 'Delivery' && deliveryFee > 0) {
       y += 8;
       doc.text(`Delivery Fee:`, 135, y + 5);
-      doc.text(`Rs 50`, 170, y + 5);
+      doc.text(`Rs ${deliveryFee}`, 170, y + 5);
     }
     
     y += 10;

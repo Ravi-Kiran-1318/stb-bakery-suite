@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import axiosInstance from '../../utils/axiosInstance';
@@ -167,14 +167,16 @@ const MyOrders = () => {
     
     // Totals
     y += 5;
-    const subtotal = order.totalAmount - (order.deliveryType === 'Delivery' ? 50 : 0);
+    const subtotal = order.items.reduce((sum, item) => sum + (item.price * item.qty), 0);
+    const deliveryFee = order.totalAmount - subtotal;
+    
     doc.text(`Subtotal:`, 135, y + 5);
     doc.text(`Rs ${subtotal}`, 170, y + 5);
     
-    if (order.deliveryType === 'Delivery') {
+    if (order.deliveryType === 'Delivery' && deliveryFee > 0) {
       y += 8;
       doc.text(`Delivery Fee:`, 135, y + 5);
-      doc.text(`Rs 50`, 170, y + 5);
+      doc.text(`Rs ${deliveryFee}`, 170, y + 5);
     }
     
     y += 10;
@@ -276,11 +278,6 @@ Order ID: #${shortOrderId}`;
               const isCancelled = order.status === 'Cancelled';
               const currentStepIndex = ORDER_STEPS.indexOf(order.status);
               
-              let itemsSummary = '';
-              if (order.items && order.items.length > 0) {
-                const firstItem = order.items[0].nameEN || order.items[0].name;
-                itemsSummary = order.items.length > 1 ? `${firstItem} and ${order.items.length - 1} more items` : firstItem;
-              }
 
               const hasCustomCake = order.items?.some(item => item.isCustomCake && (!item.customCakeId || !item.customCakeId.isGalleryRequest));
               const hasGalleryCake = order.items?.some(item => item.isCustomCake && item.customCakeId?.isGalleryRequest);

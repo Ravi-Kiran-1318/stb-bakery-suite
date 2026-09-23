@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate, useLocation } from 'react-router-dom';
 import axiosInstance from '../../utils/axiosInstance';
@@ -10,7 +10,7 @@ const CustomOrdersTab = () => {
   const [requests, setRequests] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [, setIsSubmitting] = useState(false);
   const [activeFilter, setActiveFilter] = useState('Custom Cakes');
   const { addToast } = useContext(ToastContext);
   const location = useLocation();
@@ -30,6 +30,7 @@ const CustomOrdersTab = () => {
 
   useEffect(() => {
     fetchRequests();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [location.search]);
 
   const fetchRequests = async () => {
@@ -45,14 +46,6 @@ const CustomOrdersTab = () => {
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
-
-  const handleImageChange = (e) => {
-    if (e.target.files && e.target.files[0]) {
-      const file = e.target.files[0];
-      setImageFile(file);
-      setImagePreview(URL.createObjectURL(file));
-    }
   };
 
   const handleSubmit = async (e) => {
@@ -394,7 +387,7 @@ const CustomOrdersTab = () => {
                   <div className="bg-blue-50 border border-blue-100 rounded-lg p-4 mt-2">
                     <p className="text-sm text-blue-800 mb-2">
                       <span className="font-semibold">Bakery Admin:</span> We can make this for <span className="font-bold text-lg">₹{req.quotePrice}</span>.
-                      {req.adminNotes && <span className="block mt-1 italic text-blue-700">"{req.adminNotes}"</span>}
+                      {req.adminNotes && <span className="block mt-1 italic text-blue-700">&quot;{req.adminNotes}&quot;</span>}
                     </p>
                     <div className="flex gap-3 mt-4">
                       <button 

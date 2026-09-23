@@ -1,6 +1,7 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { FaCamera, FaUpload, FaRedo, FaCheck, FaTimes } from 'react-icons/fa';
+import { useState, useRef, useEffect } from 'react';
+import { FaCamera, FaRedo, FaCheck, FaTimes } from 'react-icons/fa';
 import { motion, AnimatePresence } from 'framer-motion';
+import PropTypes from 'prop-types';
 
 const ImageUploadWithCamera = ({ onImageCaptured, imagePreview, isRequired = false }) => {
   const [isCameraOpen, setIsCameraOpen] = useState(false);
@@ -208,6 +209,12 @@ const ImageUploadWithCamera = ({ onImageCaptured, imagePreview, isRequired = fal
       )}
     </div>
   );
+};
+
+ImageUploadWithCamera.propTypes = {
+  onImageCaptured: PropTypes.func.isRequired,
+  imagePreview: PropTypes.string,
+  isRequired: PropTypes.bool
 };
 
 export default ImageUploadWithCamera;

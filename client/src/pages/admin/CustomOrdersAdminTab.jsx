@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import { motion } from 'framer-motion';
 import { useLocation } from 'react-router-dom';
 import axiosInstance from '../../utils/axiosInstance';

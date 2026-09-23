@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import PageWrapper from '../../components/PageWrapper';
 import Footer from '../../components/Footer';
@@ -8,7 +8,6 @@ import ProfileTab from './ProfileTab';
 import RemindersTab from './RemindersTab';
 import FavoritesTab from './FavoritesTab';
 import AddressesTab from './AddressesTab';
-import CustomOrdersTab from './CustomOrdersTab';
 
 const CustomerDashboard = () => {
   const location = useLocation();

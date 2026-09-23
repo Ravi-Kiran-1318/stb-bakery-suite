@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import { motion } from 'framer-motion';
 import { useLocation } from 'react-router-dom';
 import axiosInstance from '../../utils/axiosInstance';
@@ -70,6 +70,7 @@ const OrdersTab = () => {
 
   useEffect(() => {
     fetchOrders();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [range, statusFilter, search, deliveryTypeFilter, paymentMethodFilter, dueTodayFilter, location.search]);
 
   useEffect(() => {
@@ -78,6 +79,7 @@ const OrdersTab = () => {
     if (urlSearch && urlSearch !== search) {
       setSearch(urlSearch);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [location.search]);
 
   const handleStatusUpdate = async (id, newStatus) => {
@@ -93,7 +95,7 @@ const OrdersTab = () => {
   const handlePaymentUpdate = async (method) => {
     if (!orderToPay) return;
     try {
-      const { data } = await axiosInstance.patch(`/orders/${orderToPay}/payment-status`, {
+      await axiosInstance.patch(`/orders/${orderToPay}/payment-status`, {
         deliveryPaymentMethod: method
       });
       setOrders(orders.map(o => o._id === orderToPay ? { ...o, paymentStatus: 'Paid', deliveryPaymentMethod: method } : o));

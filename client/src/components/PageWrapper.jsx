@@ -1,5 +1,5 @@
-import React from 'react';
 import { motion } from 'framer-motion';
+import PropTypes from 'prop-types';
 
 const PageWrapper = ({ children }) => {
   return (
@@ -12,6 +12,10 @@ const PageWrapper = ({ children }) => {
       {children}
     </motion.div>
   );
+};
+
+PageWrapper.propTypes = {
+  children: PropTypes.node.isRequired
 };
 
 export default PageWrapper;

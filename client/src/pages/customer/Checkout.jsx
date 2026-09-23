@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useCart } from '../../context/CartContext';
@@ -287,7 +287,7 @@ const Checkout = () => {
         };
 
         const razorpay = new window.Razorpay(options);
-        razorpay.on('payment.failed', function (response) {
+        razorpay.on('payment.failed', function () {
           addToast('Payment failed. Please try again.', 'error');
           setIsSubmitting(false);
         });
@@ -406,7 +406,7 @@ const Checkout = () => {
                         {distanceKm === 9999 && (
                           <div className="mt-4 bg-amber-50 text-amber-800 p-4 rounded-xl border border-amber-200 flex items-start gap-3">
                             <span className="text-xl">📍</span>
-                            <p className="font-medium mt-0.5">This address is missing exact map coordinates. Please click "+ Add a new address" below and physically drop the pin on the map so we can verify your delivery distance.</p>
+                            <p className="font-medium mt-0.5">This address is missing exact map coordinates. Please click &quot;+ Add a new address&quot; below and physically drop the pin on the map so we can verify your delivery distance.</p>
                           </div>
                         )}
                         <button 

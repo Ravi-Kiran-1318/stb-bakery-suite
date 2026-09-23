@@ -55,6 +55,17 @@ const NotificationBell = () => {
     }
   }, [socket]);
 
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [isOpen]);
+
   const unreadCount = notifications.filter((n) => !n.read).length;
 
   const handleMarkAsRead = async (id, actionTab, referenceId, recipientRole) => {

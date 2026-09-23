@@ -25,8 +25,8 @@ const AddressesTab = () => {
   const [distanceKm, setDistanceKm] = useState(0);
   const { addToast } = useContext(ToastContext);
   
-  const shopLat = parseFloat(import.meta.env.VITE_SHOP_LAT) || 13.6288;
-  const shopLng = parseFloat(import.meta.env.VITE_SHOP_LNG) || 79.4192;
+  const shopLat = parseFloat(import.meta.env.VITE_SHOP_LAT) || 17.2852909;
+  const shopLng = parseFloat(import.meta.env.VITE_SHOP_LNG) || 82.105785;
 
   const handleLocationSelect = useCallback((lat, lng, address, dist) => {
     setFormData(prev => ({ ...prev, lat, lng }));

@@ -1,13 +1,13 @@
-import { useEffect, useCallback } from 'react';
+import { useEffect, useCallback, useContext } from 'react';
 import { getToken, onMessage } from 'firebase/messaging';
 import { messaging } from '../firebase';
 import axiosInstance from '../utils/axiosInstance';
 import { useAuth } from '../context/AuthContext';
-import { useToast } from '../context/ToastContext';
+import { ToastContext } from '../context/ToastContext';
 
 export const usePushNotifications = () => {
   const { user } = useAuth();
-  const { addToast } = useToast();
+  const { addToast } = useContext(ToastContext);
 
   const registerToken = useCallback(async () => {
     if (!messaging || !user) return;

@@ -7,6 +7,7 @@ import Footer from '../../components/Footer';
 import PageWrapper from '../../components/PageWrapper';
 import HowItWorksStepper from '../../components/HowItWorksStepper';
 import axiosInstance from '../../utils/axiosInstance';
+import SEO from '../../components/SEO';
 
 const Home = () => {
   const [lovedProducts, setLovedProducts] = useState([]);
@@ -97,6 +98,7 @@ const Home = () => {
 
   return (
     <PageWrapper>
+      <SEO title="Home" description="Sri Tirupati Bakery - Experience the perfect blend of tradition, quality, and flavor in every bite. Order delicious cakes, pastries, and party supplies online." />
       <div className="bg-[#fefaf3] min-h-screen">
 
         {/* ═══════════════════════════════════════════════════════

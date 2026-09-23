@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import ProductCard from '../../components/ProductCard';
 import PageWrapper from '../../components/PageWrapper';
@@ -6,13 +6,14 @@ import Footer from '../../components/Footer';
 import axiosInstance from '../../utils/axiosInstance';
 import { useSearchParams } from 'react-router-dom';
 import { useCart } from '../../context/CartContext';
+import SEO from '../../components/SEO';
 
 const CATEGORIES = ['All', 'Party Items', 'Decoration Items'];
 
 const PartyDecorations = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   let initialCategory = 'All';
   const categoryParam = searchParams.get('category');
   if (categoryParam === 'party-items') initialCategory = 'Party Items';
@@ -89,6 +90,7 @@ const PartyDecorations = () => {
 
   return (
     <PageWrapper>
+      <SEO title="Party & Decoration Items" description="Make your celebrations unforgettable with our party supplies and decorations." />
       <div className="bg-white min-h-screen pt-16 flex flex-col">
         
         {/* Main Content Area */}
@@ -169,7 +171,10 @@ const PartyDecorations = () => {
             {CATEGORIES.map(category => (
               <button
                 key={category}
-                onClick={() => setActiveCategory(category)}
+                onClick={() => {
+                  setActiveCategory(category);
+                  setSearchParams({ category: category.toLowerCase().replace(' ', '-') }, { replace: true });
+                }}
                 className={`whitespace-nowrap px-6 py-2 rounded-full font-semibold transition-all ${
                   activeCategory === category 
                     ? 'bg-amber-500 text-white shadow-md' 

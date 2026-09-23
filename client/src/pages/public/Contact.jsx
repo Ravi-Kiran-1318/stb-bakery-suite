@@ -1,17 +1,16 @@
-import React, { useEffect } from 'react';
 import { motion } from 'framer-motion';
 import PageWrapper from '../../components/PageWrapper';
 import Footer from '../../components/Footer';
 import WhatsAppButton from '../../components/WhatsAppButton';
-import { useTranslation } from 'react-i18next';
+import SEO from '../../components/SEO';
 
 const Contact = () => {
-  const { t } = useTranslation();
   
   const shopWhatsApp = import.meta.env.VITE_SHOP_WHATSAPP || '+918074381678';
 
   return (
     <PageWrapper>
+      <SEO title="Contact Us" description="Get in touch with Sri Tirupati Bakery. Find our location in Yeleswaram or message us on WhatsApp for orders." />
       <div 
         className="min-h-screen pt-4 flex flex-col bg-cover bg-center bg-no-repeat bg-fixed"
         style={{ backgroundImage: "url('/contact_bg.png')" }}
@@ -32,7 +31,7 @@ const Contact = () => {
               transition={{ delay: 0.2 }}
               className="text-lg text-gray-600 max-w-2xl mx-auto"
             >
-              We'd love to hear from you. Visit our bakery or message us directly on WhatsApp for orders and inquiries.
+              We&apos;d love to hear from you. Visit our bakery or message us directly on WhatsApp for orders and inquiries.
             </motion.p>
           </div>
 

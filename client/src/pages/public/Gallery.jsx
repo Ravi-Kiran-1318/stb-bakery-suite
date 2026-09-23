@@ -7,6 +7,7 @@ import Footer from '../../components/Footer';
 import HowItWorksStepper from '../../components/HowItWorksStepper';
 import { ToastContext } from '../../context/ToastContext';
 import { useAuth } from '../../context/AuthContext';
+import SEO from '../../components/SEO';
 
 const Gallery = () => {
   const [items, setItems] = useState([]);
@@ -141,6 +142,7 @@ const Gallery = () => {
 
   return (
     <PageWrapper>
+      <SEO title="Cake Gallery" description="Browse our gallery of beautifully crafted custom cakes and get inspired for your next event." />
       <div className="bg-[#fefaf3] min-h-screen pt-14 sm:pt-16 flex flex-col">
         <div className="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-0 pb-6 sm:pb-12 w-full">
           

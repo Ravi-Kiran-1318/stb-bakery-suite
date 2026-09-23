@@ -3,10 +3,12 @@ import PageWrapper from '../../components/PageWrapper';
 import Footer from '../../components/Footer';
 import CustomOrdersTab from './CustomOrdersTab';
 import HowItWorksStepper from '../../components/HowItWorksStepper';
+import SEO from '../../components/SEO';
 
 const CustomCakesPage = () => {
   return (
     <PageWrapper>
+      <SEO title="Custom Cakes" description="Request and track custom cake quotes. We'll bake the perfect custom cake for your special occasion." />
       <div className="bg-gray-50 min-h-screen pt-14 lg:pt-16 flex flex-col">
         <div className="flex-grow max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 pt-0 pb-6 sm:pb-8 w-full">
           <div className="text-center mb-6">

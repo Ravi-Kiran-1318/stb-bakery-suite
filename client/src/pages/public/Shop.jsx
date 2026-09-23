@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import ProductCard from '../../components/ProductCard';
 import PageWrapper from '../../components/PageWrapper';
@@ -6,6 +6,7 @@ import Footer from '../../components/Footer';
 import axiosInstance from '../../utils/axiosInstance';
 import { useSearchParams } from 'react-router-dom';
 import { useCart } from '../../context/CartContext';
+import SEO from '../../components/SEO';
 
 const CATEGORIES = ['All', 'Specials', 'Bread', 'Bun', 'Cake', 'Pastry', 'Snacks', 'Beverages', 'Chocolates & Biscuits', 'Other'];
 
@@ -93,6 +94,7 @@ const Shop = () => {
 
   return (
     <PageWrapper>
+      <SEO title="Our Products" description="Browse our wide selection of freshly baked bread, buns, cakes, pastries, snacks, and beverages. Order online for delivery." />
       <div className="bg-white min-h-screen pt-16 flex flex-col">
         
         {/* Main Content Area */}

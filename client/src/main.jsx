@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom/client';
 import './i18n/i18n';
 import App from './App';
 import './index.css';
+import { HelmetProvider } from 'react-helmet-async';
 import { AuthProvider } from './context/AuthContext';
 import { CartProvider } from './context/CartContext';
 import { FavoritesProvider } from './context/FavoritesContext';
@@ -11,17 +12,19 @@ import { ToastProvider } from './context/ToastContext';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    <AuthProvider>
-      <CartProvider>
-        <FavoritesProvider>
-          <SocketProvider>
-            <ToastProvider>
-              <App />
-            </ToastProvider>
-          </SocketProvider>
-        </FavoritesProvider>
-      </CartProvider>
-    </AuthProvider>
+    <HelmetProvider>
+      <AuthProvider>
+        <CartProvider>
+          <FavoritesProvider>
+            <SocketProvider>
+              <ToastProvider>
+                <App />
+              </ToastProvider>
+            </SocketProvider>
+          </FavoritesProvider>
+        </CartProvider>
+      </AuthProvider>
+    </HelmetProvider>
   </React.StrictMode>
 );
 

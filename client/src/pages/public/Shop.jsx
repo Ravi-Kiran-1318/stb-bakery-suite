@@ -12,10 +12,13 @@ const CATEGORIES = ['All', 'Specials', 'Bread', 'Bun', 'Cake', 'Pastry', 'Snacks
 const Shop = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   let initialCategory = 'All';
   const categoryParam = searchParams.get('category');
-  if (categoryParam === 'specials') initialCategory = 'Specials';
+  if (categoryParam) {
+    if (categoryParam.toLowerCase() === 'specials') initialCategory = 'Specials';
+    else if (CATEGORIES.includes(categoryParam)) initialCategory = categoryParam;
+  }
 
   const [activeCategory, setActiveCategory] = useState(initialCategory);
   const [searchQuery, setSearchQuery] = useState('');
@@ -43,8 +46,12 @@ const Shop = () => {
   // Effect to handle URL category changes
   useEffect(() => {
     const categoryQuery = searchParams.get('category');
-    if (categoryQuery === 'specials') {
-      setActiveCategory('Specials');
+    if (categoryQuery) {
+      if (categoryQuery.toLowerCase() === 'specials') {
+        setActiveCategory('Specials');
+      } else if (CATEGORIES.includes(categoryQuery)) {
+        setActiveCategory(categoryQuery);
+      }
     }
   }, [searchParams]);
 
@@ -166,7 +173,10 @@ const Shop = () => {
             {CATEGORIES.map(category => (
               <button
                 key={category}
-                onClick={() => setActiveCategory(category)}
+                onClick={() => {
+                  setActiveCategory(category);
+                  setSearchParams({ category }, { replace: true });
+                }}
                 className={`whitespace-nowrap px-6 py-2 rounded-full font-semibold transition-all ${
                   activeCategory === category 
                     ? 'bg-amber-500 text-white shadow-md' 

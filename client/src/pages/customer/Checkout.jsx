@@ -321,9 +321,9 @@ const Checkout = () => {
   return (
     <PageWrapper>
       <div className="bg-gray-50 min-h-[100dvh] pt-16 pb-32 lg:pb-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 pb-8 lg:py-8">
           
-          <h1 className="text-4xl font-serif font-bold text-gray-900 mb-8">Checkout</h1>
+          <h1 className="text-4xl font-serif font-bold text-gray-900 mb-6 lg:mb-8">Checkout</h1>
           
           <div className="flex flex-col lg:flex-row gap-10 items-start">
             
@@ -446,7 +446,9 @@ const Checkout = () => {
                         />
                         
                         <div className="mt-6">
-                          <label className="block text-sm font-semibold text-gray-700 mb-2">Complete Address</label>
+                          <label className="block text-sm font-semibold text-gray-700 mb-2">
+                            Complete Address <span className="text-red-500">*</span>
+                          </label>
                           <textarea 
                             className="input-field w-full h-20 resize-none"
                             value={addressText}
@@ -490,7 +492,9 @@ const Checkout = () => {
                 <h2 className="text-xl font-bold text-gray-900 mb-6">Requested Date & Time</h2>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">Select Date</label>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      Select Date <span className="text-red-500">*</span>
+                    </label>
                     <input 
                       type="date" 
                       className="input-field w-full"
@@ -501,7 +505,9 @@ const Checkout = () => {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">Time Slot</label>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      Time Slot <span className="text-red-500">*</span>
+                    </label>
                     <select 
                       className="input-field w-full"
                       value={requestedTime}
@@ -520,7 +526,9 @@ const Checkout = () => {
 
               {/* Payment Method */}
               <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100">
-                <h2 className="text-xl font-bold text-gray-900 mb-6">Payment Method</h2>
+                <h2 className="text-xl font-bold text-gray-900 mb-6">
+                  Payment Method <span className="text-red-500">*</span>
+                </h2>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div 

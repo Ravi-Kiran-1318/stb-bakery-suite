@@ -115,6 +115,13 @@ const Checkout = () => {
   
   // Dynamic Delivery Fee Logic
   const hasCustomOrGalleryCake = items.some(item => item.isCustomCake || item.isGallery);
+  
+  useEffect(() => {
+    if (hasCustomOrGalleryCake && paymentMethod === 'COD') {
+      setPaymentMethod('');
+    }
+  }, [hasCustomOrGalleryCake, paymentMethod]);
+
   const baseDeliveryFee = hasCustomOrGalleryCake ? 30 : 20;
 
   const deliveryFee = deliveryType === 'Delivery' ? baseDeliveryFee : 0;
@@ -532,18 +539,26 @@ const Checkout = () => {
                   </div>
 
                   <div 
-                    onClick={() => setPaymentMethod('COD')}
-                    className={`cursor-pointer p-5 rounded-2xl border-2 transition-all ${
+                    onClick={() => {
+                      if (!hasCustomOrGalleryCake) setPaymentMethod('COD');
+                    }}
+                    className={`p-5 rounded-2xl border-2 transition-all ${
+                      hasCustomOrGalleryCake ? 'opacity-50 cursor-not-allowed bg-gray-50 border-gray-200' :
                       paymentMethod === 'COD' 
-                        ? 'border-amber-500 bg-amber-50 shadow-md' 
-                        : 'border-gray-200 hover:border-amber-300 hover:bg-gray-50'
+                        ? 'border-amber-500 bg-amber-50 shadow-md cursor-pointer' 
+                        : 'border-gray-200 hover:border-amber-300 hover:bg-gray-50 cursor-pointer'
                     }`}
                   >
                     <div className="flex items-center gap-3 mb-2">
                       <span className="text-2xl">💵</span>
                       <h3 className="font-bold text-gray-900 text-lg">Cash on {deliveryType}</h3>
                     </div>
-                    <p className="text-sm text-gray-600 pl-9">Pay full amount when you receive your order</p>
+                    <p className="text-sm text-gray-600 pl-9">
+                      {hasCustomOrGalleryCake 
+                        ? "COD is not available for Custom/Gallery Cakes"
+                        : "Pay full amount when you receive your order"
+                      }
+                    </p>
                   </div>
                 </div>
 

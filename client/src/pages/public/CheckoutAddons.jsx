@@ -5,7 +5,7 @@ import axiosInstance from '../../utils/axiosInstance';
 import PageWrapper from '../../components/PageWrapper';
 import { useCart } from '../../context/CartContext';
 import { formatCurrency } from '../../utils/formatCurrency';
-import { useTranslation } from 'react-i18next';
+import { useI18n } from '../../context/I18nContext';
 
 const CheckoutAddons = () => {
   const { addToCart, items, removeFromCart } = useCart();
@@ -21,8 +21,7 @@ const CheckoutAddons = () => {
       }));
   });
   const navigate = useNavigate();
-  const { i18n } = useTranslation();
-  const lang = i18n.language === 'te' ? 'te' : 'en';
+  const { t, language: lang } = useI18n();
 
   useEffect(() => {
     // If cart is empty or no gallery/custom cake, redirect back
@@ -102,13 +101,13 @@ const CheckoutAddons = () => {
   };
 
   const getStepTitle = () => {
-    return step === 1 ? "Add Chocolates & Biscuits?" : "Add Party & Decoration Items?";
+    return step === 1 ? t('CheckoutAddons.Step1Title', null, "Add Chocolates & Biscuits?") : t('CheckoutAddons.Step2Title', null, "Add Party & Decoration Items?");
   };
 
   const getStepDescription = () => {
     return step === 1 
-      ? "Make your cake even more special with our premium chocolates and biscuits."
-      : "Complete your celebration with these amazing party accessories.";
+      ? t('CheckoutAddons.Step1Desc', null, "Make your cake even more special with our premium chocolates and biscuits.")
+      : t('CheckoutAddons.Step2Desc', null, "Complete your celebration with these amazing party accessories.");
   };
 
   return (
@@ -150,7 +149,7 @@ const CheckoutAddons = () => {
               >
                 {products.length === 0 ? (
                   <div className="col-span-full text-center py-10 text-gray-500">
-                    No items available in this category right now.
+                    {t('CheckoutAddons.NoItemsAvailable', null, 'No items available in this category right now.')}
                   </div>
                 ) : (
                   products.map(product => {
@@ -169,7 +168,7 @@ const CheckoutAddons = () => {
                           {product.imageUrl ? (
                             <img src={product.imageUrl} alt={name} className="w-full h-full object-cover" />
                           ) : (
-                            <div className="w-full h-full bg-gray-100 flex justify-center items-center text-gray-400">No Image</div>
+                            <div className="w-full h-full bg-gray-100 flex justify-center items-center text-gray-400">{t('CheckoutAddons.NoImage', null, 'No Image')}</div>
                           )}
                           {isSelected && (
                             <div className="absolute top-2 right-2 bg-[#c37e50] text-white rounded-full p-1 shadow-md">
@@ -193,7 +192,7 @@ const CheckoutAddons = () => {
                               <button 
                                 className="text-xs sm:text-sm font-semibold px-3 sm:px-4 py-1 rounded-full transition-colors bg-gray-100 text-gray-700 hover:bg-gray-200 shrink-0"
                               >
-                                Add
+                                {t('CheckoutAddons.Add', null, 'Add')}
                               </button>
                             )}
                           </div>
@@ -217,9 +216,9 @@ const CheckoutAddons = () => {
                   const currentStepQty = currentStepSelectedAddons.reduce((acc, curr) => acc + curr.qty, 0);
                   
                   return currentStepQty > 0 ? (
-                    <span>{currentStepQty} items</span>
+                    <span>{currentStepQty} {t('CheckoutAddons.ItemsCount', null, 'items')}</span>
                   ) : (
-                    <span>No items</span>
+                    <span>{t('CheckoutAddons.NoItems', null, 'No items')}</span>
                   );
                 })()}
               </div>
@@ -231,7 +230,7 @@ const CheckoutAddons = () => {
                   const currentStepSelectedAddons = selectedAddons.filter(addon => 
                     products.some(p => p._id === (addon.product?._id || addon._id))
                   );
-                  return currentStepSelectedAddons.length > 0 ? 'Add & Continue' : 'Skip & Continue';
+                  return currentStepSelectedAddons.length > 0 ? t('CheckoutAddons.AddAndContinue', null, 'Add & Continue') : t('CheckoutAddons.SkipAndContinue', null, 'Skip & Continue');
                 })()}
               </button>
             </div>

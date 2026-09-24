@@ -5,11 +5,13 @@ import axiosInstance from '../../utils/axiosInstance';
 import { useFavorites } from '../../context/FavoritesContext';
 import ProductCard from '../../components/ProductCard';
 import Loader from '../../components/Loader';
+import { useI18n } from '../../context/I18nContext';
 
 const FavoritesTab = () => {
   const { favoriteIds } = useFavorites();
   const [favoriteProducts, setFavoriteProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const { t } = useI18n();
 
   useEffect(() => {
     const fetchFavorites = async () => {
@@ -37,7 +39,7 @@ const FavoritesTab = () => {
 
   return (
     <div className="max-w-6xl mx-auto">
-      <h2 className="text-3xl font-serif font-bold text-gray-900 mb-8">My Favorites ❤️</h2>
+      <h2 className="text-3xl font-serif font-bold text-gray-900 mb-8">{t('FavoritesTab.Title', null, 'My Favorites ❤️')}</h2>
       
       {favoriteProducts.length === 0 ? (
         <motion.div 
@@ -46,13 +48,13 @@ const FavoritesTab = () => {
           className="text-center py-20 bg-white rounded-3xl border border-gray-100 shadow-sm"
         >
           <div className="text-6xl mb-6 text-red-400">🤍</div>
-          <h3 className="text-2xl font-bold text-gray-900 mb-4">No favorites yet.</h3>
-          <p className="text-gray-500 mb-8">Tap the heart icon on any product to save it here for later!</p>
+          <h3 className="text-2xl font-bold text-gray-900 mb-4">{t('FavoritesTab.NoFavorites', null, 'No favorites yet.')}</h3>
+          <p className="text-gray-500 mb-8">{t('FavoritesTab.Desc', null, 'Tap the heart icon on any product to save it here for later!')}</p>
           <Link 
             to="/shop" 
             className="bg-amber-500 hover:bg-amber-600 text-white font-semibold py-3 px-8 rounded-full transition-colors"
           >
-            Explore Menu &rarr;
+            {t('FavoritesTab.ExploreMenu', null, 'Explore Menu →')}
           </Link>
         </motion.div>
       ) : (

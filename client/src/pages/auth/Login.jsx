@@ -6,6 +6,7 @@ import { motion } from 'framer-motion';
 import { FiEye, FiEyeOff } from 'react-icons/fi';
 import { RecaptchaVerifier, signInWithPhoneNumber, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
 import { auth } from '../../firebase';
+import { useI18n } from '../../context/I18nContext';
 
 const Login = () => {
   const { login } = useAuth();
@@ -32,6 +33,8 @@ const Login = () => {
   // Extract ?redirect= param
   const queryParams = new URLSearchParams(location.search);
   const redirect = queryParams.get('redirect');
+
+  const { t } = useI18n();
 
   useEffect(() => {
     if (user && !authLoading) {
@@ -183,29 +186,12 @@ const Login = () => {
         >
           <div>
             <h2 className="mt-2 text-center text-3xl font-bold font-serif text-gray-900">
-              Welcome Back
+              {t('LoginPage.WelcomeBack', null, 'Welcome Back')}
             </h2>
             <p className="mt-2 text-center text-sm text-gray-600">
-              Please sign in to your account
+              {t('LoginPage.SignInPrompt', null, 'Please sign in to your account')}
             </p>
           </div>
-
-          {/* Temporarily hidden to save SMS costs
-          <div className="flex justify-center space-x-4 mt-6 border-b pb-4">
-            <button
-              className={`text-sm font-semibold pb-1 border-b-2 ${!isPhoneLogin ? 'border-amber-500 text-amber-600' : 'border-transparent text-gray-500 hover:text-gray-700'}`}
-              onClick={() => { setIsPhoneLogin(false); setError(''); }}
-            >
-              Email / Password
-            </button>
-            <button
-              className={`text-sm font-semibold pb-1 border-b-2 ${isPhoneLogin ? 'border-amber-500 text-amber-600' : 'border-transparent text-gray-500 hover:text-gray-700'}`}
-              onClick={() => { setIsPhoneLogin(true); setError(''); }}
-            >
-              Phone Login (OTP)
-            </button>
-          </div>
-          */}
 
           {!isPhoneLogin ? (
             <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
@@ -217,18 +203,18 @@ const Login = () => {
 
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Mobile Number (or) Email</label>
+                  <label className="block text-sm font-medium text-gray-700">{t('LoginPage.MobileOrEmail', null, 'Mobile Number (or) Email')}</label>
                   <input
                     type="text"
                     required
                     className="input-field mt-1"
                     value={loginId}
                     onChange={(e) => setLoginId(e.target.value)}
-                    placeholder="Enter your 10-digit mobile or gmail address"
+                    placeholder={t('LoginPage.MobileOrEmailPh', null, 'Enter your 10-digit mobile or gmail address')}
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Password</label>
+                  <label className="block text-sm font-medium text-gray-700">{t('LoginPage.Password', null, 'Password')}</label>
                   <div className="relative mt-1">
                     <input
                       type={showPassword ? "text" : "password"}
@@ -236,7 +222,7 @@ const Login = () => {
                       className="input-field w-full pr-10"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      placeholder="Enter your password"
+                      placeholder={t('LoginPage.PasswordPh', null, 'Enter your password')}
                     />
                     <button
                       type="button"
@@ -255,7 +241,7 @@ const Login = () => {
                   disabled={loading}
                   className="w-full bg-amber-500 hover:bg-amber-600 text-white font-bold py-3 px-4 rounded-xl shadow-md transition-colors"
                 >
-                  {loading ? 'Signing in...' : 'Sign In'}
+                  {loading ? t('LoginPage.SigningIn', null, 'Signing in...') : t('LoginPage.SignIn', null, 'Sign In')}
                 </button>
               </div>
             </form>
@@ -315,7 +301,7 @@ const Login = () => {
                 <div className="w-full border-t border-gray-300" />
               </div>
               <div className="relative flex justify-center text-sm">
-                <span className="bg-white px-2 text-gray-500">Or continue with</span>
+                <span className="bg-white px-2 text-gray-500">{t('LoginPage.OrContinueWith', null, 'Or continue with')}</span>
               </div>
             </div>
 
@@ -326,13 +312,13 @@ const Login = () => {
                 className="w-full flex justify-center py-3 px-4 border border-gray-300 rounded-xl shadow-sm bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-500 transition-colors"
               >
                 <img className="h-5 w-5 mr-2" src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google logo" />
-                Google
+                {t('LoginPage.GoogleSignIn', null, 'Google')}
               </button>
             </div>
           </div>
 
           <div className="text-center text-sm text-gray-600 mt-6">
-            Don&apos;t have an account? <Link to="/signup" className="text-amber-600 hover:text-amber-700 font-semibold">Sign up</Link>
+            {t('LoginPage.DontHaveAccount', null, "Don't have an account?")} <Link to="/signup" className="text-amber-600 hover:text-amber-700 font-semibold">{t('LoginPage.SignUp', null, 'Sign up')}</Link>
           </div>
         </motion.div>
       </div>
@@ -345,21 +331,21 @@ const Login = () => {
             animate={{ opacity: 1, scale: 1 }}
             className="bg-white rounded-2xl p-6 max-w-sm w-full shadow-2xl space-y-4"
           >
-            <h3 className="text-xl font-bold text-gray-900 text-center">Almost there!</h3>
+            <h3 className="text-xl font-bold text-gray-900 text-center">{t('LoginPage.AlmostThere', null, 'Almost there!')}</h3>
             <p className="text-sm text-gray-600 text-center">
-              Please provide your mobile number to complete your registration. We need this for order deliveries.
+              {t('LoginPage.MobilePromptDesc', null, 'Please provide your mobile number to complete your registration. We need this for order deliveries.')}
             </p>
             <form onSubmit={handleGoogleMobileSubmit} className="space-y-4 mt-4">
               {error && <div className="text-red-500 text-sm text-center bg-red-50 p-2 rounded">{error}</div>}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Mobile Number</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('LoginPage.MobileOrEmail', null, 'Mobile Number')}</label>
                 <input
                   type="tel"
                   required
                   className="input-field w-full"
                   value={googleMobile}
                   onChange={(e) => setGoogleMobile(e.target.value)}
-                  placeholder="10-digit mobile number"
+                  placeholder={t('LoginPage.MobilePh', null, '10-digit mobile number')}
                 />
               </div>
               <div className="flex gap-3">
@@ -368,14 +354,14 @@ const Login = () => {
                   onClick={() => setShowMobilePrompt(false)}
                   className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-2 px-4 rounded-xl transition-colors"
                 >
-                  Cancel
+                  {t('LoginPage.Cancel', null, 'Cancel')}
                 </button>
                 <button
                   type="submit"
                   disabled={loading}
                   className="flex-1 bg-amber-500 hover:bg-amber-600 text-white font-bold py-2 px-4 rounded-xl transition-colors"
                 >
-                  {loading ? 'Saving...' : 'Complete'}
+                  {loading ? t('LoginPage.Saving', null, 'Saving...') : t('LoginPage.Complete', null, 'Complete')}
                 </button>
               </div>
             </form>

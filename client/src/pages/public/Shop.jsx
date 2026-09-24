@@ -7,10 +7,12 @@ import axiosInstance from '../../utils/axiosInstance';
 import { useSearchParams } from 'react-router-dom';
 import { useCart } from '../../context/CartContext';
 import SEO from '../../components/SEO';
+import { useI18n } from '../../context/I18nContext';
 
 const CATEGORIES = ['All', 'Specials', 'Bread', 'Bun', 'Cake', 'Pastry', 'Snacks', 'Beverages', 'Chocolates & Biscuits', 'Other'];
 
 const Shop = () => {
+  const { t } = useI18n();
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchParams, setSearchParams] = useSearchParams();
@@ -58,7 +60,7 @@ const Shop = () => {
 
   const handleAddToCart = (product) => {
     addToCart(product);
-    setToastMessage('✓ Added to cart');
+    setToastMessage(t('ShopPage.AddedToCart', null, '✓ Added to cart'));
     setTimeout(() => setToastMessage(''), 2000);
   };
 
@@ -101,7 +103,7 @@ const Shop = () => {
         <div className="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
           
           <div className="mb-8 flex flex-col md:flex-row justify-between items-center gap-6">
-            <h1 className="text-4xl font-serif font-bold text-gray-900">Our Menu</h1>
+            <h1 className="text-4xl font-serif font-bold text-gray-900">{t('ShopPage.Title', null, 'Our Menu')}</h1>
             
             {/* Search and Sort */}
             <div className="flex flex-col sm:flex-row gap-4 w-full md:w-auto">
@@ -114,7 +116,7 @@ const Shop = () => {
                 </div>
                 <input 
                   type="text" 
-                  placeholder="Search our menu..." 
+                  placeholder={t('ShopPage.SearchPlaceholder', null, 'Search our menu...')} 
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="w-full pl-11 pr-4 py-2.5 bg-white border-2 border-gray-100 rounded-full focus:outline-none focus:border-amber-500 focus:ring-4 focus:ring-amber-500/10 transition-all shadow-sm text-gray-700 placeholder-gray-400"
@@ -128,7 +130,7 @@ const Shop = () => {
                   className="w-full pl-5 pr-10 py-2.5 bg-white border-2 border-gray-100 rounded-full focus:outline-none focus:border-amber-500 focus:ring-4 focus:ring-amber-500/10 transition-all shadow-sm text-gray-700 font-medium text-left flex items-center justify-between"
                 >
                   <span className="truncate">
-                    {sortOrder === 'default' ? 'Sort: Recommended' : sortOrder === 'price-low' ? 'Price: Low to High' : 'Price: High to Low'}
+                    {sortOrder === 'default' ? t('ShopPage.Sort.Recommended', null, 'Sort: Recommended') : sortOrder === 'price-low' ? t('ShopPage.Sort.PriceLowHigh', null, 'Price: Low to High') : t('ShopPage.Sort.PriceHighLow', null, 'Price: High to Low')}
                   </span>
                   <div className="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none">
                     <svg className={`w-4 h-4 text-gray-400 transition-transform duration-300 ${isSortOpen ? 'rotate-180 text-amber-500' : 'group-focus-within:text-amber-500'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -144,9 +146,9 @@ const Shop = () => {
                     <div className="fixed inset-0 z-40" onClick={() => setIsSortOpen(false)}></div>
                     <div className="absolute z-50 w-full mt-2 bg-white border border-gray-100 rounded-2xl shadow-xl overflow-hidden py-1">
                       {[
-                        { value: 'default', label: 'Sort: Recommended' },
-                        { value: 'price-low', label: 'Price: Low to High' },
-                        { value: 'price-high', label: 'Price: High to Low' }
+                        { value: 'default', label: t('ShopPage.Sort.Recommended', null, 'Sort: Recommended') },
+                        { value: 'price-low', label: t('ShopPage.Sort.PriceLowHigh', null, 'Price: Low to High') },
+                        { value: 'price-high', label: t('ShopPage.Sort.PriceHighLow', null, 'Price: High to Low') }
                       ].map((option) => (
                         <button
                           key={option.value}
@@ -172,7 +174,9 @@ const Shop = () => {
 
           {/* Category Filter Bar */}
           <div className="flex overflow-x-auto pb-4 mb-8 gap-3 hide-scrollbar">
-            {CATEGORIES.map(category => (
+            {CATEGORIES.map(category => {
+              const catKey = category === 'Chocolates & Biscuits' ? 'ChocolatesBiscuits' : category;
+              return (
               <button
                 key={category}
                 onClick={() => {
@@ -185,9 +189,9 @@ const Shop = () => {
                     : 'bg-white border-2 border-gray-200 text-gray-600 hover:border-amber-500'
                 }`}
               >
-                {category}
+                {t(`Categories.${catKey}`, null, category)}
               </button>
-            ))}
+            )})}
           </div>
 
           {/* Product Grid */}
@@ -202,8 +206,8 @@ const Shop = () => {
               className="text-center py-20"
             >
               <div className="text-6xl mb-4">⚠️</div>
-              <h3 className="text-2xl font-bold text-gray-700">No products found.</h3>
-              <p className="text-gray-500 mt-2">Try adjusting your search or category filter.</p>
+              <h3 className="text-2xl font-bold text-gray-700">{t('ShopPage.NoProducts', null, 'No products found.')}</h3>
+              <p className="text-gray-500 mt-2">{t('ShopPage.AdjustFilter', null, 'Try adjusting your search or category filter.')}</p>
             </motion.div>
           ) : (
             <motion.div 

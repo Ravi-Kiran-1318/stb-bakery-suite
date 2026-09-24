@@ -3,12 +3,14 @@ import { motion, AnimatePresence } from 'framer-motion';
 import axiosInstance from '../../utils/axiosInstance';
 import Loader from '../../components/Loader';
 import ErrorState from '../../components/ErrorState';
+import { useI18n } from '../../context/I18nContext';
 
 const RemindersTab = () => {
   const [reminders, setReminders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const { t } = useI18n();
   
   // Form state
   const [label, setLabel] = useState('');
@@ -89,20 +91,20 @@ const RemindersTab = () => {
   return (
     <div className="max-w-3xl mx-auto relative">
       <div className="flex justify-between items-center mb-8">
-        <h2 className="text-3xl font-serif font-bold text-gray-900">Occasion Reminders</h2>
+        <h2 className="text-3xl font-serif font-bold text-gray-900">{t('RemindersTab.Title', null, 'Occasion Reminders')}</h2>
         <button 
           onClick={() => setIsModalOpen(true)}
           className="bg-amber-500 hover:bg-amber-600 text-white font-semibold py-2 px-6 rounded-full transition-colors shadow-sm"
         >
-          + Add Reminder
+          {t('RemindersTab.AddBtn', null, '+ Add Reminder')}
         </button>
       </div>
 
       {reminders.length === 0 ? (
         <div className="text-center py-20 bg-white rounded-3xl border border-gray-100 shadow-sm">
           <div className="text-6xl mb-6">🎂</div>
-          <h3 className="text-2xl font-bold text-gray-900 mb-4">No reminders set.</h3>
-          <p className="text-gray-500">Add one to get notified before special occasions!</p>
+          <h3 className="text-2xl font-bold text-gray-900 mb-4">{t('RemindersTab.NoReminders', null, 'No reminders set.')}</h3>
+          <p className="text-gray-500">{t('RemindersTab.NoRemindersDesc', null, 'Add one to get notified before special occasions!')}</p>
         </div>
       ) : (
         <div className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden mb-8">
@@ -128,7 +130,7 @@ const RemindersTab = () => {
                   <button 
                     onClick={() => handleDeleteReminder(idx)}
                     className="text-red-400 hover:text-red-600 p-2 rounded-full hover:bg-red-50 transition-colors"
-                    title="Delete Reminder"
+                    title={t('RemindersTab.Delete', null, 'Delete Reminder')}
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -143,7 +145,7 @@ const RemindersTab = () => {
 
       <div className="bg-blue-50 text-blue-800 p-4 rounded-xl flex items-start gap-3">
         <span className="text-xl">💡</span>
-        <p className="font-medium mt-0.5">We'll remind you 2 days before each occasion to order your cake! 🎂</p>
+        <p className="font-medium mt-0.5">{t('RemindersTab.Tip', null, 'We\'ll remind you 2 days before each occasion to order your cake! 🎂')}</p>
       </div>
 
       {/* Add Reminder Modal */}
@@ -154,22 +156,22 @@ const RemindersTab = () => {
             animate={{ opacity: 1, scale: 1 }}
             className="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl"
           >
-            <h3 className="text-2xl font-bold text-gray-900 mb-6">Add Occasion</h3>
+            <h3 className="text-2xl font-bold text-gray-900 mb-6">{t('RemindersTab.AddModalTitle', null, 'Add Occasion')}</h3>
             <form onSubmit={handleAddReminder}>
               <div className="mb-6">
-                <label className="block text-sm font-semibold text-gray-700 mb-2">Label (e.g., Wife's Birthday)</label>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">{t('RemindersTab.Label', null, 'Label (e.g., Wife\'s Birthday)')}</label>
                 <input 
                   type="text" 
                   required
                   className="input-field"
-                  placeholder="Enter occasion name"
+                  placeholder={t('RemindersTab.LabelPh', null, 'Enter occasion name')}
                   value={label}
                   onChange={(e) => setLabel(e.target.value)}
                 />
               </div>
               
               <div className="mb-8">
-                <label className="block text-sm font-semibold text-gray-700 mb-2">Date</label>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">{t('RemindersTab.Date', null, 'Date')}</label>
                 <div className="flex gap-4">
                   <select 
                     className="input-field flex-1"
@@ -199,14 +201,14 @@ const RemindersTab = () => {
                   onClick={() => setIsModalOpen(false)}
                   className="px-6 py-2 text-gray-600 font-semibold rounded-full hover:bg-gray-100 transition-colors"
                 >
-                  Cancel
+                  {t('RemindersTab.Cancel', null, 'Cancel')}
                 </button>
                 <button 
                   type="submit" 
                   disabled={submitting}
                   className="px-6 py-2 bg-amber-500 hover:bg-amber-600 text-white font-semibold rounded-full shadow-md transition-colors disabled:opacity-50"
                 >
-                  {submitting ? 'Saving...' : 'Save Reminder'}
+                  {submitting ? t('RemindersTab.Saving', null, 'Saving...') : t('RemindersTab.SaveBtn', null, 'Save Reminder')}
                 </button>
               </div>
             </form>

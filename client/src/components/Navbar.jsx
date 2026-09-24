@@ -3,6 +3,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { AuthContext } from '../context/AuthContext';
 import { CartContext } from '../context/CartContext';
+import { useI18n } from '../context/I18nContext';
 import NotificationBell from './NotificationBell';
 import { FaSignOutAlt } from 'react-icons/fa';
 import logoImg from '../assets/adminT_cropped.png';
@@ -11,6 +12,7 @@ import adminIcon from '../assets/admin1.png';
 const Navbar = () => {
   const { user, logout } = useContext(AuthContext);
   const { items: cart = [] } = useContext(CartContext);
+  const { t, language, changeLanguage } = useI18n();
   const navigate = useNavigate();
   const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -29,15 +31,14 @@ const Navbar = () => {
 
 
   const navLinks = [
-    { label: 'Home', to: '/', icon: '🏠' },
-    { label: 'About Us', to: '/#about-us', icon: 'ℹ️' },
-    { label: 'Our Products', to: '/shop', icon: '🥐' },
-    { label: 'Specials', to: '/shop?category=specials', icon: '✨' },
-    { label: 'Cake Gallery', to: '/gallery', icon: '🖼️' },
-    { label: 'Custom Cakes', to: '/custom-cakes', icon: '🎂' },
-    { label: 'Party Items', to: '/party-decorations?category=party-items', icon: '🎉' },
-    { label: 'Decoration Items', to: '/party-decorations?category=decoration-items', icon: '🎀' },
-    { label: 'Contact', to: '/contact', icon: '📞' },
+    { label: 'Home', tKey: 'Home', to: '/', icon: '🏠' },
+    { label: 'About Us', tKey: 'AboutUs', to: '/#about-us', icon: 'ℹ️' },
+    { label: 'Our Products', tKey: 'OurProducts', to: '/shop', icon: '🥐' },
+    { label: 'Specials', tKey: 'Specials', to: '/shop?category=specials', icon: '✨' },
+    { label: 'Cake Gallery', tKey: 'CakeGallery', to: '/gallery', icon: '🖼️' },
+    { label: 'Custom Cakes', tKey: 'CustomCakes', to: '/custom-cakes', icon: '🎂' },
+    { label: 'Party Items', tKey: 'PartyItems', to: '/party-decorations?category=party-items', icon: '🎉' },
+    { label: 'Contact', tKey: 'Contact', to: '/contact', icon: '📞' },
   ];
 
   const cakeGalleryCategories = [
@@ -119,7 +120,7 @@ const Navbar = () => {
                     onClick={(e) => handleNavClick(e, item.to)}
                     className="px-2 py-2 text-[13px] xl:text-sm font-bold transition-all duration-200 hover:text-amber-600 relative text-gray-900 flex items-center gap-1 whitespace-nowrap"
                   >
-                    {item.label}
+                    {t('Navigation.' + item.tKey, null, item.label)}
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4">
                       <path fillRule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clipRule="evenodd" />
                     </svg>
@@ -129,7 +130,7 @@ const Navbar = () => {
                     <div className="rounded-lg shadow-2xl p-6 overflow-hidden bg-white border border-gray-100 grid grid-cols-3 gap-x-6 gap-y-4">
                       {cakeGalleryCategories.map(cat => (
                         <Link key={cat} to={`/gallery?category=${encodeURIComponent(cat)}`} className="text-[13px] font-semibold transition-colors hover:text-amber-600 text-gray-700 whitespace-nowrap">
-                          {cat}
+                          {t(`Categories.${cat.replace(/ /g, '')}`, null, cat)}
                         </Link>
                       ))}
                     </div>
@@ -142,7 +143,7 @@ const Navbar = () => {
                 onClick={(e) => handleNavClick(e, item.to)}
                 className="px-2 py-2 text-[13px] xl:text-sm font-bold transition-all duration-200 hover:text-amber-600 relative group text-gray-900 whitespace-nowrap"
               >
-                {item.label}
+                {t('Navigation.' + item.tKey, null, item.label)}
                 <span
                   className="absolute bottom-0 left-1/2 -translate-x-1/2 h-[2px] w-0 group-hover:w-full transition-all duration-300 rounded-full bg-amber-500"
                 />
@@ -153,6 +154,27 @@ const Navbar = () => {
 
           {/* ── RIGHT ACTIONS ── */}
           <div className="flex items-center gap-1 sm:gap-2">
+
+            {/* Language Switcher */}
+            <div className="relative group flex items-center z-50">
+              <button className="p-2 rounded-full transition-colors hover:bg-gray-100 text-gray-800 flex items-center gap-1 cursor-pointer">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.998 8.998 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 013 12c0-1.605.42-3.113 1.157-4.418" />
+                </svg>
+                <span className="text-sm font-bold hidden sm:flex items-center gap-0.5">
+                  {language === 'en' ? 'EN' : 'TE'}
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-3.5 h-3.5">
+                    <path fillRule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clipRule="evenodd" />
+                  </svg>
+                </span>
+              </button>
+              <div className="absolute right-0 top-full pt-1 w-32 z-50 hidden group-hover:block">
+                <div className="rounded-lg shadow-xl py-1 overflow-hidden bg-white border border-gray-100">
+                  <button onClick={() => changeLanguage('en')} className={`w-full text-left px-4 py-2 text-sm font-semibold transition-colors hover:bg-amber-50 ${language === 'en' ? 'text-amber-600' : 'text-gray-800'}`}>English</button>
+                  <button onClick={() => changeLanguage('te')} className={`w-full text-left px-4 py-2 text-sm font-semibold transition-colors hover:bg-amber-50 ${language === 'te' ? 'text-amber-600' : 'text-gray-800'}`}>తెలుగు</button>
+                </div>
+              </div>
+            </div>
 
 
 
@@ -186,7 +208,7 @@ const Navbar = () => {
                   to="/login"
                   className="text-sm font-bold transition-colors hover:text-amber-600 whitespace-nowrap text-gray-800"
                 >
-                  Login
+                  {t('Navigation.Login', null, 'Login')}
                 </Link>
                 <Link
                   to="/shop"
@@ -202,13 +224,13 @@ const Navbar = () => {
                   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 0 0-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 0 0-16.536-1.84M7.5 14.25 5.106 5.272M6 20.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Zm12.75 0a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z" />
                   </svg>
-                  Order Online
+                  {t('Navigation.OrderOnline', null, 'Order Online')}
                 </Link>
               </div>
             ) : user.role === 'customer' ? (
               <div className="relative group ml-1 hidden lg:block h-full flex items-center">
                 <div className="flex items-center gap-1 text-sm font-bold cursor-pointer h-full py-5 text-gray-800 hover:text-amber-600 transition-colors">
-                  My Profile
+                  {t('Navigation.MyProfile', null, 'My Profile')}
                   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4">
                     <path fillRule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clipRule="evenodd" />
                   </svg>
@@ -216,11 +238,11 @@ const Navbar = () => {
                 {/* Invisible wrapper to cover the gap */}
                 <div className="absolute right-0 top-full pt-1 w-48 z-50 hidden group-hover:block">
                   <div className="rounded-lg shadow-2xl py-1 overflow-hidden" style={{ background: '#0f0a04', border: '1px solid rgba(212,175,55,0.25)' }}>
-                    <Link to="/customer/dashboard?tab=orders" className="block px-4 py-2.5 text-sm transition-colors hover:bg-white/10" style={{ color: 'rgba(212,175,55,0.8)' }}>My Orders</Link>
-                    <Link to="/customer/dashboard?tab=occasions" className="block px-4 py-2.5 text-sm transition-colors hover:bg-white/10" style={{ color: 'rgba(212,175,55,0.8)' }}>Occasion Reminders</Link>
+                    <Link to="/customer/dashboard?tab=orders" className="block px-4 py-2.5 text-sm transition-colors hover:bg-white/10" style={{ color: 'rgba(212,175,55,0.8)' }}>{t('Navigation.MyOrders', null, 'My Orders')}</Link>
+                    <Link to="/customer/dashboard?tab=occasions" className="block px-4 py-2.5 text-sm transition-colors hover:bg-white/10" style={{ color: 'rgba(212,175,55,0.8)' }}>{t('Navigation.OccasionReminders', null, 'Occasion Reminders')}</Link>
                     <div style={{ borderTop: '1px solid rgba(212,175,55,0.2)', margin: '4px 0' }} />
                     <button onClick={handleLogout} className="w-full flex items-center justify-between text-left px-4 py-2.5 text-sm text-red-400 hover:bg-red-900/30 transition-colors">
-                      Logout
+                      {t('Navigation.Logout', null, 'Logout')}
                       <FaSignOutAlt size={14} />
                     </button>
                   </div>
@@ -357,7 +379,7 @@ const Navbar = () => {
                         }`}
                       >
                         {item.icon && <span className="text-xl">{item.icon}</span>}
-                        <span>{item.label}</span>
+                        <span>{t('Navigation.' + item.tKey, null, item.label)}</span>
                       </Link>
                     )})}
                     
@@ -366,15 +388,15 @@ const Navbar = () => {
                         <div className="my-2 border-t border-gray-100" />
                         <Link to="/customer/dashboard?tab=orders" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-4 py-3 rounded-xl text-base font-bold hover:bg-amber-50 text-gray-800">
                           <span className="text-xl">📦</span>
-                          <span>My Orders</span>
+                          <span>{t('Navigation.MyOrders', null, 'My Orders')}</span>
                         </Link>
                         <Link to="/customer/dashboard?tab=occasions" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-4 py-3 rounded-xl text-base font-bold hover:bg-amber-50 text-gray-800">
                           <span className="text-xl">📅</span>
-                          <span>Occasion Reminders</span>
+                          <span>{t('Navigation.OccasionReminders', null, 'Occasion Reminders')}</span>
                         </Link>
                         <Link to="/customer/dashboard?tab=profile" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-4 py-3 rounded-xl text-base font-bold hover:bg-amber-50 text-gray-800">
                           <span className="text-xl">👤</span>
-                          <span>My Profile</span>
+                          <span>{t('Navigation.MyProfile', null, 'My Profile')}</span>
                         </Link>
                       </>
                     )}
@@ -398,7 +420,7 @@ const Navbar = () => {
                       onClick={() => setMobileMenuOpen(false)}
                       className="block px-4 py-3 text-center font-bold border rounded-xl transition-colors hover:bg-amber-50 text-gray-800 border-amber-300"
                     >
-                      Login
+                      {t('Navigation.Login', null, 'Login')}
                     </Link>
                     <Link
                       to="/shop"
@@ -406,7 +428,7 @@ const Navbar = () => {
                       className="block px-4 py-3 text-center font-bold rounded-xl shadow-sm"
                       style={{ background: 'linear-gradient(135deg, #f5d472, #c8922a)', color: '#1a0a00' }}
                     >
-                      Order Online
+                      {t('Navigation.OrderOnline', null, 'Order Online')}
                     </Link>
                   </div>
                 )}

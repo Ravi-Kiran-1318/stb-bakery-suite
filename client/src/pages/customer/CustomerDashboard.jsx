@@ -8,17 +8,29 @@ import ProfileTab from './ProfileTab';
 import RemindersTab from './RemindersTab';
 import FavoritesTab from './FavoritesTab';
 import AddressesTab from './AddressesTab';
+import { useI18n } from '../../context/I18nContext';
 
 const CustomerDashboard = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const queryParams = new URLSearchParams(location.search);
   const activeTab = queryParams.get('tab') || 'orders';
+  const { t } = useI18n();
 
   useEffect(() => {
     // Redirect if invalid tab
     if (!['orders', 'profile', 'reminders', 'favorites', 'addresses'].includes(activeTab)) {
       navigate('/customer/dashboard?tab=orders', { replace: true });
+    } else {
+      // Use framer-motion for a slower, more deliberate smooth scroll
+      import('framer-motion').then(({ animate }) => {
+        animate(window.scrollY, 0, {
+          type: "tween",
+          ease: "easeInOut",
+          duration: 0.8, // 800ms for a very smooth and elegant scroll
+          onUpdate: (latest) => window.scrollTo(0, latest)
+        });
+      });
     }
   }, [activeTab, navigate]);
 
@@ -40,11 +52,11 @@ const CustomerDashboard = () => {
   };
 
   const tabs = [
-    { id: 'orders', label: '📦 My Orders' },
-    { id: 'favorites', label: '❤️ Favorites' },
-    { id: 'addresses', label: '📍 Addresses' },
-    { id: 'reminders', label: '📅 Reminders' },
-    { id: 'profile', label: '👤 Profile' },
+    { id: 'orders', label: t('CustomerDashboard.MyOrders', null, '📦 My Orders') },
+    { id: 'favorites', label: t('CustomerDashboard.Favorites', null, '❤️ Favorites') },
+    { id: 'addresses', label: t('CustomerDashboard.Addresses', null, '📍 Addresses') },
+    { id: 'reminders', label: t('CustomerDashboard.Reminders', null, '📅 Reminders') },
+    { id: 'profile', label: t('CustomerDashboard.Profile', null, '👤 Profile') },
   ];
 
   return (
@@ -55,7 +67,7 @@ const CustomerDashboard = () => {
           {/* Navigation Menu (Sidebar on Desktop, Wrapped Grid on Mobile) */}
           <div className="w-full lg:w-72 flex-shrink-0">
             <div className="bg-white p-3 lg:p-4 rounded-2xl shadow-sm border border-gray-100 sticky top-24">
-              <h2 className="hidden lg:block text-xl font-bold text-gray-800 mb-4 px-2">Dashboard Menu</h2>
+              <h2 className="hidden lg:block text-xl font-bold text-gray-800 mb-4 px-2">{t('CustomerDashboard.MenuTitle', null, 'Dashboard Menu')}</h2>
               <div className="flex flex-row flex-wrap lg:flex-col gap-2 lg:gap-3">
                 {tabs.map((tab) => (
                   <button

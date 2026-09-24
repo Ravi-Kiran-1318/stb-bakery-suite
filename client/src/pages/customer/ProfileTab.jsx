@@ -4,6 +4,7 @@ import { useAuth } from '../../context/AuthContext';
 import { ToastContext } from '../../context/ToastContext';
 import axiosInstance from '../../utils/axiosInstance';
 import { FiEye, FiEyeOff } from 'react-icons/fi';
+import { useI18n } from '../../context/I18nContext';
 
 const AnimatedCounter = ({ value }) => {
   const spring = useSpring(0, { mass: 1, stiffness: 50, damping: 20 });
@@ -24,6 +25,7 @@ const ProfileTab = () => {
   const [isChangingPassword, setIsChangingPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const { t } = useI18n();
 
   // Profile Edit State
   const [formData, setFormData] = useState({
@@ -47,10 +49,10 @@ const ProfileTab = () => {
     try {
       const { data } = await axiosInstance.put('/users/profile', formData);
       setUser(data);
-      addToast('Profile updated successfully!', 'success');
+      addToast(t('ProfileTab.ProfileUpdateSuccess', null, 'Profile updated successfully!'), 'success');
       setIsEditing(false);
     } catch (error) {
-      addToast(error.response?.data?.message || 'Failed to update profile', 'error');
+      addToast(error.response?.data?.message || t('ProfileTab.ProfileUpdateFailed', null, 'Failed to update profile'), 'error');
     } finally {
       setIsSubmitting(false);
     }
@@ -59,7 +61,7 @@ const ProfileTab = () => {
   const handlePasswordSubmit = async (e) => {
     e.preventDefault();
     if (passwords.newPassword !== passwords.confirmPassword) {
-      return addToast('New passwords do not match!', 'error');
+      return addToast(t('ProfileTab.PwdMismatch', null, 'New passwords do not match!'), 'error');
     }
     setIsSubmitting(true);
     try {
@@ -67,11 +69,11 @@ const ProfileTab = () => {
         currentPassword: passwords.currentPassword,
         newPassword: passwords.newPassword
       });
-      addToast('Password changed successfully!', 'success');
+      addToast(t('ProfileTab.PwdChangeSuccess', null, 'Password changed successfully!'), 'success');
       setIsChangingPassword(false);
       setPasswords({ currentPassword: '', newPassword: '', confirmPassword: '' });
     } catch (error) {
-      addToast(error.response?.data?.message || 'Failed to change password', 'error');
+      addToast(error.response?.data?.message || t('ProfileTab.PwdChangeFailed', null, 'Failed to change password'), 'error');
     } finally {
       setIsSubmitting(false);
     }
@@ -80,7 +82,7 @@ const ProfileTab = () => {
   return (
     <div className="max-w-4xl mx-auto space-y-8">
       <div className="flex justify-between items-center mb-8">
-        <h2 className="text-3xl font-serif font-bold text-gray-900">My Profile</h2>
+        <h2 className="text-3xl font-serif font-bold text-gray-900">{t('ProfileTab.Title', null, 'My Profile')}</h2>
       </div>
 
       <div className="grid grid-cols-1 gap-8">
@@ -100,7 +102,7 @@ const ProfileTab = () => {
                 onClick={() => setIsEditing(true)}
                 className="bg-amber-100 text-amber-700 px-4 py-2 rounded-lg font-bold hover:bg-amber-200 transition-colors"
               >
-                Edit Profile
+                {t('ProfileTab.EditProfile', null, 'Edit Profile')}
               </button>
             )}
           </div>
@@ -108,7 +110,7 @@ const ProfileTab = () => {
           {isEditing ? (
             <form onSubmit={handleProfileSubmit} className="space-y-6 max-w-xl">
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">Full Name</label>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">{t('ProfileTab.FullName', null, 'Full Name')}</label>
                 <input
                   type="text"
                   required
@@ -118,7 +120,7 @@ const ProfileTab = () => {
                 />
               </div>
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">Mobile Number</label>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">{t('ProfileTab.Mobile', null, 'Mobile Number')}</label>
                 <input
                   type="text"
                   required
@@ -128,7 +130,7 @@ const ProfileTab = () => {
                 />
               </div>
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">Email Address</label>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">{t('ProfileTab.Email', null, 'Email Address')}</label>
                 <input
                   type="email"
                   className="input-field w-full"
@@ -137,30 +139,30 @@ const ProfileTab = () => {
                 />
               </div>
               <div className="flex gap-4 pt-4">
-                <button type="button" onClick={() => setIsEditing(false)} className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-50">Cancel</button>
-                <button type="submit" disabled={isSubmitting} className="btn-primary">Save Changes</button>
+                <button type="button" onClick={() => setIsEditing(false)} className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-50">{t('ProfileTab.Cancel', null, 'Cancel')}</button>
+                <button type="submit" disabled={isSubmitting} className="btn-primary">{t('ProfileTab.SaveChanges', null, 'Save Changes')}</button>
               </div>
             </form>
           ) : (
             <div className="space-y-6">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 <div>
-                  <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Mobile Number</label>
+                  <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">{t('ProfileTab.Mobile', null, 'Mobile Number')}</label>
                   <p className="text-lg font-medium text-gray-900">{user.mobile}</p>
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Email Address</label>
-                  <p className="text-lg font-medium text-gray-900">{user.email || 'Not provided'}</p>
+                  <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">{t('ProfileTab.Email', null, 'Email Address')}</label>
+                  <p className="text-lg font-medium text-gray-900">{user.email || t('ProfileTab.NotProvided', null, 'Not provided')}</p>
                 </div>
               </div>
               
               <div className="pt-8 border-t border-gray-100">
-                <h3 className="text-lg font-bold text-gray-900 mb-4">Security</h3>
+                <h3 className="text-lg font-bold text-gray-900 mb-4">{t('ProfileTab.Security', null, 'Security')}</h3>
                 <button 
                   onClick={() => setIsChangingPassword(!isChangingPassword)}
                   className="text-amber-600 font-bold hover:text-amber-700 transition-colors"
                 >
-                  Change Password
+                  {t('ProfileTab.ChangePwd', null, 'Change Password')}
                 </button>
                 
                 {isChangingPassword && (
@@ -169,7 +171,7 @@ const ProfileTab = () => {
                       <input
                         type={showPassword ? "text" : "password"}
                         required
-                        placeholder="Current Password"
+                        placeholder={t('ProfileTab.CurrentPwd', null, 'Current Password')}
                         className="input-field w-full pr-10"
                         value={passwords.currentPassword}
                         onChange={(e) => setPasswords({...passwords, currentPassword: e.target.value})}
@@ -186,7 +188,7 @@ const ProfileTab = () => {
                       <input
                         type={showPassword ? "text" : "password"}
                         required
-                        placeholder="New Password"
+                        placeholder={t('ProfileTab.NewPwd', null, 'New Password')}
                         className="input-field w-full pr-10"
                         value={passwords.newPassword}
                         onChange={(e) => setPasswords({...passwords, newPassword: e.target.value})}
@@ -203,7 +205,7 @@ const ProfileTab = () => {
                       <input
                         type={showPassword ? "text" : "password"}
                         required
-                        placeholder="Confirm New Password"
+                        placeholder={t('ProfileTab.ConfirmPwd', null, 'Confirm New Password')}
                         className="input-field w-full pr-10"
                         value={passwords.confirmPassword}
                         onChange={(e) => setPasswords({...passwords, confirmPassword: e.target.value})}
@@ -216,7 +218,7 @@ const ProfileTab = () => {
                         {showPassword ? <FiEyeOff /> : <FiEye />}
                       </button>
                     </div>
-                    <button type="submit" disabled={isSubmitting} className="btn-primary w-full mt-2">Update Password</button>
+                    <button type="submit" disabled={isSubmitting} className="btn-primary w-full mt-2">{t('ProfileTab.UpdatePwd', null, 'Update Password')}</button>
                   </form>
                 )}
               </div>

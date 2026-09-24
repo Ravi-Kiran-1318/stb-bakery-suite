@@ -4,8 +4,10 @@ import Footer from '../../components/Footer';
 import CustomOrdersTab from './CustomOrdersTab';
 import HowItWorksStepper from '../../components/HowItWorksStepper';
 import SEO from '../../components/SEO';
+import { useI18n } from '../../context/I18nContext';
 
 const CustomCakesPage = () => {
+  const { t } = useI18n();
   return (
     <PageWrapper>
       <SEO title="Custom Cakes" description="Request and track custom cake quotes. We'll bake the perfect custom cake for your special occasion." />
@@ -13,10 +15,10 @@ const CustomCakesPage = () => {
         <div className="flex-grow max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 pt-0 pb-6 sm:pb-8 w-full">
           <div className="text-center mb-6">
             <h1 className="text-3xl sm:text-4xl font-serif font-bold text-[#2d170a] mb-2">
-              Custom Cake Requests
+              {t('CustomCakesPage.Title', null, 'Custom Cake Requests')}
             </h1>
             <p className="text-[#5c4033] max-w-2xl mx-auto">
-              Track your custom cake quotes or request a new design from scratch.
+              {t('CustomCakesPage.Subtitle', null, 'Track your custom cake quotes or request a new design from scratch.')}
             </p>
           </div>
           

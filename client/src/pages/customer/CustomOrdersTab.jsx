@@ -5,8 +5,10 @@ import axiosInstance from '../../utils/axiosInstance';
 import { ToastContext } from '../../context/ToastContext';
 import { CartContext } from '../../context/CartContext';
 import ImageUploadWithCamera from '../../components/ImageUploadWithCamera';
+import { useI18n } from '../../context/I18nContext';
 
 const CustomOrdersTab = () => {
+  const { t, language } = useI18n();
   const [requests, setRequests] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
@@ -182,7 +184,7 @@ const CustomOrdersTab = () => {
             onClick={() => setShowForm(true)} 
             className="bg-amber-500 hover:bg-amber-600 text-white px-4 py-2 rounded-lg font-medium shadow-sm transition-colors w-full sm:w-auto text-center"
           >
-            + Request Custom Cake
+            {t('CustomOrdersTab.ReqCustomCake', null, '+ Request Custom Cake')}
           </button>
         )}
       </div>
@@ -202,7 +204,7 @@ const CustomOrdersTab = () => {
                   : 'bg-white border-gray-200 text-gray-600 hover:border-amber-300 hover:text-amber-600'
               }`}
             >
-              {filter}
+              {t(`CustomOrdersTab.Filter${filter.replace(/ /g, '')}`, null, filter)}
             </button>
           ))}
         </div>
@@ -362,8 +364,8 @@ const CustomOrdersTab = () => {
               <div className="flex-grow">
                 <div className="flex justify-between items-start mb-2">
                   <div className="flex items-center gap-2">
-                    <h4 className="font-semibold text-lg text-gray-800">{req.isGalleryRequest ? 'Gallery Cake Quote Request' : 'Custom Cake Quote Request'}</h4>
-                    {req.isGalleryRequest && <span className="bg-blue-50 text-blue-700 text-xs px-2 py-0.5 rounded-full font-bold">Gallery</span>}
+                    <h4 className="font-semibold text-lg text-gray-800">{req.isGalleryRequest ? t('CustomOrdersTab.GalleryQuote', null, 'Gallery Cake Quote Request') : t('CustomOrdersTab.CustomQuote', null, 'Custom Cake Quote Request')}</h4>
+                    {req.isGalleryRequest && <span className="bg-blue-50 text-blue-700 text-xs px-2 py-0.5 rounded-full font-bold">{t('CustomOrdersTab.Gallery', null, 'Gallery')}</span>}
                   </div>
                   {getStatusBadge(req.status)}
                 </div>
@@ -372,25 +374,25 @@ const CustomOrdersTab = () => {
                 
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-y-2 gap-x-4 text-sm mb-4">
                   <div>
-                    <span className="text-gray-500">Weight:</span> <span className="font-medium">{req.weight}{/[a-zA-Z]/.test(String(req.weight)) ? '' : ' kg'}</span>
+                    <span className="text-gray-500">{t('CustomOrdersTab.Weight', null, 'Weight:')}</span> <span className="font-medium">{req.weight}{/[a-zA-Z]/.test(String(req.weight)) ? '' : ' kg'}</span>
                   </div>
                   {req.flavour && (
                     <div>
-                      <span className="text-gray-500">Flavour:</span> <span className="font-medium">{req.flavour}</span>
+                      <span className="text-gray-500">{t('CustomOrdersTab.Flavour', null, 'Flavour:')}</span> <span className="font-medium">{req.flavour}</span>
                     </div>
                   )}
                   {req.color && (
                     <div>
-                      <span className="text-gray-500">Color:</span> <span className="font-medium">{req.color}</span>
+                      <span className="text-gray-500">{t('CustomOrdersTab.Color', null, 'Color:')}</span> <span className="font-medium">{req.color}</span>
                     </div>
                   )}
                   {req.shape && (
                     <div>
-                      <span className="text-gray-500">Shape:</span> <span className="font-medium">{req.shape}</span>
+                      <span className="text-gray-500">{t('CustomOrdersTab.Shape', null, 'Shape:')}</span> <span className="font-medium">{req.shape}</span>
                     </div>
                   )}
                   <div>
-                    <span className="text-gray-500">Needed By:</span> <span className="font-medium">{new Date(req.requestedDate).toLocaleDateString()} {req.requestedTime && `at ${req.requestedTime}`}</span>
+                    <span className="text-gray-500">{t('CustomOrdersTab.NeededBy', null, 'Needed By:')}</span> <span className="font-medium">{new Date(req.requestedDate).toLocaleDateString()} {req.requestedTime && `at ${req.requestedTime}`}</span>
                   </div>
                 </div>
 
@@ -420,13 +422,13 @@ const CustomOrdersTab = () => {
                 {req.status === 'Accepted' && (
                   <div className="bg-green-50 border border-green-100 rounded-lg p-4 mt-2 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                     <p className="text-sm text-green-700 font-medium">
-                      Quote Accepted (₹{req.quotePrice}).
+                      {t('CustomOrdersTab.QuoteAccepted', { price: req.quotePrice }, `Quote Accepted (₹${req.quotePrice}).`)}
                     </p>
                     <button 
                       onClick={() => handleAddToCart(req)}
                       className="w-full sm:w-auto bg-amber-500 hover:bg-amber-600 text-white font-medium py-2 px-6 rounded-lg shadow-sm transition-colors"
                     >
-                      Proceed to Checkout
+                      {t('CustomOrdersTab.ProceedToCheckout', null, 'Proceed to Checkout')}
                     </button>
                   </div>
                 )}

@@ -1,24 +1,23 @@
-import React from 'react';
 import { Link } from 'react-router-dom';
 import { 
-  FaFacebookF, 
   FaInstagram, 
   FaWhatsapp, 
-  FaYoutube, 
   FaHome,
   FaPhoneAlt,
   FaImages
 } from 'react-icons/fa';
 import { MdCake } from 'react-icons/md';
 import { GiPartyPopper } from "react-icons/gi";
-import { BsBoxSeam, BsBell } from "react-icons/bs";
+import { BsBoxSeam } from "react-icons/bs";
 import { RiMotorbikeFill } from "react-icons/ri";
 import { HiOutlineUserGroup } from "react-icons/hi";
 import { BiCube } from "react-icons/bi";
 import { LuLink } from "react-icons/lu";
 import { PiSquaresFourFill } from "react-icons/pi";
+import { useI18n } from '../context/I18nContext';
 
 const Footer = () => {
+  const { t } = useI18n();
   return (
     <footer className="w-full bg-[#fdfbf6] border-t border-[#f5e6c8]">
       <div className="max-w-6xl mx-auto px-4 pt-12">
@@ -30,16 +29,16 @@ const Footer = () => {
               <MdCake className="text-2xl" />
             </div>
             <div className="flex flex-col text-left">
-              <span className="font-serif font-bold text-[22px] text-[#4a2e00] leading-tight">Sri Tirupathi</span>
-              <span className="font-sans text-[10px] text-[#b68424] uppercase tracking-[0.15em] font-bold">Venkatachalapathi Bakery</span>
+              <span className="font-serif font-bold text-[22px] text-[#4a2e00] leading-tight">{t('FooterPage.Brand1', null, 'Sri Tirupathi')}</span>
+              <span className="font-sans text-[10px] text-[#b68424] uppercase tracking-[0.15em] font-bold">{t('FooterPage.Brand2', null, 'Venkatachalapathi Bakery')}</span>
             </div>
           </Link>
 
           <p className="font-bold text-[#b68424] mb-3 text-[15px]">
-            Fresh from the oven — every single day. <span className="text-[#f97316]">♥</span>
+            {t('FooterPage.Fresh', null, 'Fresh from the oven — every single day.')} <span className="text-[#f97316]">♥</span>
           </p>
           <p className="text-[13px] leading-[1.6] text-[#6b4919] mb-6 max-w-[480px]">
-            We bring you the finest quality baked goodies made with pure ingredients, traditional recipes, and lots of love.
+            {t('FooterPage.Description', null, 'We bring you the finest quality baked goodies made with pure ingredients, traditional recipes, and lots of love.')}
           </p>
 
           <div className="flex items-center justify-center gap-6">
@@ -72,22 +71,22 @@ const Footer = () => {
               <div className="w-9 h-9 rounded-[10px] bg-[#fbebc4] flex items-center justify-center text-[#7a4e15]">
                 <PiSquaresFourFill className="text-xl" />
               </div>
-              <h3 className="font-serif font-bold text-[17px] text-[#4a2e00] flex-1">Our Services</h3>
+              <h3 className="font-serif font-bold text-[17px] text-[#4a2e00] flex-1">{t('FooterPage.OurServices', null, 'Our Services')}</h3>
               <span className="text-[#d2a353] text-lg">✦</span>
             </div>
             <ul className="space-y-[14px]">
               {[
-                { label: 'Custom Cakes', icon: <MdCake className="text-xl" /> },
-                { label: 'Party Orders', icon: <GiPartyPopper className="text-xl" /> },
-                { label: 'Home Delivery', icon: <RiMotorbikeFill className="text-xl" /> },
-                { label: 'Bulk Orders', icon: <BsBoxSeam className="text-[17px]" /> },
+                { label: 'Custom Cakes', tKey: 'CustomCakes', icon: <MdCake className="text-xl" /> },
+                { label: 'Party Orders', tKey: 'PartyOrders', icon: <GiPartyPopper className="text-xl" /> },
+                { label: 'Home Delivery', tKey: 'HomeDelivery', icon: <RiMotorbikeFill className="text-xl" /> },
+                { label: 'Bulk Orders', tKey: 'BulkOrders', icon: <BsBoxSeam className="text-[17px]" /> },
               ].map((service, idx) => (
                 <li key={idx}>
                   <Link to="#" className="flex items-center group">
                     <div className="w-9 h-9 rounded-[10px] bg-[#fbebc4]/40 flex items-center justify-center text-[#956a29] mr-4 group-hover:bg-[#fbebc4] transition-colors">
                       {service.icon}
                     </div>
-                    <span className="text-[14px] font-medium text-[#6b4919] group-hover:text-[#4a2e00] flex-1 transition-colors">{service.label}</span>
+                    <span className="text-[14px] font-medium text-[#6b4919] group-hover:text-[#4a2e00] flex-1 transition-colors">{t('FooterPage.Services.' + service.tKey, null, service.label)}</span>
                     <span className="text-[#d2a353] group-hover:translate-x-1 transition-transform">›</span>
                   </Link>
                 </li>
@@ -101,22 +100,22 @@ const Footer = () => {
               <div className="w-9 h-9 rounded-[10px] bg-[#fbebc4] flex items-center justify-center text-[#7a4e15]">
                 <LuLink className="text-[19px]" />
               </div>
-              <h3 className="font-serif font-bold text-[17px] text-[#4a2e00] flex-1">Quick Links</h3>
+              <h3 className="font-serif font-bold text-[17px] text-[#4a2e00] flex-1">{t('FooterPage.QuickLinks', null, 'Quick Links')}</h3>
               <span className="text-[#d2a353] text-lg">✦</span>
             </div>
             <ul className="space-y-[14px]">
               {[
-                { label: 'Home', icon: <FaHome className="text-[17px]" />, link: '/' },
-                { label: 'About Us', icon: <HiOutlineUserGroup className="text-[19px]" />, link: '/#about-us' },
-                { label: 'Our Products', icon: <BiCube className="text-[19px]" />, link: '/shop' },
-                { label: 'Cake Gallery', icon: <FaImages className="text-[17px]" />, link: '/gallery' },
-                { label: 'Contact Us', icon: <FaPhoneAlt className="text-[15px]" />, link: '/contact' },
+                { label: 'Home', tKey: 'Home', icon: <FaHome className="text-[17px]" />, link: '/' },
+                { label: 'About Us', tKey: 'AboutUs', icon: <HiOutlineUserGroup className="text-[19px]" />, link: '/#about-us' },
+                { label: 'Our Products', tKey: 'OurProducts', icon: <BiCube className="text-[19px]" />, link: '/shop' },
+                { label: 'Cake Gallery', tKey: 'CakeGallery', icon: <FaImages className="text-[17px]" />, link: '/gallery' },
+                { label: 'Contact Us', tKey: 'ContactUs', icon: <FaPhoneAlt className="text-[15px]" />, link: '/contact' },
               ].map((link, idx) => (
                 <li key={idx}>
                   <Link 
                     to={link.link} 
                     className="flex items-center group"
-                    onClick={(e) => {
+                    onClick={() => {
                       if (link.label === 'About Us') {
                         if (window.location.pathname === '/') {
                           const aboutSection = document.getElementById('about-us');
@@ -132,7 +131,7 @@ const Footer = () => {
                     <div className="w-9 h-9 rounded-[10px] bg-[#fbebc4]/40 flex items-center justify-center text-[#956a29] mr-4 group-hover:bg-[#fbebc4] transition-colors">
                       {link.icon}
                     </div>
-                    <span className="text-[14px] font-medium text-[#6b4919] group-hover:text-[#4a2e00] flex-1 transition-colors">{link.label}</span>
+                    <span className="text-[14px] font-medium text-[#6b4919] group-hover:text-[#4a2e00] flex-1 transition-colors">{t('FooterPage.Links.' + link.tKey, null, link.label)}</span>
                     <span className="text-[#d2a353] group-hover:translate-x-1 transition-transform">›</span>
                   </Link>
                 </li>
@@ -153,14 +152,14 @@ const Footer = () => {
             <span className="w-10 h-px bg-gradient-to-l from-transparent to-[#d2a353]"></span>
           </div>
           <p className="text-[11px] text-[#6b4919] font-medium">
-            &copy; 2025 Sri Tirupathi Bakery. All rights reserved.
+            {t('FooterPage.Rights', null, '© 2025 Sri Tirupathi Bakery. All rights reserved.')}
           </p>
         </div>
         
         {/* Desktop Yellow Bar */}
         <div className="hidden md:flex w-full bg-[#f3bc4b] py-[18px] justify-center rounded-t-3xl mx-auto max-w-7xl">
           <p className="text-[13px] text-[#4a2e00] font-medium">
-            &copy; 2025 Sri Tirupathi Bakery. All rights reserved.
+            {t('FooterPage.Rights', null, '© 2025 Sri Tirupathi Bakery. All rights reserved.')}
           </p>
         </div>
       </div>

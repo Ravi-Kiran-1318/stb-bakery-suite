@@ -10,10 +10,12 @@ import { useContext } from 'react';
 import { haversine } from '../../utils/haversine';
 import MapPicker from '../../components/MapPicker';
 import PageWrapper from '../../components/PageWrapper';
+import { useI18n } from '../../context/I18nContext';
 
 const Checkout = () => {
   const { items, clearCart } = useCart();
   const { user } = useAuth();
+  const { t, language } = useI18n();
   const navigate = useNavigate();
   const { addToast } = useContext(ToastContext);
 
@@ -323,7 +325,7 @@ const Checkout = () => {
       <div className="bg-gray-50 min-h-[100dvh] pt-16 pb-32 lg:pb-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 pb-8 lg:py-8">
           
-          <h1 className="text-4xl font-serif font-bold text-gray-900 mb-6 lg:mb-8">Checkout</h1>
+          <h1 className="text-4xl font-serif font-bold text-gray-900 mb-6 lg:mb-8">{t('CheckoutPage.Title', null, 'Checkout')}</h1>
           
           <div className="flex flex-col lg:flex-row gap-10 items-start">
             
@@ -332,7 +334,7 @@ const Checkout = () => {
               
               {/* Delivery Type Toggle */}
               <div className="bg-white p-4 sm:p-6 rounded-2xl sm:rounded-3xl shadow-sm border border-gray-100">
-                <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-4 sm:mb-6">How would you like to receive your order?</h2>
+                <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-4 sm:mb-6">{t('CheckoutPage.ReceiveOrder', null, 'How would you like to receive your order?')}</h2>
                 <div className="grid grid-cols-2 gap-4">
                   <button 
                     onClick={() => {
@@ -347,10 +349,10 @@ const Checkout = () => {
                           : 'bg-white text-gray-600 border-2 border-gray-200 hover:border-amber-500'
                     }`}
                   >
-                    🚚 Delivery
+                    {t('CheckoutPage.Delivery', null, '🚚 Delivery')}
                     {!isDeliveryAvailable && (
                       <span className="absolute -bottom-6 left-1/2 -translate-x-1/2 text-xs font-bold text-red-500 whitespace-nowrap">
-                        Today delivery is not available
+                        {t('CheckoutPage.DeliveryNotAvailable', null, 'Today delivery is not available')}
                       </span>
                     )}
                   </button>
@@ -362,7 +364,7 @@ const Checkout = () => {
                         : 'bg-white text-gray-600 border-2 border-gray-200 hover:border-amber-500'
                     }`}
                   >
-                    🏪 Pickup
+                    {t('CheckoutPage.Pickup', null, '🏪 Pickup')}
                   </button>
                 </div>
               </div>
@@ -377,7 +379,7 @@ const Checkout = () => {
                     exit={{ opacity: 0, height: 0 }}
                     className="bg-white p-4 sm:p-6 rounded-2xl sm:rounded-3xl shadow-sm border border-gray-100 overflow-hidden space-y-4 sm:space-y-6"
                   >
-                    <h2 className="text-lg sm:text-xl font-bold text-gray-900">Delivery Location</h2>
+                    <h2 className="text-lg sm:text-xl font-bold text-gray-900">{t('CheckoutPage.DeliveryLocation', null, 'Delivery Location')}</h2>
                     
                     {!isAddingNewAddress && savedAddresses.length > 0 && (
                       <div className="space-y-4">
@@ -391,7 +393,7 @@ const Checkout = () => {
                               <div className="flex items-center gap-2 mb-2">
                                 <span className="text-xl">{addr.type === 'Home' ? '🏠' : addr.type === 'Work' ? '💼' : '📍'}</span>
                                 <span className="font-bold text-gray-800">{addr.type}</span>
-                                {addr.isDefault && <span className="bg-amber-100 text-amber-700 text-[10px] font-bold px-2 py-0.5 rounded ml-auto">Default</span>}
+                                {addr.isDefault && <span className="bg-amber-100 text-amber-700 text-[10px] font-bold px-2 py-0.5 rounded ml-auto">{t('CheckoutPage.Default', null, 'Default')}</span>}
                               </div>
                               <p className="text-sm text-gray-600 font-medium">{addr.name}</p>
                               <p className="text-sm text-gray-600 truncate">{addr.addressLine1}, {addr.city}</p>
@@ -401,26 +403,26 @@ const Checkout = () => {
                         {distanceKm <= 5 && distanceKm > 0 && distanceKm !== 9999 && (
                           <div className="mt-4 bg-green-50 text-green-800 p-4 rounded-xl border border-green-200 flex items-start gap-3">
                             <span className="text-xl">✅</span>
-                            <p className="font-medium mt-0.5">Eligible for delivery. Distance: {distanceKm.toFixed(1)} km</p>
+                            <p className="font-medium mt-0.5">{t('CheckoutPage.EligibleDelivery', null, 'Eligible for delivery. Distance:')} {distanceKm.toFixed(1)} km</p>
                           </div>
                         )}
                         {distanceKm > 5 && distanceKm !== 9999 && (
                           <div className="mt-4 bg-red-50 text-red-700 p-4 rounded-xl border border-red-200 flex items-start gap-3">
                             <span className="text-xl">⚠️</span>
-                            <p className="font-medium mt-0.5">This saved address is outside our 5km delivery zone ({distanceKm.toFixed(1)} km). Please choose a closer location or switch to Pickup.</p>
+                            <p className="font-medium mt-0.5">{t('CheckoutPage.OutsideZoneSave', { dist: distanceKm.toFixed(1) }, `This saved address is outside our 5km delivery zone (${distanceKm.toFixed(1)} km). Please choose a closer location or switch to Pickup.`)}</p>
                           </div>
                         )}
                         {distanceKm === 9999 && (
                           <div className="mt-4 bg-amber-50 text-amber-800 p-4 rounded-xl border border-amber-200 flex items-start gap-3">
                             <span className="text-xl">📍</span>
-                            <p className="font-medium mt-0.5">This address is missing exact map coordinates. Please click &quot;+ Add a new address&quot; below and physically drop the pin on the map so we can verify your delivery distance.</p>
+                            <p className="font-medium mt-0.5">{t('CheckoutPage.MissingMap', null, 'This address is missing exact map coordinates. Please click "+ Add a new address" below and physically drop the pin on the map so we can verify your delivery distance.')}</p>
                           </div>
                         )}
                         <button 
                           onClick={() => setIsAddingNewAddress(true)}
                           className="text-amber-600 font-bold hover:text-amber-700 flex items-center gap-1 mt-2"
                         >
-                          + Add a new address
+                          {t('CheckoutPage.AddNewAddress', null, '+ Add a new address')}
                         </button>
                       </div>
                     )}
@@ -429,12 +431,12 @@ const Checkout = () => {
                       <div className="space-y-6">
                         {savedAddresses.length > 0 && (
                           <div className="flex justify-between items-center border-b border-gray-100 pb-2">
-                            <h3 className="font-bold text-gray-800">Pinpoint new location</h3>
+                            <h3 className="font-bold text-gray-800">{t('CheckoutPage.PinpointLocation', null, 'Pinpoint new location')}</h3>
                             <button 
                               onClick={() => setIsAddingNewAddress(false)}
                               className="text-sm text-gray-500 hover:text-gray-700 font-medium underline"
                             >
-                              Use saved address
+                              {t('CheckoutPage.UseSavedAddress', null, 'Use saved address')}
                             </button>
                           </div>
                         )}
@@ -447,20 +449,20 @@ const Checkout = () => {
                         
                         <div className="mt-6">
                           <label className="block text-sm font-semibold text-gray-700 mb-2">
-                            Complete Address <span className="text-red-500">*</span>
+                            {t('CheckoutPage.CompleteAddress', null, 'Complete Address')} <span className="text-red-500">*</span>
                           </label>
                           <textarea 
                             className="input-field w-full h-20 resize-none"
                             value={addressText}
                             onChange={(e) => setAddressText(e.target.value)}
-                            placeholder="House/Flat No, Landmark, etc."
+                            placeholder={t('CheckoutPage.AddressPh', null, 'House/Flat No, Landmark, etc.')}
                           />
                         </div>
                         
                         {distanceKm > 5 && (
                           <div className="mt-4 bg-red-50 text-red-700 p-4 rounded-xl border border-red-200 flex items-start gap-3">
                             <span className="text-xl">⚠️</span>
-                            <p className="font-medium mt-0.5">Your location is outside our 5km delivery zone. Switch to Pickup or choose a closer location.</p>
+                            <p className="font-medium mt-0.5">{t('CheckoutPage.OutsideZoneMap', null, 'Your location is outside our 5km delivery zone. Switch to Pickup or choose a closer location.')}</p>
                           </div>
                         )}
                       </div>
@@ -474,7 +476,7 @@ const Checkout = () => {
                     exit={{ opacity: 0, height: 0 }}
                     className="bg-white p-4 sm:p-6 rounded-2xl sm:rounded-3xl shadow-sm border border-gray-100 overflow-hidden"
                   >
-                    <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-3 sm:mb-4">Pickup Location</h2>
+                    <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-3 sm:mb-4">{t('CheckoutPage.PickupLocation', null, 'Pickup Location')}</h2>
                     
                     <div className="bg-amber-50 p-4 rounded-xl border border-amber-100 flex items-start gap-3">
                       <span className="text-2xl mt-0.5">🏪</span>
@@ -489,11 +491,11 @@ const Checkout = () => {
 
               {/* Date & Time */}
               <div className="bg-white p-4 sm:p-6 rounded-2xl sm:rounded-3xl shadow-sm border border-gray-100">
-                <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-4 sm:mb-6">Requested Date & Time</h2>
+                <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-4 sm:mb-6">{t('CheckoutPage.ReqDateTime', null, 'Requested Date & Time')}</h2>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-semibold text-gray-700 mb-2">
-                      Select Date <span className="text-red-500">*</span>
+                      {t('CheckoutPage.SelectDate', null, 'Select Date')} <span className="text-red-500">*</span>
                     </label>
                     <input 
                       type="date" 
@@ -506,7 +508,7 @@ const Checkout = () => {
                   </div>
                   <div>
                     <label className="block text-sm font-semibold text-gray-700 mb-2">
-                      Time Slot <span className="text-red-500">*</span>
+                      {t('CheckoutPage.TimeSlot', null, 'Time Slot')} <span className="text-red-500">*</span>
                     </label>
                     <select 
                       className="input-field w-full"
@@ -520,14 +522,14 @@ const Checkout = () => {
                   </div>
                 </div>
                 <p className="text-gray-500 text-sm mt-3 flex items-center gap-2">
-                  <span>💡</span> We need at least 24 hours. For custom cakes, order 2–3 days ahead.
+                  <span>💡</span> {t('CheckoutPage.TimeNote', null, 'We need at least 24 hours. For custom cakes, order 2–3 days ahead.')}
                 </p>
               </div>
 
               {/* Payment Method */}
               <div className="bg-white p-4 sm:p-6 rounded-2xl sm:rounded-3xl shadow-sm border border-gray-100">
                 <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-4 sm:mb-6">
-                  Payment Method <span className="text-red-500">*</span>
+                  {t('CheckoutPage.PaymentMethod', null, 'Payment Method')} <span className="text-red-500">*</span>
                 </h2>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -541,9 +543,9 @@ const Checkout = () => {
                   >
                     <div className="flex items-center gap-3 mb-2">
                       <span className="text-2xl">💳</span>
-                      <h3 className="font-bold text-gray-900 text-lg">Pay Online (Razorpay)</h3>
+                      <h3 className="font-bold text-gray-900 text-lg">{t('CheckoutPage.PayOnline', null, 'Pay Online (Razorpay)')}</h3>
                     </div>
-                    <p className="text-sm text-gray-600 pl-9">Pay 20% advance now, rest on delivery</p>
+                    <p className="text-sm text-gray-600 pl-9">{t('CheckoutPage.PayAdvanceDesc', null, 'Pay 20% advance now, rest on delivery')}</p>
                   </div>
 
                   <div 
@@ -559,12 +561,12 @@ const Checkout = () => {
                   >
                     <div className="flex items-center gap-3 mb-2">
                       <span className="text-2xl">💵</span>
-                      <h3 className="font-bold text-gray-900 text-lg">Cash on {deliveryType}</h3>
+                      <h3 className="font-bold text-gray-900 text-lg">{t('CheckoutPage.CashOn', { type: t(`CheckoutPage.${deliveryType}`, null, deliveryType) }, `Cash on ${deliveryType}`)}</h3>
                     </div>
                     <p className="text-sm text-gray-600 pl-9">
                       {hasCustomOrGalleryCake 
-                        ? "COD is not available for Custom/Gallery Cakes"
-                        : "Pay full amount when you receive your order"
+                        ? t('CheckoutPage.CODNotAvail', null, "COD is not available for Custom/Gallery Cakes")
+                        : t('CheckoutPage.PayFullDesc', null, "Pay full amount when you receive your order")
                       }
                     </p>
                   </div>
@@ -577,10 +579,10 @@ const Checkout = () => {
                     className="mt-6 bg-blue-50 text-blue-800 p-4 rounded-xl border border-blue-100 font-medium space-y-2"
                   >
                     <div>
-                      You will pay <span className="font-bold">₹{Math.ceil(totalAmount * 0.2)}</span> now. Remaining ₹{totalAmount - Math.ceil(totalAmount * 0.2)} on delivery.
+                      {t('CheckoutPage.PayNowDesc', { adv: Math.ceil(totalAmount * 0.2), rem: (totalAmount - Math.ceil(totalAmount * 0.2)) }, `You will pay ₹${Math.ceil(totalAmount * 0.2)} now. Remaining ₹${totalAmount - Math.ceil(totalAmount * 0.2)} on delivery.`)}
                     </div>
                     <div className="text-sm text-blue-700 opacity-90">
-                      *Note: Minimum 20% of the total estimated price should be paid in advance.
+                      {t('CheckoutPage.MinAdvanceNote', null, '*Note: Minimum 20% of the total estimated price should be paid in advance.')}
                     </div>
                   </motion.div>
                 )}
@@ -588,12 +590,12 @@ const Checkout = () => {
 
               {/* Notes */}
               <div className="bg-white p-4 sm:p-6 rounded-2xl sm:rounded-3xl shadow-sm border border-gray-100">
-                <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-4 sm:mb-6">Additional Notes (Optional)</h2>
+                <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-4 sm:mb-6">{t('CheckoutPage.AdditionalNotes', null, 'Additional Notes (Optional)')}</h2>
                 <textarea 
                   className="input-field w-full h-24 resize-none"
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
-                  placeholder="Any special requests? E.g. Eggless cake, message on cake..."
+                  placeholder={t('CheckoutPage.NotesPh', null, 'Any special requests? E.g. Eggless cake, message on cake...')}
                 />
               </div>
 
@@ -602,12 +604,12 @@ const Checkout = () => {
             {/* Right: Sticky Summary */}
             <div className="w-full lg:w-96 flex-shrink-0 sticky top-24">
               <div className="bg-white p-4 sm:p-6 rounded-2xl sm:rounded-3xl shadow-lg border border-gray-100">
-                <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-4 sm:mb-6">Order Summary</h2>
+                <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-4 sm:mb-6">{t('CheckoutPage.OrderSummary', null, 'Order Summary')}</h2>
                 
                 <div className="space-y-4 mb-6 max-h-60 overflow-y-auto pr-2">
                   {items.map(item => (
                     <div key={item.productId} className="flex justify-between text-sm">
-                      <span className="text-gray-600 flex-1 pr-4 line-clamp-2">{item.qty}x {item.nameEN}</span>
+                      <span className="text-gray-600 flex-1 pr-4 line-clamp-2">{item.qty}x {language === 'te' && item.nameTE ? item.nameTE : item.nameEN}</span>
                       <span className="font-medium text-gray-900">{formatCurrency(item.price * item.qty)}</span>
                     </div>
                   ))}
@@ -615,19 +617,19 @@ const Checkout = () => {
 
                 <div className="border-t border-gray-100 pt-4 space-y-3">
                   <div className="flex justify-between text-gray-600">
-                    <span>Subtotal</span>
+                    <span>{t('CheckoutPage.Subtotal', null, 'Subtotal')}</span>
                     <span>{formatCurrency(subtotal)}</span>
                   </div>
                   
                   {deliveryType === 'Delivery' && (
                     <div className="flex justify-between text-gray-600">
-                      <span>Delivery Fee {distanceKm > 0 ? `(${distanceKm.toFixed(1)} km)` : ''}</span>
+                      <span>{t('CheckoutPage.DeliveryFee', null, 'Delivery Fee')} {distanceKm > 0 ? `(${distanceKm.toFixed(1)} km)` : ''}</span>
                       <span>{formatCurrency(deliveryFee)}</span>
                     </div>
                   )}
 
                   <div className="flex justify-between text-lg font-bold text-gray-900 pt-2 border-t border-gray-100">
-                    <span>Total</span>
+                    <span>{t('CheckoutPage.Total', null, 'Total')}</span>
                     <span className="text-amber-600">{formatCurrency(totalAmount)}</span>
                   </div>
                 </div>
@@ -640,16 +642,16 @@ const Checkout = () => {
                   {isSubmitting ? (
                     <div className="flex items-center gap-2">
                       <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                      Processing...
+                      {t('CheckoutPage.Processing', null, 'Processing...')}
                     </div>
                   ) : (
-                    `Place Order • ${formatCurrency(totalAmount)}`
+                    `${t('CheckoutPage.PlaceOrder', null, 'Place Order')} • ${formatCurrency(totalAmount)}`
                   )}
                 </button>
                 
                 {!isFormValid() && (
                   <p className="text-center text-xs text-red-500 mt-3 font-medium">
-                    Please complete all required fields.
+                    {t('CheckoutPage.CompleteReq', null, 'Please complete all required fields.')}
                   </p>
                 )}
               </div>

@@ -9,6 +9,7 @@ import jsPDF from 'jspdf';
 import WhatsAppButton from '../../components/WhatsAppButton';
 import Loader from '../../components/Loader';
 import ErrorState from '../../components/ErrorState';
+import { useI18n } from '../../context/I18nContext';
 
 const ORDER_STEPS = ['Received', 'Preparing', 'Ready', 'Out for Delivery', 'Delivered'];
 
@@ -20,6 +21,7 @@ const MyOrders = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { replaceCart } = useContext(CartContext);
+  const { t, language } = useI18n();
   
   const queryParams = new URLSearchParams(location.search);
   const highlightOrderId = queryParams.get('highlightOrderId');
@@ -32,7 +34,7 @@ const MyOrders = () => {
       setOrders(data);
     } catch (err) {
       console.error('Failed to fetch orders', err);
-      setError(err.response?.data?.message || 'Failed to fetch your orders. Please try again.');
+      setError(err.response?.data?.message || t('MyOrders.FetchError', null, 'Failed to fetch your orders. Please try again.'));
     } finally {
       if (!silent) setLoading(false);
     }
@@ -83,10 +85,10 @@ const MyOrders = () => {
   }, [highlightOrderId, orders, loading]);
 
   const handleCancelOrder = async (orderId) => {
-    if (window.confirm('Cancel this order? This cannot be undone.')) {
+    if (window.confirm(t('MyOrders.CancelConfirm', null, 'Cancel this order? This cannot be undone.'))) {
       try {
         const { data } = await axiosInstance.patch(`/orders/${orderId}/cancel`, {
-          reason: 'Cancelled by customer',
+          reason: t('MyOrders.CancelReason', null, 'Cancelled by customer'),
           cancelledBy: 'customer'
         });
         setOrders(prev => prev.map(o => o._id === data._id ? data : o));
@@ -245,7 +247,7 @@ Order ID: #${shortOrderId}`;
 
   return (
     <div className="max-w-4xl mx-auto">
-      <h2 className="text-3xl font-serif font-bold text-gray-900 mb-8">My Orders</h2>
+      <h2 className="text-3xl font-serif font-bold text-gray-900 mb-8">{t('MyOrders.Title', null, 'My Orders')}</h2>
       
       {orders.length === 0 ? (
         <motion.div 
@@ -254,13 +256,13 @@ Order ID: #${shortOrderId}`;
           className="text-center py-20 bg-white rounded-3xl border border-gray-100 shadow-sm"
         >
           <div className="text-6xl mb-6">📦</div>
-          <h3 className="text-2xl font-bold text-gray-900 mb-4">No orders yet.</h3>
-          <p className="text-gray-500 mb-8">Start shopping to get your favorite treats!</p>
+          <h3 className="text-2xl font-bold text-gray-900 mb-4">{t('MyOrders.NoOrders', null, 'No orders yet.')}</h3>
+          <p className="text-gray-500 mb-8">{t('MyOrders.StartShopping', null, 'Start shopping to get your favorite treats!')}</p>
           <Link 
             to="/shop" 
             className="bg-amber-500 hover:bg-amber-600 text-white font-semibold py-3 px-8 rounded-full transition-colors"
           >
-            Browse Products &rarr;
+            {t('MyOrders.BrowseProducts', null, 'Browse Products →')}
           </Link>
         </motion.div>
       ) : (
@@ -298,19 +300,19 @@ Order ID: #${shortOrderId}`;
                 >
                   {(hasCustomCake || hasGalleryCake) && (
                     <div className={`absolute top-0 left-0 text-white text-[10px] md:text-xs font-bold px-4 py-1.5 rounded-br-2xl flex items-center gap-1.5 shadow-sm z-10 ${hasGalleryCake && !hasCustomCake ? 'bg-green-600' : 'bg-amber-500'}`}>
-                      {hasGalleryCake && !hasCustomCake ? '🍰 GALLERY CAKE' : '🎂 CUSTOM CAKE'}
+                      {hasGalleryCake && !hasCustomCake ? `🍰 ${t('MyOrders.GalleryCakeLabel', null, 'GALLERY CAKE').toUpperCase()}` : `🎂 ${t('MyOrders.CustomCakeLabel', null, 'CUSTOM CAKE').toUpperCase()}`}
                     </div>
                   )}
                   <div className={`p-6 ${(hasCustomCake || hasGalleryCake) ? 'pt-10' : ''}`}>
                     <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
                       <div>
                         <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
-                          Order #{order._id.toString().slice(-6).toUpperCase()}
+                          {t('MyOrders.OrderNum', { id: order._id.toString().slice(-6).toUpperCase() }, `Order #${order._id.toString().slice(-6).toUpperCase()}`)}
                         </h3>
-                        <p className="text-sm text-gray-500">Placed on: {dateObj.toLocaleString()}</p>
+                        <p className="text-sm text-gray-500">{t('MyOrders.PlacedOn', { date: dateObj.toLocaleString() }, `Placed on: ${dateObj.toLocaleString()}`)}</p>
                         {order.requestedDate && (
                           <p className="text-sm font-semibold text-amber-600 mt-1">
-                            Requested for: {new Date(order.requestedDate).toLocaleDateString()} {order.requestedTime && `| ${order.requestedTime}`}
+                            {t('MyOrders.RequestedFor', { date: new Date(order.requestedDate).toLocaleDateString(), time: order.requestedTime ? `| ${order.requestedTime}` : '' }, `Requested for: ${new Date(order.requestedDate).toLocaleDateString()} ${order.requestedTime ? `| ${order.requestedTime}` : ''}`)}
                           </p>
                         )}
                         <div className="mt-4 flex flex-col gap-3 border-t border-gray-100 pt-3">
@@ -318,29 +320,29 @@ Order ID: #${shortOrderId}`;
                             <div key={item.productId || i} className="flex items-center gap-3">
                               <div className="w-12 h-12 rounded bg-gray-100 flex-shrink-0 border border-gray-200 overflow-hidden">
                                 {item.imageUrl ? (
-                                  <img src={item.imageUrl} alt={item.nameEN || item.name} className="w-full h-full object-cover" />
+                                  <img src={item.imageUrl} alt={language === 'te' && item.nameTE ? item.nameTE : item.nameEN || item.name} className="w-full h-full object-cover" />
                                 ) : (
-                                  <div className="w-full h-full flex items-center justify-center text-xs text-gray-400">No Img</div>
+                                  <div className="w-full h-full flex items-center justify-center text-xs text-gray-400">{t('MyOrders.NoImg', null, 'No Img')}</div>
                                 )}
                               </div>
                               <div className="flex-1 min-w-0">
                                 <div className="font-semibold text-dark flex items-center flex-wrap gap-2">
-                                  <span className="truncate">{(item.isCustomCake && item.customCakeId && !item.customCakeId.isGalleryRequest) ? 'Custom Cake' : (item.nameEN || item.name)}</span>
+                                  <span className="truncate">{(item.isCustomCake && item.customCakeId && !item.customCakeId.isGalleryRequest) ? t('MyOrders.CustomCakeLabel', null, 'Custom Cake') : (language === 'te' && item.nameTE ? item.nameTE : item.nameEN || item.name)}</span>
                                   {item.isCustomCake && (
                                     <span className={`${item.customCakeId?.isGalleryRequest ? 'bg-green-100 text-green-800' : 'bg-amber-100 text-amber-800'} text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wide`}>
-                                      {item.customCakeId?.isGalleryRequest ? 'Gallery Cake' : 'Custom Cake'}
+                                      {item.customCakeId?.isGalleryRequest ? t('MyOrders.GalleryCakeLabel', null, 'Gallery Cake') : t('MyOrders.CustomCakeLabel', null, 'Custom Cake')}
                                     </span>
                                   )}
                                 </div>
                                 {item.isCustomCake && item.customCakeId && (
                                   <div className="text-xs text-gray-600 mt-1 flex flex-wrap gap-x-3 gap-y-1">
-                                    {item.customCakeId.weight && <span><span className="text-gray-400">Weight:</span> {String(item.customCakeId.weight).toLowerCase().includes('kg') || String(item.customCakeId.weight).toLowerCase().includes('g') ? item.customCakeId.weight : `${item.customCakeId.weight}kg`}</span>}
-                                    {item.customCakeId.flavour && <span><span className="text-gray-400">Flavour:</span> {item.customCakeId.flavour}</span>}
-                                    {item.customCakeId.shape && <span><span className="text-gray-400">Shape:</span> {item.customCakeId.shape}</span>}
-                                    {item.customCakeId.color && <span><span className="text-gray-400">Color:</span> {item.customCakeId.color}</span>}
+                                    {item.customCakeId.weight && <span><span className="text-gray-400">{t('MyOrders.Weight', null, 'Weight:')}</span> {String(item.customCakeId.weight).toLowerCase().includes('kg') || String(item.customCakeId.weight).toLowerCase().includes('g') ? item.customCakeId.weight : `${item.customCakeId.weight}kg`}</span>}
+                                    {item.customCakeId.flavour && <span><span className="text-gray-400">{t('MyOrders.Flavour', null, 'Flavour:')}</span> {item.customCakeId.flavour}</span>}
+                                    {item.customCakeId.shape && <span><span className="text-gray-400">{t('MyOrders.Shape', null, 'Shape:')}</span> {item.customCakeId.shape}</span>}
+                                    {item.customCakeId.color && <span><span className="text-gray-400">{t('MyOrders.Color', null, 'Color:')}</span> {item.customCakeId.color}</span>}
                                   </div>
                                 )}
-                                <div className="text-xs text-gray-500 mt-1">Qty: {item.qty} × {formatCurrency(item.price)}</div>
+                                <div className="text-xs text-gray-500 mt-1">{t('MyOrders.Qty', { qty: item.qty, price: formatCurrency(item.price) }, `Qty: ${item.qty} × ${formatCurrency(item.price)}`)}</div>
                               </div>
                             </div>
                           ))}
@@ -352,10 +354,10 @@ Order ID: #${shortOrderId}`;
                         {order.paymentMethod === 'Online' && (
                           <div className="mt-1 mb-2 text-xs font-medium">
                             <span className={`${order.paymentStatus === 'Partial' || order.paymentStatus === 'Paid' ? 'text-green-600 bg-green-50 border-green-200' : 'text-amber-600 bg-amber-50 border-amber-200'} px-2 py-0.5 rounded border`}>
-                              Advance (20%): ₹{Math.ceil(order.totalAmount * 0.2)} {order.paymentStatus === 'Partial' || order.paymentStatus === 'Paid' ? '(Paid)' : '(Pending)'}
+                              {t('MyOrders.Advance', { adv: Math.ceil(order.totalAmount * 0.2), status: (order.paymentStatus === 'Partial' || order.paymentStatus === 'Paid') ? t('MyOrders.Paid', null, '(Paid)') : t('MyOrders.Pending', null, '(Pending)') }, `Advance (20%): ₹${Math.ceil(order.totalAmount * 0.2)} ${(order.paymentStatus === 'Partial' || order.paymentStatus === 'Paid') ? '(Paid)' : '(Pending)'}`)}
                             </span>
                             <div className="text-red-600 mt-1 font-semibold">
-                              Due on Delivery: ₹{order.totalAmount - Math.ceil(order.totalAmount * 0.2)}
+                              {t('MyOrders.Due', { due: order.totalAmount - Math.ceil(order.totalAmount * 0.2) }, `Due on Delivery: ₹${order.totalAmount - Math.ceil(order.totalAmount * 0.2)}`)}
                             </div>
                           </div>
                         )}
@@ -366,13 +368,12 @@ Order ID: #${shortOrderId}`;
                       </div>
                     </div>
 
-                    {/* Status Tracker */}
                     <div className="my-8">
                       {isCancelled ? (
                         <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl flex items-start gap-3">
                           <span className="text-xl">❌</span>
                           <div>
-                            <p className="font-bold">Order Cancelled</p>
+                            <p className="font-bold">{t('MyOrders.OrderCancelled', null, 'Order Cancelled')}</p>
                             <p className="text-sm opacity-90">{order.cancelReason}</p>
                           </div>
                         </div>
@@ -407,10 +408,10 @@ Order ID: #${shortOrderId}`;
                         className="bg-amber-500 hover:bg-amber-600 text-white font-bold px-5 py-2 rounded-lg transition-colors text-sm shadow-md flex items-center gap-2"
                       >
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
-                        Re-Order
+                        {t('MyOrders.Reorder', null, 'Re-Order')}
                       </button>
                       <WhatsAppButton 
-                        label="Share" 
+                        label={t('MyOrders.Share', null, 'Share')}
                         message={getWhatsAppMessage(order)} 
                         variant="outlined" 
                         className="!px-3 !py-1 !text-sm !rounded-lg"
@@ -419,7 +420,7 @@ Order ID: #${shortOrderId}`;
                         onClick={() => generateReceipt(order)}
                         className="text-gray-600 hover:text-gray-900 font-semibold px-4 py-2 flex items-center gap-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors text-sm"
                       >
-                        📄 Receipt
+                        {t('MyOrders.Receipt', null, '📄 Receipt')}
                       </button>
                       
                       {!isCancelled && order.status === 'Received' && (
@@ -427,7 +428,7 @@ Order ID: #${shortOrderId}`;
                           onClick={() => handleCancelOrder(order._id)}
                           className="text-red-600 hover:text-white font-semibold px-4 py-2 border border-red-600 hover:bg-red-600 rounded-lg transition-colors text-sm"
                         >
-                          Cancel
+                          {t('MyOrders.CancelBtn', null, 'Cancel')}
                         </button>
                       )}
                     </div>

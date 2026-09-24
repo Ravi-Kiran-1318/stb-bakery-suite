@@ -1,15 +1,14 @@
-import React from 'react';
+import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
 import { motion, useMotionValue, useTransform } from 'framer-motion';
-import { useTranslation } from 'react-i18next';
+import { useI18n } from '../context/I18nContext';
 import { formatCurrency } from '../utils/formatCurrency';
 import { useCart } from '../context/CartContext';
 import { useFavorites } from '../context/FavoritesContext';
 
 const ProductCard = ({ product, showAdminControls, onEdit, onDelete }) => {
-  const { i18n } = useTranslation();
-  const lang = i18n.language === 'te' ? 'te' : 'en';
-  const name = lang === 'te' && product.nameTe ? product.nameTe : product.nameEN;
+  const { t, language } = useI18n();
+  const name = language === 'te' && product.nameTe ? product.nameTe : product.nameEN;
 
   const { items, addToCart, updateQty } = useCart();
   const cartItem = items.find((i) => i.productId === product._id);
@@ -63,18 +62,18 @@ const ProductCard = ({ product, showAdminControls, onEdit, onDelete }) => {
           {product.imageUrl ? (
             <img src={product.imageUrl} alt={name} className="w-full h-full object-cover transition-transform duration-300 hover:scale-110" />
           ) : (
-            <div className="w-full h-full flex items-center justify-center text-muted">No Image</div>
+            <div className="w-full h-full flex items-center justify-center text-muted">{t('ProductCard.NoImage', null, 'No Image')}</div>
           )}
           
           {!product.isAvailable && (
             <div className="absolute top-2 left-2 bg-gray-500 text-white text-xs px-2 py-1 rounded-md shadow">
-              Unavailable
+              {t('ProductCard.Unavailable', null, 'Unavailable')}
             </div>
           )}
 
           {product.isAvailable && product.isSpecial && (
             <div className="absolute top-2 left-2 bg-amber-500 text-white text-xs px-2 py-1 rounded-md shadow font-bold flex items-center gap-1">
-              ⭐ Special
+              {t('ProductCard.Special', null, '⭐ Special')}
             </div>
           )}
 
@@ -122,7 +121,7 @@ const ProductCard = ({ product, showAdminControls, onEdit, onDelete }) => {
               {product.weight && <span className="text-muted bg-slate-100 px-2 py-0.5 rounded">{product.weight}</span>}
               {showAdminControls && product.quantity !== undefined && (
                 <span className={`px-2 py-0.5 rounded ${product.quantity > 0 ? 'bg-blue-50 text-blue-600' : 'bg-red-50 text-red-600'}`}>
-                  Stock: {product.quantity}
+                  {t('ProductCard.Stock', null, 'Stock:')} {product.quantity}
                 </span>
               )}
             </div>
@@ -144,10 +143,10 @@ const ProductCard = ({ product, showAdminControls, onEdit, onDelete }) => {
                   onClick={() => addToCart(product)}
                   className="flex items-center justify-center p-2 sm:py-1.5 sm:px-4 rounded-lg transition-all hover:scale-105 shadow-sm"
                   style={{ background: 'linear-gradient(135deg, #D4AF37 0%, #c8922a 100%)', color: '#1a0a00' }}
-                  title="Add to Cart"
+                  title={t('ProductCard.AddToCart', null, 'Add to Cart')}
                 >
                   {/* Text for larger screens */}
-                  <span className="hidden sm:inline-block text-sm font-bold">Add to Cart</span>
+                  <span className="hidden sm:inline-block text-sm font-bold">{t('ProductCard.AddToCart', null, 'Add to Cart')}</span>
                   {/* Icon for mobile screens */}
                   <svg className="w-4 h-4 sm:hidden stroke-current stroke-2" fill="none" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path>
@@ -160,6 +159,23 @@ const ProductCard = ({ product, showAdminControls, onEdit, onDelete }) => {
       </motion.div>
     </motion.div>
   );
+};
+
+ProductCard.propTypes = {
+  product: PropTypes.shape({
+    _id: PropTypes.string.isRequired,
+    nameEN: PropTypes.string,
+    nameTe: PropTypes.string,
+    imageUrl: PropTypes.string,
+    isAvailable: PropTypes.bool,
+    isSpecial: PropTypes.bool,
+    price: PropTypes.number.isRequired,
+    weight: PropTypes.string,
+    quantity: PropTypes.number
+  }).isRequired,
+  showAdminControls: PropTypes.bool,
+  onEdit: PropTypes.func,
+  onDelete: PropTypes.func
 };
 
 export default ProductCard;

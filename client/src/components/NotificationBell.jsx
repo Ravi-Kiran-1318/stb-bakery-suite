@@ -4,12 +4,14 @@ import axiosInstance from '../utils/axiosInstance';
 import { SocketContext } from '../context/SocketContext';
 import { AuthContext } from '../context/AuthContext';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useI18n } from '../context/I18nContext';
 
 const NotificationBell = () => {
   const [notifications, setNotifications] = useState([]);
   const [isOpen, setIsOpen] = useState(false);
   const { socket } = useContext(SocketContext);
   const { user } = useContext(AuthContext);
+  const { t } = useI18n();
   const navigate = useNavigate();
   const wrapperRef = useRef(null);
 
@@ -179,10 +181,10 @@ const NotificationBell = () => {
               className="fixed top-0 right-0 h-[100dvh] w-[90%] sm:w-[400px] bg-white z-[110] shadow-2xl flex flex-col"
             >
               <div className="flex justify-between items-center p-4 border-b border-gray-100 bg-white">
-                <h3 className="text-lg font-bold text-gray-900">Notifications</h3>
+                <h3 className="text-lg font-bold text-gray-900">{t('Notifications.Title', null, 'Notifications')}</h3>
                 <div className="flex items-center gap-3">
-                  <button onClick={handleMarkAllRead} className="text-xs font-semibold text-amber-600 hover:text-amber-700 transition-colors">Mark All Read</button>
-                  <button onClick={handleClearAll} className="text-xs font-semibold text-red-500 hover:text-red-600 transition-colors">Clear All</button>
+                  <button onClick={handleMarkAllRead} className="text-xs font-semibold text-amber-600 hover:text-amber-700 transition-colors">{t('Notifications.MarkAllRead', null, 'Mark All Read')}</button>
+                  <button onClick={handleClearAll} className="text-xs font-semibold text-red-500 hover:text-red-600 transition-colors">{t('Notifications.ClearAll', null, 'Clear All')}</button>
                   <button onClick={() => setIsOpen(false)} className="p-1 rounded-full hover:bg-gray-100 transition-colors text-gray-500 ml-1">
                     <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -195,7 +197,7 @@ const NotificationBell = () => {
                 {notifications.length === 0 ? (
                   <div className="p-8 text-center flex flex-col items-center justify-center h-full opacity-60">
                     <div className="text-4xl mb-3">🔔</div>
-                    <p className="text-base font-medium text-gray-700">No notifications yet.</p>
+                    <p className="text-base font-medium text-gray-700">{t('Notifications.Empty', null, 'No notifications yet.')}</p>
                   </div>
                 ) : (
                   notifications.map((n) => (

@@ -8,6 +8,7 @@ import HowItWorksStepper from '../../components/HowItWorksStepper';
 import { ToastContext } from '../../context/ToastContext';
 import { useAuth } from '../../context/AuthContext';
 import SEO from '../../components/SEO';
+import { useI18n } from '../../context/I18nContext';
 
 const Gallery = () => {
   const [items, setItems] = useState([]);
@@ -20,6 +21,7 @@ const Gallery = () => {
   const { addToast } = useContext(ToastContext);
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { t, language: lang } = useI18n();
 
   const [requestModalOpen, setRequestModalOpen] = useState(false);
   const [selectedCake, setSelectedCake] = useState(null);
@@ -79,7 +81,7 @@ const Gallery = () => {
   const openRequestModal = (cake) => {
     // Check if user is logged in
     if (!user) {
-      addToast('Please login to request a quote', 'error');
+      addToast(t('Gallery.LoginError', null, 'Please login to request a quote'), 'error');
       navigate('/login', { state: { from: '/gallery' } });
       return;
     }
@@ -104,7 +106,7 @@ const Gallery = () => {
   const handleRequestSubmit = async (e) => {
     e.preventDefault();
     if (!requestData.requestedDate) {
-      addToast('Please select a required date', 'error');
+      addToast(t('Gallery.DateError', null, 'Please select a required date'), 'error');
       return;
     }
 
@@ -123,7 +125,7 @@ const Gallery = () => {
       const rawText = `Hello sir/ Madam,\n\nI just submitted a quote request for a Gallery Cake.\n\n*Cake Name:* ${selectedCake.nameEN}\n*Base Price:* ₹${selectedCake.price}\n*Image:* ${selectedCake.imageUrl}\n\n*My Details:*\n- Weight: ${requestData.weight}\n- Flavour: ${requestData.flavour || 'N/A'}\n- Color: ${requestData.color || 'N/A'}\n- Date Required: ${requestData.requestedDate}\n- Time Required: ${requestData.requestedTime || 'N/A'}\n- Notes: ${requestData.description || 'N/A'}\n\nPlease check my request in the dashboard and provide a quote!`;
       const text = encodeURIComponent(rawText);
       
-      addToast('Request sent successfully! Opening WhatsApp...', 'success');
+      addToast(t('Gallery.Success', null, 'Request sent successfully! Opening WhatsApp...'), 'success');
       
       setRequestModalOpen(false);
       setSelectedCake(null);
@@ -134,7 +136,7 @@ const Gallery = () => {
       }, 300);
       
     } catch (error) {
-      addToast(error.response?.data?.message || 'Failed to submit request', 'error');
+      addToast(error.response?.data?.message || t('Gallery.Fail', null, 'Failed to submit request'), 'error');
     } finally {
       setIsSubmitting(false);
     }
@@ -148,12 +150,12 @@ const Gallery = () => {
           
           <div className="text-center mb-6 sm:mb-12">
             <h1 className="text-3xl sm:text-4xl md:text-5xl font-serif font-bold text-[#2d170a] mb-3 sm:mb-4">
-              {viewState === 'categories' ? 'Custom Cake Gallery' : selectedCategory}
+              {viewState === 'categories' ? t('Gallery.Title', null, 'Custom Cake Gallery') : t(`Categories.${selectedCategory}`, null, selectedCategory)}
             </h1>
             <p className="text-lg text-[#5c4033] max-w-2xl mx-auto">
               {viewState === 'categories' 
-                ? 'Explore our beautiful collection of custom cakes designed for every special occasion.'
-                : 'Browse our beautiful designs and add your favorite to the cart.'}
+                ? t('Gallery.Subtitle1', null, 'Explore our beautiful collection of custom cakes designed for every special occasion.')
+                : t('Gallery.Subtitle2', null, 'Browse our beautiful designs and add your favorite to the cart.')}
             </p>
           </div>
 
@@ -170,7 +172,7 @@ const Gallery = () => {
           ) : items.length === 0 ? (
             <div className="text-center py-20 text-[#5c4033]">
               <span className="text-4xl block mb-4">🎂</span>
-              <p className="text-xl">Our custom cake gallery is currently empty. Check back soon!</p>
+              <p className="text-xl">{t('Gallery.Empty', null, 'Our custom cake gallery is currently empty. Check back soon!')}</p>
             </div>
           ) : (
             <AnimatePresence mode="wait">
@@ -196,8 +198,8 @@ const Gallery = () => {
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
                         <div className="absolute bottom-4 left-4 right-4 text-white">
-                          <h3 className="font-bold text-xl drop-shadow-md">{cat.name}</h3>
-                          <p className="text-sm font-semibold text-amber-300">{cat.count} Designs</p>
+                          <h3 className="font-bold text-xl drop-shadow-md">{t(`Categories.${cat.name.replace(/ /g, '')}`, null, cat.name)}</h3>
+                          <p className="text-sm font-semibold text-amber-300">{cat.count} {t('Gallery.Designs', null, 'Designs')}</p>
                         </div>
                       </div>
                     </div>
@@ -217,7 +219,7 @@ const Gallery = () => {
                     className="mb-8 flex items-center gap-2 text-[#c37e50] font-bold hover:text-[#a0633b] transition-colors"
                   >
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
-                    Back to Occasions
+                    {t('Gallery.BackToOccasions', null, 'Back to Occasions')}
                   </button>
 
                   <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-6">
@@ -231,7 +233,7 @@ const Gallery = () => {
                           />
                         </div>
                         <div className="p-3 sm:p-5 flex flex-col flex-grow">
-                          <h3 className="font-bold text-sm sm:text-lg text-[#2d170a] leading-tight mb-1 sm:mb-2 line-clamp-2">{cake.nameEN}</h3>
+                          <h3 className="font-bold text-sm sm:text-lg text-[#2d170a] leading-tight mb-1 sm:mb-2 line-clamp-2">{lang === 'te' && cake.nameTe ? cake.nameTe : cake.nameEN}</h3>
                           
                           <div className="flex flex-wrap gap-1 sm:gap-2 mb-2 sm:mb-3">
                             {cake.weight && (
@@ -246,8 +248,8 @@ const Gallery = () => {
                             )}
                           </div>
                           
-                          {cake.descriptionEN && (
-                            <p className="hidden sm:block text-sm text-gray-500 mb-4 line-clamp-2 flex-grow">{cake.descriptionEN}</p>
+                          {(lang === 'te' && cake.descriptionTe ? cake.descriptionTe : cake.descriptionEN) && (
+                            <p className="hidden sm:block text-sm text-gray-500 mb-4 line-clamp-2 flex-grow">{lang === 'te' && cake.descriptionTe ? cake.descriptionTe : cake.descriptionEN}</p>
                           )}
                           
                           <div className="flex items-center justify-between mt-auto pt-2 sm:pt-4 border-t border-gray-100">
@@ -256,7 +258,7 @@ const Gallery = () => {
                               onClick={() => openRequestModal(cake)}
                               className="bg-[#c37e50] hover:bg-[#a0633b] text-white px-3 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm font-bold rounded-lg shadow-sm transition-colors transform hover:scale-105 active:scale-95 whitespace-nowrap"
                             >
-                              Request Quote
+                              {t('Gallery.RequestQuote', null, 'Request Quote')}
                             </button>
                           </div>
                         </div>
@@ -277,7 +279,7 @@ const Gallery = () => {
                 className="bg-white rounded-2xl shadow-xl w-full max-w-lg overflow-hidden my-auto"
               >
                 <div className="p-4 sm:p-6 bg-[#fefaf3] border-b border-[#f3e8d6] flex justify-between items-center">
-                  <h3 className="text-xl sm:text-2xl font-serif font-bold text-[#2d170a]">Request Gallery Cake</h3>
+                  <h3 className="text-xl sm:text-2xl font-serif font-bold text-[#2d170a]">{t('Gallery.ReqTitle', null, 'Request Gallery Cake')}</h3>
                   <button onClick={() => setRequestModalOpen(false)} className="text-[#a0633b] hover:text-[#2d170a]">
                     <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                   </button>
@@ -287,27 +289,27 @@ const Gallery = () => {
                   <div className="flex gap-4 mb-6 p-3 bg-amber-50 rounded-xl border border-amber-100">
                     <img src={selectedCake.imageUrl} alt={selectedCake.nameEN} className="w-20 h-20 object-cover rounded-lg shadow-sm" />
                     <div>
-                      <h4 className="font-bold text-[#2d170a]">{selectedCake.nameEN}</h4>
-                      <p className="text-sm text-amber-800 font-semibold mt-1">Base Price: ₹{selectedCake.price}</p>
-                      <p className="text-xs text-amber-700/70 mt-1">Submit this request for the admin to provide a final quote based on your requirements.</p>
+                      <h4 className="font-bold text-[#2d170a]">{lang === 'te' && selectedCake.nameTe ? selectedCake.nameTe : selectedCake.nameEN}</h4>
+                      <p className="text-sm text-amber-800 font-semibold mt-1">{t('Gallery.BasePrice', null, 'Base Price: ₹')}{selectedCake.price}</p>
+                      <p className="text-xs text-amber-700/70 mt-1">{t('Gallery.SubmitDesc', null, 'Submit this request for the admin to provide a final quote based on your requirements.')}</p>
                     </div>
                   </div>
 
                   <form onSubmit={handleRequestSubmit} className="space-y-4">
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-sm font-semibold text-[#5c4033] mb-1">Required Date *</label>
+                        <label className="block text-sm font-semibold text-[#5c4033] mb-1">{t('Gallery.RequiredDate', null, 'Required Date *')}</label>
                         <input type="date" name="requestedDate" required value={requestData.requestedDate} onChange={handleRequestChange} min={new Date().toISOString().split('T')[0]} className="w-full border border-gray-200 rounded-lg p-2.5 focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none" />
                       </div>
                       <div>
-                        <label className="block text-sm font-semibold text-[#5c4033] mb-1">Time (Optional)</label>
+                        <label className="block text-sm font-semibold text-[#5c4033] mb-1">{t('Gallery.TimeOpt', null, 'Time (Optional)')}</label>
                         <div className="relative">
                           <div 
                             onClick={() => setIsTimeDropdownOpen(!isTimeDropdownOpen)}
                             className={`w-full border rounded-lg p-2.5 bg-white flex justify-between items-center cursor-pointer select-none transition-all ${isTimeDropdownOpen ? 'border-amber-500 ring-2 ring-amber-500/30' : 'border-gray-200 hover:border-amber-300'}`}
                           >
                             <span className={requestData.requestedTime ? "text-gray-900 font-medium" : "text-gray-500"}>
-                              {requestData.requestedTime || "Select a time slot"}
+                              {requestData.requestedTime || t('Gallery.SelectTime', null, 'Select a time slot')}
                             </span>
                             <svg className={`w-4 h-4 transition-transform ${isTimeDropdownOpen ? 'rotate-180 text-amber-600' : 'text-gray-400'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
                           </div>
@@ -339,31 +341,31 @@ const Gallery = () => {
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-sm font-semibold text-[#5c4033] mb-1">Weight (e.g. 1kg) *</label>
-                        <input type="text" name="weight" required value={requestData.weight} onChange={handleRequestChange} className="w-full border border-gray-200 rounded-lg p-2.5 focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none" placeholder="1 Kg" />
+                        <label className="block text-sm font-semibold text-[#5c4033] mb-1">{t('Gallery.Weight', null, 'Weight (e.g. 1kg) *')}</label>
+                        <input type="text" name="weight" required value={requestData.weight} onChange={handleRequestChange} className="w-full border border-gray-200 rounded-lg p-2.5 focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none" placeholder={t('Gallery.WeightPh', null, '1 Kg')} />
                       </div>
                       <div>
-                        <label className="block text-sm font-semibold text-[#5c4033] mb-1">Flavour (Optional)</label>
-                        <input type="text" name="flavour" value={requestData.flavour} onChange={handleRequestChange} className="w-full border border-gray-200 rounded-lg p-2.5 focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none" placeholder="e.g. Chocolate" />
+                        <label className="block text-sm font-semibold text-[#5c4033] mb-1">{t('Gallery.Flavour', null, 'Flavour (Optional)')}</label>
+                        <input type="text" name="flavour" value={requestData.flavour} onChange={handleRequestChange} className="w-full border border-gray-200 rounded-lg p-2.5 focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none" placeholder={t('Gallery.FlavourPh', null, 'e.g. Chocolate')} />
                       </div>
                     </div>
 
                     <div>
-                      <label className="block text-sm font-semibold text-[#5c4033] mb-1">Color Theme (Optional)</label>
-                      <input type="text" name="color" value={requestData.color} onChange={handleRequestChange} className="w-full border border-gray-200 rounded-lg p-2.5 focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none" placeholder="e.g. Pink and White" />
+                      <label className="block text-sm font-semibold text-[#5c4033] mb-1">{t('Gallery.Color', null, 'Color Theme (Optional)')}</label>
+                      <input type="text" name="color" value={requestData.color} onChange={handleRequestChange} className="w-full border border-gray-200 rounded-lg p-2.5 focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none" placeholder={t('Gallery.ColorPh', null, 'e.g. Pink and White')} />
                     </div>
 
                     <div>
-                      <label className="block text-sm font-semibold text-[#5c4033] mb-1">Notes / Text on Cake (Optional)</label>
-                      <textarea name="description" value={requestData.description} onChange={handleRequestChange} rows="3" className="w-full border border-gray-200 rounded-lg p-2.5 focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none resize-none" placeholder="Any specific instructions or text to write on the cake..."></textarea>
+                      <label className="block text-sm font-semibold text-[#5c4033] mb-1">{t('Gallery.Notes', null, 'Notes / Text on Cake (Optional)')}</label>
+                      <textarea name="description" value={requestData.description} onChange={handleRequestChange} rows="3" className="w-full border border-gray-200 rounded-lg p-2.5 focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none resize-none" placeholder={t('Gallery.NotesPh', null, 'Any specific instructions or text to write on the cake...')}></textarea>
                     </div>
 
                     <div className="pt-4 border-t border-gray-100 flex gap-3">
                       <button type="button" onClick={() => setRequestModalOpen(false)} className="flex-1 py-3 px-4 bg-gray-100 text-gray-700 rounded-xl font-bold hover:bg-gray-200 transition-colors">
-                        Cancel
+                        {t('Gallery.Cancel', null, 'Cancel')}
                       </button>
                       <button type="submit" disabled={isSubmitting} className="flex-1 py-3 px-4 bg-[#c37e50] text-white rounded-xl font-bold hover:bg-[#a0633b] transition-colors shadow-md disabled:opacity-50">
-                        {isSubmitting ? 'Sending...' : 'Send Request'}
+                        {isSubmitting ? t('Gallery.Sending', null, 'Sending...') : t('Gallery.SendReq', null, 'Send Request')}
                       </button>
                     </div>
                   </form>

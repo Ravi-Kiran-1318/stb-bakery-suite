@@ -9,6 +9,7 @@
     background-color: #ffffff;
     color: #111827; /* dark */
     font-family: 'Inter', system-ui, Avenir, Helvetica, Arial, sans-serif;
+    scroll-behavior: smooth;
   }
 }
 

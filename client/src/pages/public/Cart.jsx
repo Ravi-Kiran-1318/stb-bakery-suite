@@ -1,19 +1,18 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link, useNavigate } from 'react-router-dom';
 import PageWrapper from '../../components/PageWrapper';
 import Footer from '../../components/Footer';
 import { useCart } from '../../context/CartContext';
 import { useAuth } from '../../context/AuthContext';
-import { useTranslation } from 'react-i18next';
+import { useI18n } from '../../context/I18nContext';
 import { formatCurrency } from '../../utils/formatCurrency';
 
 const Cart = () => {
   const { items, updateQty, removeFromCart, clearCart } = useCart();
   const { user } = useAuth();
   const navigate = useNavigate();
-  const { i18n } = useTranslation();
-  const lang = i18n.language === 'te' ? 'te' : 'en';
+  const { t, language: lang } = useI18n();
   
   const [showClearConfirm, setShowClearConfirm] = useState(false);
 
@@ -47,7 +46,7 @@ const Cart = () => {
         <div className="flex-grow max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12 w-full">
           
           <h1 className="text-4xl font-serif font-bold text-gray-900 mb-8">
-            Your Cart {items.length > 0 && <span className="text-xl text-gray-500 font-sans font-normal ml-2">({items.length} items)</span>}
+            {t('CartPage.Title', null, 'Your Cart')} {items.length > 0 && <span className="text-xl text-gray-500 font-sans font-normal ml-2">({items.length} {t('CartPage.ItemsCount', null, 'items')})</span>}
           </h1>
 
           {items.length === 0 ? (
@@ -57,13 +56,13 @@ const Cart = () => {
               className="text-center py-20 bg-gray-50 rounded-2xl border border-gray-100"
             >
               <div className="text-6xl mb-6">🛒</div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">Your cart is empty.</h2>
-              <p className="text-gray-500 mb-8">Looks like you haven't added any delicious treats yet!</p>
+              <h2 className="text-2xl font-bold text-gray-900 mb-4">{t('CartPage.EmptyTitle', null, 'Your cart is empty.')}</h2>
+              <p className="text-gray-500 mb-8">{t('CartPage.EmptyDesc', null, "Looks like you haven't added any delicious treats yet!")}</p>
               <Link 
                 to="/shop" 
                 className="bg-amber-500 hover:bg-amber-600 text-white font-semibold py-3 px-8 rounded-full transition-colors inline-block"
               >
-                Browse Products &rarr;
+                {t('CartPage.BrowseProducts', null, 'Browse Products →')}
               </Link>
             </motion.div>
           ) : (
@@ -88,7 +87,7 @@ const Cart = () => {
                           {item.imageUrl ? (
                             <img src={item.imageUrl} alt={name} className="w-full h-full object-cover" />
                           ) : (
-                            <div className="w-full h-full flex items-center justify-center text-gray-400 text-[10px] sm:text-xs text-center leading-tight">No img</div>
+                            <div className="w-full h-full flex items-center justify-center text-gray-400 text-[10px] sm:text-xs text-center leading-tight">{t('CartPage.NoImg', null, 'No img')}</div>
                           )}
                         </div>
 
@@ -150,13 +149,13 @@ const Cart = () => {
                     onClick={handleClearCart}
                     className="text-gray-500 hover:text-red-600 font-medium transition-colors"
                   >
-                    Clear Cart
+                    {t('CartPage.ClearCart', null, 'Clear Cart')}
                   </button>
                   <Link 
                     to="/shop"
                     className="text-amber-600 hover:text-amber-700 font-semibold transition-colors"
                   >
-                    &larr; Continue Shopping
+                    {t('CartPage.ContinueShopping', null, '← Continue Shopping')}
                   </Link>
                 </div>
               </div>
@@ -164,21 +163,21 @@ const Cart = () => {
               {/* Order Summary sidebar */}
               <div className="w-full md:w-80 flex-shrink-0">
                 <div className="bg-gray-50 rounded-2xl p-6 border border-gray-200 sticky top-24">
-                  <h2 className="text-xl font-bold text-gray-900 mb-6">Order Summary</h2>
+                  <h2 className="text-xl font-bold text-gray-900 mb-6">{t('CartPage.OrderSummary', null, 'Order Summary')}</h2>
                   
                   <div className="flex justify-between items-center mb-4 text-gray-600">
-                    <span>Subtotal</span>
+                    <span>{t('CartPage.Subtotal', null, 'Subtotal')}</span>
                     <span className="font-semibold text-gray-900">{formatCurrency(subtotal)}</span>
                   </div>
                   
                   <div className="border-t border-gray-200 pt-4 mb-6">
                     <p className="text-sm text-gray-500 italic">
-                      * Delivery fee calculated at checkout
+                      {t('CartPage.DeliveryFee', null, '* Delivery fee calculated at checkout')}
                     </p>
                   </div>
 
                   <div className="flex justify-between items-center mb-8 text-lg font-bold text-gray-900">
-                    <span>Total Estimated</span>
+                    <span>{t('CartPage.TotalEstimated', null, 'Total Estimated')}</span>
                     <span>{formatCurrency(subtotal)}</span>
                   </div>
 
@@ -187,12 +186,12 @@ const Cart = () => {
                     disabled={subtotal < 100}
                     className="w-full bg-gray-900 hover:bg-gray-800 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-bold py-4 rounded-xl shadow-lg transition-colors flex justify-center items-center gap-2"
                   >
-                    Proceed to Checkout &rarr;
+                    {t('CartPage.ProceedCheckout', null, 'Proceed to Checkout →')}
                   </button>
                   
                   {subtotal < 100 && (
                     <p className="text-center text-xs text-red-500 mt-3 font-medium">
-                      Minimum order amount is ₹100.
+                      {t('CartPage.MinOrder', null, 'Minimum order amount is ₹100.')}
                     </p>
                   )}
                 </div>
@@ -221,21 +220,21 @@ const Cart = () => {
                 className="bg-white rounded-2xl shadow-xl w-full max-w-sm overflow-hidden pointer-events-auto"
               >
                 <div className="p-6">
-                  <h3 className="text-xl font-bold text-gray-900 mb-2">Clear Cart?</h3>
-                  <p className="text-gray-600">Are you sure you want to remove all items from your cart? This action cannot be undone.</p>
+                  <h3 className="text-xl font-bold text-gray-900 mb-2">{t('CartPage.ConfirmTitle', null, 'Clear Cart?')}</h3>
+                  <p className="text-gray-600">{t('CartPage.ConfirmDesc', null, 'Are you sure you want to remove all items from your cart? This action cannot be undone.')}</p>
                 </div>
                 <div className="px-6 py-4 bg-gray-50 flex justify-end gap-3 border-t border-gray-100">
                   <button 
                     onClick={() => setShowClearConfirm(false)}
                     className="px-4 py-2 rounded-xl text-gray-600 font-semibold hover:bg-gray-200 transition-colors"
                   >
-                    Cancel
+                    {t('CartPage.Cancel', null, 'Cancel')}
                   </button>
                   <button 
                     onClick={confirmClear}
                     className="px-4 py-2 rounded-xl bg-red-500 hover:bg-red-600 text-white font-semibold shadow-sm transition-colors"
                   >
-                    Clear Cart
+                    {t('CartPage.ClearCart', null, 'Clear Cart')}
                   </button>
                 </div>
               </motion.div>

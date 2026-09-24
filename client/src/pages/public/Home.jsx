@@ -8,8 +8,10 @@ import PageWrapper from '../../components/PageWrapper';
 import HowItWorksStepper from '../../components/HowItWorksStepper';
 import axiosInstance from '../../utils/axiosInstance';
 import SEO from '../../components/SEO';
+import { useI18n } from '../../context/I18nContext';
 
 const Home = () => {
+  const { t } = useI18n();
   const [lovedProducts, setLovedProducts] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -39,10 +41,10 @@ const Home = () => {
   };
 
   const sidebarCategories = [
-    { icon: '📷', label: 'Cake Gallery' },
-    { icon: '🎂', label: 'Custom Cakes' },
-    { icon: '🎉', label: 'Party items' },
-    { icon: '🎈', label: 'Decoration items' },
+    { icon: '📷', label: 'Cake Gallery', tKey: 'CakeGallery', linkPath: '/gallery' },
+    { icon: '🎂', label: 'Custom Cakes', tKey: 'CustomCakes', linkPath: '/custom-cakes' },
+    { icon: '🎉', label: 'Party items', tKey: 'PartyItems', linkPath: '/party-decorations?category=party-items' },
+    { icon: '🎈', label: 'Decoration items', tKey: 'DecorationItems', linkPath: '/party-decorations?category=decoration-items' },
   ];
 
   const features = [
@@ -53,7 +55,7 @@ const Home = () => {
           <path d="M12 17C10.8954 17 10 16.1046 10 15" stroke="#b46a36" strokeWidth="1.5" strokeLinecap="round"/>
         </svg>
       ),
-      label: '100% Pure', sub: 'Ingredients',
+      label: '100% Pure', sub: 'Ingredients', tKey: 'Pure',
     },
     {
       icon: (
@@ -69,7 +71,7 @@ const Home = () => {
           <path d="M9.87868 14.1213L7.05025 16.9497" stroke="#b46a36" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
         </svg>
       ),
-      label: 'Hygienic', sub: 'Preparation',
+      label: 'Hygienic', sub: 'Preparation', tKey: 'Hygienic',
     },
     {
       icon: (
@@ -79,7 +81,7 @@ const Home = () => {
           <circle cx="12" cy="15" r="2" stroke="#b46a36" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
         </svg>
       ),
-      label: 'Freshly Baked', sub: 'Everyday',
+      label: 'Freshly Baked', sub: 'Everyday', tKey: 'Fresh',
     },
     {
       icon: (
@@ -92,7 +94,7 @@ const Home = () => {
           <path d="M3 8H10" stroke="#b46a36" strokeWidth="1.5" strokeLinecap="round"/>
         </svg>
       ),
-      label: 'On-Time', sub: 'Delivery',
+      label: 'On-Time', sub: 'Delivery', tKey: 'Delivery',
     },
   ];
 
@@ -148,7 +150,7 @@ const Home = () => {
                   </svg>
                 </div>
                 <span className="font-sans uppercase tracking-[0.15em] text-[9px] sm:text-[10px] font-bold" style={{ color: '#b46a36' }}>
-                  BAKED WITH LOVE, SERVED WITH DEVOTION
+                  {t('HomePage.Hero.Tagline', null, 'BAKED WITH LOVE, SERVED WITH DEVOTION')}
                 </span>
               </motion.div>
 
@@ -162,9 +164,9 @@ const Home = () => {
                   letterSpacing: '-0.02em',
                 }}
               >
-                Freshly Baked,<br/>
+                {t('HomePage.Hero.TitleLine1', null, 'Freshly Baked,')}<br/>
                 <span style={{ color: '#c37e50', fontStyle: 'italic' }}>
-                  Deliciously Yours
+                  {t('HomePage.Hero.TitleLine2', null, 'Deliciously Yours')}
                 </span>
               </motion.h1>
 
@@ -178,8 +180,7 @@ const Home = () => {
                   maxWidth: '480px',
                 }}
               >
-                Experience the perfect blend of tradition, quality,
-                and flavor in every bite.
+                {t('HomePage.Hero.Subtitle', null, 'Experience the perfect blend of tradition, quality, and flavor in every bite.')}
               </motion.p>
 
               {/* CTA Buttons */}
@@ -200,7 +201,7 @@ const Home = () => {
                     whiteSpace: 'nowrap',
                   }}
                 >
-                  Order Online &rarr;
+                  {t('HomePage.Hero.OrderOnline', null, 'Order Online →')}
                 </Link>
 
                 <button
@@ -215,7 +216,7 @@ const Home = () => {
                     whiteSpace: 'nowrap',
                   }}
                 >
-                  Explore Our Products
+                  {t('HomePage.Hero.ExploreProducts', null, 'Explore Our Products')}
                   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.8} stroke="currentColor" className="w-4 h-4 text-[#4e2815]">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 10.5V6a3.75 3.75 0 1 0-7.5 0v4.5m11.356-1.993 1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 0 1-1.12-1.243l1.264-12A1.125 1.125 0 0 1 5.513 7.5h12.974c.576 0 1.059.435 1.119 1.007Z" />
                   </svg>
@@ -237,7 +238,7 @@ const Home = () => {
                   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z" />
                   </svg>
-                  Customize & Order your cake
+                  {t('HomePage.Hero.CustomizeCake', null, 'Customize & Order your cake')}
                 </Link>
               </motion.div>
 
@@ -261,8 +262,8 @@ const Home = () => {
                       </div>
                     </div>
                     <div className="flex flex-col text-left py-0.5">
-                      <span className="text-[12px] font-bold leading-tight" style={{ color: '#4e2815' }}>{f.label}</span>
-                      <span className="text-[10px] font-medium leading-tight mt-0.5" style={{ color: '#8a6e5d' }}>{f.sub}</span>
+                      <span className="text-[12px] font-bold leading-tight" style={{ color: '#4e2815' }}>{t('HomePage.Features.' + f.tKey + 'Label', null, f.label)}</span>
+                      <span className="text-[10px] font-medium leading-tight mt-0.5" style={{ color: '#8a6e5d' }}>{t('HomePage.Features.' + f.tKey + 'Sub', null, f.sub)}</span>
                     </div>
                   </div>
                 ))}
@@ -282,20 +283,10 @@ const Home = () => {
               transition={{ duration: 0.65, delay: 0.45, ease: 'easeOut' }}
             >
               {sidebarCategories.map((cat, i) => {
-                const slug = cat.label.toLowerCase().replace(/\s+/g, '-');
-                let linkPath = `/shop?category=${slug}`;
-                if (slug === 'party-items' || slug === 'decoration-items') {
-                  linkPath = `/party-decorations?category=${slug}`;
-                } else if (slug === 'cake-gallery') {
-                  linkPath = '/gallery';
-                } else if (slug === 'custom-cakes') {
-                  linkPath = '/custom-cakes';
-                }
-                
                 return (
                   <Link
                     key={i}
-                    to={linkPath}
+                    to={cat.linkPath}
                     className="flex flex-col items-center justify-center gap-1.5 rounded-2xl transition-all duration-200 hover:scale-105 group bg-white shadow-sm border border-[#eae0d5]"
                     style={{
                       padding: '16px 14px',
@@ -310,7 +301,7 @@ const Home = () => {
                       {cat.icon}
                     </div>
                     <span className="text-xs font-bold text-center leading-tight" style={{ color: '#4e2815' }}>
-                      {cat.label}
+                      {t('HomePage.Sidebar.' + cat.tKey, null, cat.label)}
                     </span>
                   </Link>
                 );
@@ -335,20 +326,10 @@ const Home = () => {
                 transition={{ duration: 0.5, delay: 0.5 }}
               >
               {sidebarCategories.map((cat, i) => {
-                const slug = cat.label.toLowerCase().replace(/\s+/g, '-');
-                let linkPath = `/shop?category=${slug}`;
-                if (slug === 'party-items' || slug === 'decoration-items') {
-                  linkPath = `/party-decorations?category=${slug}`;
-                } else if (slug === 'cake-gallery') {
-                  linkPath = '/gallery';
-                } else if (slug === 'custom-cakes') {
-                  linkPath = '/custom-cakes';
-                }
-                
                 return (
                   <Link
                     key={i}
-                    to={linkPath}
+                    to={cat.linkPath}
                     className="flex flex-col items-center justify-center gap-1.5 rounded-2xl transition-all duration-200 active:scale-95 bg-white shadow-sm border border-[#eae0d5]"
                     style={{
                       padding: '12px 6px',
@@ -365,7 +346,7 @@ const Home = () => {
                       {cat.icon}
                     </div>
                     <span className="text-[10px] font-bold text-center leading-tight" style={{ color: '#4e2815' }}>
-                      {cat.label}
+                      {t('HomePage.Sidebar.' + cat.tKey, null, cat.label)}
                     </span>
                   </Link>
                 );
@@ -397,7 +378,7 @@ const Home = () => {
               <div className="flex items-center justify-center gap-3 mb-3">
                 <div className="h-px w-10 bg-[#b56d36]" />
                 <span className="text-[10px] md:text-xs font-bold tracking-[0.28em] uppercase text-[#b56d36]">
-                  OUR BESTSELLERS
+                  {t('HomePage.Bestsellers.Tagline', null, 'OUR BESTSELLERS')}
                 </span>
                 <div className="h-px w-10 bg-[#b56d36]" />
               </div>
@@ -405,10 +386,10 @@ const Home = () => {
                 className="font-serif font-bold mb-3"
                 style={{ fontSize: 'clamp(1.8rem, 4vw, 2.6rem)', color: '#4e2815' }}
               >
-                Loved by Everyone
+                {t('HomePage.Bestsellers.Title', null, 'Loved by Everyone')}
               </h2>
               <p className="text-sm font-medium text-[#6e4f3a]">
-                Handpicked favorites that our customers can&apos;t get enough of.
+                {t('HomePage.Bestsellers.Subtitle', null, "Handpicked favorites that our customers can't get enough of.")}
               </p>
             </div>
 
@@ -425,7 +406,7 @@ const Home = () => {
                   <ProductCard key={product._id} product={product} />
                 )) : (
                   <div className="col-span-full text-center py-10 text-[#6e4f3a] font-medium">
-                    New loved products coming soon!
+                    {t('HomePage.Bestsellers.ComingSoon', null, 'New loved products coming soon!')}
                   </div>
                 )}
               </div>
@@ -445,7 +426,7 @@ const Home = () => {
                   boxShadow: '0 4px 10px rgba(0,0,0,0.03)'
                 }}
               >
-                View All Products
+                {t('HomePage.Bestsellers.ViewAll', null, 'View All Products')}
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-4 h-4 text-[#d35400]">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
                 </svg>
@@ -473,7 +454,7 @@ const Home = () => {
                     <div className="absolute -bottom-4 -right-4 md:-bottom-6 md:-right-6 w-28 h-28 md:w-36 md:h-36 rounded-full flex items-center justify-center border-4 border-white shadow-xl" style={{ background: 'linear-gradient(135deg, #d35400 0%, #b56d36 100%)' }}>
                       <div className="text-center text-white">
                         <span className="block font-serif font-bold text-3xl md:text-4xl leading-none mb-1">10+</span>
-                        <span className="block font-bold text-[10px] md:text-xs uppercase tracking-wider">Years<br />Experience</span>
+                        <span className="block font-bold text-[10px] md:text-xs uppercase tracking-wider" dangerouslySetInnerHTML={{ __html: t('HomePage.AboutUs.YearsExperience', null, 'Years<br />Experience') }}></span>
                       </div>
                     </div>
                   </div>
@@ -485,7 +466,7 @@ const Home = () => {
                 <div className="flex items-center justify-center lg:justify-start gap-3 mb-4">
                   <div className="h-px w-10 bg-[#b56d36]" />
                   <span className="text-[10px] md:text-xs font-bold tracking-[0.28em] uppercase text-[#b56d36]">
-                    Our Story
+                    {t('HomePage.AboutUs.Tagline', null, 'Our Story')}
                   </span>
                 </div>
                 
@@ -493,23 +474,23 @@ const Home = () => {
                   className="font-serif font-bold mb-6"
                   style={{ fontSize: 'clamp(2rem, 4vw, 3rem)', color: '#4e2815', lineHeight: 1.15 }}
                 >
-                  A Decade of Baking <br className="hidden lg:block" />
-                  <span style={{ color: '#d35400' }}>Sweet Memories</span>
+                  {t('HomePage.AboutUs.Title1', null, 'A Decade of Baking')} <br className="hidden lg:block" />
+                  <span style={{ color: '#d35400' }}>{t('HomePage.AboutUs.Title2', null, 'Sweet Memories')}</span>
                 </h2>
 
                 <p className="text-[1rem] leading-[1.8] text-[#6e4f3a] mb-5 font-medium">
-                  At Sri Tirupathi Venkatachalapathi Bakery, baking isn&apos;t just a business—it&apos;s a devotion. For over a decade, we have been a part of your daily celebrations, combining timeless traditional recipes with the finest ingredients to create treats that warm the heart.
+                  {t('HomePage.AboutUs.P1', null, "At Sri Tirupathi Venkatachalapathi Bakery, baking isn't just a business—it's a devotion. For over a decade, we have been a part of your daily celebrations, combining timeless traditional recipes with the finest ingredients to create treats that warm the heart.")}
                 </p>
                 <p className="text-[1rem] leading-[1.8] text-[#6e4f3a] mb-8 font-medium">
-                  Every pastry, cake, and sweet is prepared fresh every single day. We pride ourselves on our uncompromising quality, hygienic standards, and the love we fold into every single batch. Thank you for making us a part of your family.
+                  {t('HomePage.AboutUs.P2', null, "Every pastry, cake, and sweet is prepared fresh every single day. We pride ourselves on our uncompromising quality, hygienic standards, and the love we fold into every single batch. Thank you for making us a part of your family.")}
                 </p>
 
                 <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4">
                   <div className="flex items-center gap-2 font-bold text-[0.85rem] uppercase tracking-wide bg-[#fdf8f0] text-[#4e2815] px-5 py-3 rounded-full border border-[#f1e6da] shadow-sm">
-                    <span className="text-[#d35400] text-lg">🌟</span> 100% Eggless Options
+                    <span className="text-[#d35400] text-lg">🌟</span> {t('HomePage.AboutUs.Eggless', null, '100% Eggless Options')}
                   </div>
                   <div className="flex items-center gap-2 font-bold text-[0.85rem] uppercase tracking-wide bg-[#fdf8f0] text-[#4e2815] px-5 py-3 rounded-full border border-[#f1e6da] shadow-sm">
-                    <span className="text-[#d35400] text-lg">👨‍🍳</span> Expert Bakers
+                    <span className="text-[#d35400] text-lg">👨‍🍳</span> {t('HomePage.AboutUs.ExpertBakers', null, 'Expert Bakers')}
                   </div>
                 </div>
               </div>
@@ -532,13 +513,13 @@ const Home = () => {
               className="font-serif font-bold mb-3"
               style={{ fontSize: 'clamp(1.5rem, 4vw, 2.2rem)', color: '#4e2815' }}
             >
-              Want to order directly?
+              {t('HomePage.CTA.Title', null, 'Want to order directly?')}
             </h2>
             <p className="mb-8 text-[1rem] font-medium" style={{ color: '#6e4f3a' }}>
-              Chat with us on WhatsApp for custom orders and quick queries
+              {t('HomePage.CTA.Subtitle', null, 'Chat with us on WhatsApp for custom orders and quick queries')}
             </p>
             <div className="flex flex-col sm:flex-row flex-wrap justify-center items-center gap-5">
-              <WhatsAppButton message="Hello! I would like to place an order." />
+              <WhatsAppButton message={t('HomePage.CTA.WhatsAppMsg', null, 'Hello! I would like to place an order.')} />
               <Link
                 to="/contact"
                 className="flex items-center gap-2 font-bold rounded-full transition-all hover:bg-white shadow-sm"
@@ -551,7 +532,7 @@ const Home = () => {
                   textDecoration: 'none',
                 }}
               >
-                <span>📞</span> Contact Us
+                <span>📞</span> {t('HomePage.CTA.ContactUs', null, 'Contact Us')}
               </Link>
             </div>
           </div>

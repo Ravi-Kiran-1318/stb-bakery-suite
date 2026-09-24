@@ -1,11 +1,13 @@
 import React, { useState, useEffect, useContext } from 'react';
 import axiosInstance from '../utils/axiosInstance';
 import { ToastContext } from '../context/ToastContext';
+import { useI18n } from '../context/I18nContext';
 
 const NotificationPrompt = () => {
   const [permission, setPermission] = useState('default');
   const [loading, setLoading] = useState(false);
   const { addToast } = useContext(ToastContext);
+  const { t } = useI18n();
 
   useEffect(() => {
     if ('Notification' in window) {
@@ -30,7 +32,7 @@ const NotificationPrompt = () => {
 
   const handleEnableNotifications = async () => {
     if (!('Notification' in window)) {
-      addToast('This browser does not support push notifications', 'error');
+      addToast(t('Notifications.NotSupported', null, 'This browser does not support push notifications'), 'error');
       return;
     }
 
@@ -56,13 +58,13 @@ const NotificationPrompt = () => {
         // Send subscription to backend
         await axiosInstance.post('/push/subscribe', subscription);
         
-        addToast('Push notifications enabled!', 'success');
+        addToast(t('Notifications.EnabledSuccess', null, 'Push notifications enabled!'), 'success');
       } else {
-        addToast('Notification permission denied', 'warning');
+        addToast(t('Notifications.Denied', null, 'Notification permission denied'), 'warning');
       }
     } catch (error) {
       console.error('Error enabling notifications:', error);
-      addToast('Failed to enable push notifications', 'error');
+      addToast(t('Notifications.EnableFail', null, 'Failed to enable push notifications'), 'error');
     } finally {
       setLoading(false);
     }
@@ -81,10 +83,10 @@ const NotificationPrompt = () => {
           </svg>
         </div>
         <div>
-          <h4 className="font-bold text-gray-800 text-sm">Stay Updated (Native Push)</h4>
-          <p className="text-xs text-gray-600">Get instant alerts for your orders, even when the app is closed.</p>
+          <h4 className="font-bold text-gray-800 text-sm">{t('Notifications.PromptTitle', null, 'Stay Updated (Native Push)')}</h4>
+          <p className="text-xs text-gray-600">{t('Notifications.PromptDesc', null, 'Get instant alerts for your orders, even when the app is closed.')}</p>
           <p className="text-[10px] text-gray-500 mt-1 italic">
-            * iOS Users: You must first "Add to Home Screen" via Safari's share menu.
+            {t('Notifications.IosNote', null, '* iOS Users: You must first "Add to Home Screen" via Safari\'s share menu.')}
           </p>
         </div>
       </div>
@@ -93,7 +95,7 @@ const NotificationPrompt = () => {
         disabled={loading || permission === 'denied'}
         className="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white text-sm font-medium rounded-lg transition-colors disabled:opacity-50 w-full sm:w-auto"
       >
-        {loading ? 'Enabling...' : permission === 'denied' ? 'Blocked by Browser' : 'Enable Notifications'}
+        {loading ? t('Notifications.BtnEnabling', null, 'Enabling...') : permission === 'denied' ? t('Notifications.BtnBlocked', null, 'Blocked by Browser') : t('Notifications.BtnEnable', null, 'Enable Notifications')}
       </button>
     </div>
   );

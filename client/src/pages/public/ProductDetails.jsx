@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { useTranslation } from 'react-i18next';
+import { useI18n } from '../../context/I18nContext';
 import api from '../../utils/axiosInstance';
 import { useCart } from '../../context/CartContext';
 import { formatCurrency } from '../../utils/formatCurrency';
@@ -10,15 +10,13 @@ import ProductCard from '../../components/ProductCard';
 const ProductDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { t, i18n } = useTranslation();
+  const { t, language: lang } = useI18n();
   const { items, addToCart, updateQty } = useCart();
   
   const [product, setProduct] = useState(null);
   const [relatedProducts, setRelatedProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-
-  const lang = i18n.language === 'te' ? 'te' : 'en';
 
   useEffect(() => {
     const fetchProductDetails = async () => {
@@ -32,7 +30,7 @@ const ProductDetails = () => {
         const currentProduct = allProducts.find(p => p._id === id);
         
         if (!currentProduct) {
-          setError('Product not found');
+          setError(t('ProductDetails.ProductNotFound', null, 'Product not found'));
           setLoading(false);
           return;
         }
@@ -63,7 +61,7 @@ const ProductDetails = () => {
     fetchProductDetails();
     // Scroll to top when the ID changes (so if user clicks a related product, it scrolls up)
     window.scrollTo(0, 0);
-  }, [id]);
+  }, [id, t]);
 
   if (loading) {
     return (
@@ -76,9 +74,9 @@ const ProductDetails = () => {
   if (error || !product) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center pt-20">
-        <h2 className="text-3xl font-bold text-accent mb-4">{error || 'Product not found'}</h2>
+        <h2 className="text-3xl font-bold text-accent mb-4">{error || t('ProductDetails.ProductNotFound', null, 'Product not found')}</h2>
         <button onClick={() => navigate('/shop')} className="btn-primary py-2 px-6 rounded-lg">
-          Back to Shop
+          {t('ProductDetails.BackToShop', null, 'Back to Shop')}
         </button>
       </div>
     );
@@ -94,9 +92,9 @@ const ProductDetails = () => {
       
       {/* Breadcrumbs */}
       <nav className="text-muted text-xs sm:text-sm mb-6 md:mb-8">
-        <Link to="/" className="hover:text-accent transition-colors">Home</Link>
+        <Link to="/" className="hover:text-accent transition-colors">{t('ProductDetails.Home', null, 'Home')}</Link>
         <span className="mx-2">/</span>
-        <Link to="/shop" className="hover:text-accent transition-colors">Shop</Link>
+        <Link to="/shop" className="hover:text-accent transition-colors">{t('ProductDetails.Shop', null, 'Shop')}</Link>
         <span className="mx-2">/</span>
         <span className="text-accent truncate">{name}</span>
       </nav>
@@ -118,12 +116,12 @@ const ProductDetails = () => {
                 className="w-full h-auto max-h-[500px] object-contain block"
               />
             ) : (
-              <div className="text-muted text-xl p-12 text-center">No Image Available</div>
+              <div className="text-muted text-xl p-12 text-center">{t('ProductDetails.NoImage', null, 'No Image Available')}</div>
             )}
             {!product.isAvailable && (
               <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
                 <span className="text-3xl font-bold text-white tracking-widest uppercase border-4 border-white py-2 px-6 rounded-lg rotate-12 opacity-80">
-                  Out of Stock
+                  {t('ProductDetails.OutOfStock', null, 'Out of Stock')}
                 </span>
               </div>
             )}
@@ -137,7 +135,7 @@ const ProductDetails = () => {
           className="w-full md:w-1/2 flex flex-col justify-center"
         >
           <span className="text-[10px] sm:text-sm font-semibold tracking-widest text-muted uppercase mb-1 md:mb-2 block">
-            {product.category}
+            {t(`Categories.${product.category === 'Chocolates & Biscuits' ? 'ChocolatesBiscuits' : product.category}`, null, product.category)}
           </span>
           <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-dark mb-2 md:mb-3 leading-tight">
             {name}
@@ -148,14 +146,14 @@ const ProductDetails = () => {
           </div>
 
           <p className="text-xs sm:text-lg text-muted mb-6 md:mb-8 leading-relaxed line-clamp-3 md:line-clamp-none">
-            {description || 'No detailed description available for this item.'}
+            {description || t('ProductDetails.NoDescription', null, 'No detailed description available for this item.')}
           </p>
 
           <div className="pt-4 md:pt-6 border-t border-border">
             {product.isAvailable ? (
               cartItem ? (
                 <div className="flex flex-col gap-2 md:gap-4">
-                  <span className="text-muted text-xs md:text-sm">Quantity in Cart</span>
+                  <span className="text-muted text-xs md:text-sm">{t('ProductDetails.QtyInCart', null, 'Quantity in Cart')}</span>
                   <div className="flex items-center gap-3 md:gap-6">
                     <button 
                       onClick={() => updateQty(product._id, cartItem.qty - 1)} 
@@ -180,12 +178,12 @@ const ProductDetails = () => {
                   className="w-full md:w-auto py-3 md:py-4 px-6 md:px-10 text-base md:text-lg font-bold rounded-xl md:rounded-xl transition-all hover:scale-105 shadow-[0_5px_15px_rgba(212,175,55,0.3)]"
                   style={{ background: 'linear-gradient(135deg, #D4AF37 0%, #c8922a 100%)', color: '#1a0a00' }}
                 >
-                  Add to Cart
+                  {t('ProductDetails.AddToCart', null, 'Add to Cart')}
                 </button>
               )
             ) : (
               <button disabled className="w-full md:w-auto py-4 px-10 text-lg font-bold rounded-xl bg-gray-600 text-gray-300 cursor-not-allowed">
-                Currently Unavailable
+                {t('ProductDetails.Unavailable', null, 'Currently Unavailable')}
               </button>
             )}
           </div>
@@ -200,7 +198,7 @@ const ProductDetails = () => {
           viewport={{ once: true }}
           className="pt-10 md:pt-12 border-t border-border mt-10 md:mt-12"
         >
-          <h2 className="text-xl md:text-3xl font-bold text-dark mb-4 md:mb-8 text-center">You May Also Like</h2>
+          <h2 className="text-xl md:text-3xl font-bold text-dark mb-4 md:mb-8 text-center">{t('ProductDetails.YouMayAlsoLike', null, 'You May Also Like')}</h2>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 sm:gap-6">
             {relatedProducts.map(relatedProduct => (
               <ProductCard key={relatedProduct._id} product={relatedProduct} />

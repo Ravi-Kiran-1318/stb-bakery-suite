@@ -2,12 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import PropTypes from 'prop-types';
+import { useI18n } from '../context/I18nContext';
 
-const steps = [
+const stepsIcons = [
   {
     id: 1,
-    title: 'Choose Your Cake',
-    description: 'Browse our cake gallery or choose a custom cake.',
     icon: (
       <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 15.546c-.523 0-1.046.151-1.5.454a2.704 2.704 0 01-3 0 2.704 2.704 0 00-3 0 2.704 2.704 0 01-3 0 2.704 2.704 0 00-3 0 2.704 2.704 0 01-3 0 2.701 2.701 0 00-1.5-.454M9 6v2m3-2v2m3-2v2M9 3h.01M12 3h.01M15 3h.01M21 21v-7a2 2 0 00-2-2H5a2 2 0 00-2 2v7h18zm-3-9v-2a2 2 0 00-2-2H8a2 2 0 00-2 2v2h12z"></path>
@@ -16,8 +15,6 @@ const steps = [
   },
   {
     id: 2,
-    title: 'Customize It',
-    description: 'Select flavors, size, design and personalizations.',
     icon: (
       <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path>
@@ -26,8 +23,6 @@ const steps = [
   },
   {
     id: 3,
-    title: 'Pick a Date & Time',
-    description: 'Choose your preferred delivery or pickup slot.',
     icon: (
       <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
@@ -36,8 +31,6 @@ const steps = [
   },
   {
     id: 4,
-    title: 'Delivery Details',
-    description: 'Add your delivery details and special requests.',
     icon: (
       <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.243-4.243a8 8 0 1111.314 0z"></path>
@@ -47,8 +40,6 @@ const steps = [
   },
   {
     id: 5,
-    title: 'Secure Payment',
-    description: 'Make a safe payment and place your order.',
     icon: (
       <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path>
@@ -59,6 +50,14 @@ const steps = [
 
 const HowItWorksStepper = ({ hideCTA = false }) => {
   const [activeStep, setActiveStep] = useState(1);
+  const { t } = useI18n();
+
+  // Re-build steps with translations
+  const steps = stepsIcons.map((step, index) => ({
+    ...step,
+    title: t(`HomePage.HowItWorks.Steps.${index}.Title`, null, 'Step Title'),
+    description: t(`HomePage.HowItWorks.Steps.${index}.Desc`, null, 'Step Description')
+  }));
 
   // Auto-play the stepper
   useEffect(() => {
@@ -81,7 +80,7 @@ const HowItWorksStepper = ({ hideCTA = false }) => {
       clearInterval(interval);
       window.removeEventListener('resize', handleResize);
     };
-  }, [activeStep]);
+  }, [activeStep, steps.length]);
 
   return (
     <div className="w-full max-w-6xl mx-auto p-4 sm:p-8">
@@ -92,9 +91,11 @@ const HowItWorksStepper = ({ hideCTA = false }) => {
         <div className="absolute bottom-0 left-0 w-48 h-48 bg-gradient-to-tr from-[#c37e50]/5 to-transparent rounded-tr-full pointer-events-none"></div>
 
         <div className="text-center mb-12 sm:mb-20 relative z-10">
-          <h4 className="text-amber-600 font-bold tracking-widest text-xs sm:text-sm uppercase mb-3">How It Works</h4>
+          <h4 className="text-amber-600 font-bold tracking-widest text-xs sm:text-sm uppercase mb-3">
+            {t('HomePage.HowItWorks.Tagline', null, 'How It Works')}
+          </h4>
           <h2 className="text-3xl sm:text-4xl font-serif font-bold text-[#2d170a]">
-            Delicious cakes, just 5 simple steps away.
+            {t('HomePage.HowItWorks.Title', null, 'Delicious cakes, just 5 simple steps away.')}
           </h2>
         </div>
 
@@ -200,7 +201,7 @@ const HowItWorksStepper = ({ hideCTA = false }) => {
                   {/* Text Content */}
                   <div className="text-center px-1">
                     <h3 className={`font-bold text-[9px] sm:text-[11px] leading-tight transition-colors ${isActive ? 'text-amber-500' : 'text-[#2d170a]'}`}>
-                      {step.title.replace('Your ', '').replace(' & Time', '')}
+                      {step.title}
                     </h3>
                   </div>
                 </div>
@@ -228,10 +229,10 @@ const HowItWorksStepper = ({ hideCTA = false }) => {
         {!hideCTA && (
           <div className="mt-14 sm:mt-20 pt-10 sm:pt-14 border-t border-amber-100/60 relative z-10 text-center">
             <h3 className="text-xl sm:text-2xl font-serif font-bold text-[#2d170a] mb-4">
-              Ready to bring your dream cake to life?
+              {t('HomePage.HowItWorks.CTA.Title', null, 'Ready to bring your dream cake to life?')}
             </h3>
             <p className="text-sm sm:text-base text-gray-600 max-w-2xl mx-auto mb-8 leading-relaxed">
-              Whether you want to customize one of our beautiful gallery designs or build a completely custom cake from scratch, our expert bakers are ready to craft the perfect centerpiece for your celebration.
+              {t('HomePage.HowItWorks.CTA.Desc', null, 'Whether you want to customize one of our beautiful gallery designs or build a completely custom cake from scratch, our expert bakers are ready to craft the perfect centerpiece for your celebration.')}
             </p>
             
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
@@ -239,13 +240,13 @@ const HowItWorksStepper = ({ hideCTA = false }) => {
                 to="/gallery"
                 className="w-full sm:w-auto px-8 py-3.5 bg-amber-500 text-white font-bold rounded-full shadow-md hover:bg-amber-600 hover:shadow-lg transition-all transform hover:-translate-y-0.5 active:translate-y-0"
               >
-                Browse Cake Gallery
+                {t('HomePage.HowItWorks.CTA.BtnGallery', null, 'Browse Cake Gallery')}
               </Link>
               <Link 
                 to="/custom-cakes"
                 className="w-full sm:w-auto px-8 py-3.5 bg-white text-amber-600 font-bold rounded-full border-2 border-amber-500 shadow-sm hover:bg-amber-50 transition-all transform hover:-translate-y-0.5 active:translate-y-0"
               >
-                Request Custom Cake
+                {t('HomePage.HowItWorks.CTA.BtnCustom', null, 'Request Custom Cake')}
               </Link>
             </div>
           </div>

@@ -2,8 +2,10 @@ import { useContext } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import { CartContext } from '../context/CartContext';
+import { useI18n } from '../context/I18nContext';
 
 const MobileBottomNav = () => {
+  const { t } = useI18n();
   const location = useLocation();
   const { user } = useContext(AuthContext);
   const { items: cartItems = [] } = useContext(CartContext);
@@ -17,7 +19,7 @@ const MobileBottomNav = () => {
   const navItems = [
     {
       id: 'home',
-      label: 'Home',
+      label: t('Navigation.Home', null, 'Home'),
       path: '/',
       icon: (
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
@@ -27,7 +29,7 @@ const MobileBottomNav = () => {
     },
     {
       id: 'shop',
-      label: 'Shop',
+      label: t('Navigation.Shop', null, 'Shop'),
       path: '/shop',
       icon: (
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
@@ -37,7 +39,7 @@ const MobileBottomNav = () => {
     },
     {
       id: 'cart',
-      label: 'Cart',
+      label: t('Navigation.Cart', null, 'Cart'),
       path: '/cart',
       icon: (
         <div className="relative">
@@ -54,7 +56,7 @@ const MobileBottomNav = () => {
     },
     {
       id: 'profile',
-      label: user ? 'Account' : 'Login',
+      label: user ? t('Navigation.Account', null, 'Account') : t('Navigation.Login', null, 'Login'),
       path: user ? (user.role === 'admin' ? '/admin/dashboard' : '/customer/dashboard') : '/login',
       icon: (
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">

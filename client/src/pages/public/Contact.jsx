@@ -3,9 +3,10 @@ import PageWrapper from '../../components/PageWrapper';
 import Footer from '../../components/Footer';
 import WhatsAppButton from '../../components/WhatsAppButton';
 import SEO from '../../components/SEO';
+import { useI18n } from '../../context/I18nContext';
 
 const Contact = () => {
-  
+  const { t } = useI18n();
   const shopWhatsApp = import.meta.env.VITE_SHOP_WHATSAPP || '+918074381678';
 
   return (
@@ -23,7 +24,7 @@ const Contact = () => {
               animate={{ opacity: 1, y: 0 }}
               className="text-3xl md:text-4xl font-serif font-bold text-gray-900 mb-2"
             >
-              Get in Touch
+              {t('ContactPage.Title', null, 'Get in Touch')}
             </motion.h1>
             <motion.p 
               initial={{ opacity: 0 }}
@@ -31,7 +32,7 @@ const Contact = () => {
               transition={{ delay: 0.2 }}
               className="text-lg text-gray-600 max-w-2xl mx-auto"
             >
-              We&apos;d love to hear from you. Visit our bakery or message us directly on WhatsApp for orders and inquiries.
+              {t('ContactPage.Subtitle', null, "We'd love to hear from you. Visit our bakery or message us directly on WhatsApp for orders and inquiries.")}
             </motion.p>
           </div>
 
@@ -45,18 +46,18 @@ const Contact = () => {
               className="space-y-6"
             >
               <div>
-                <WhatsAppButton message="Hi! I have an inquiry." className="bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 px-6 rounded-full shadow-md flex items-center justify-center gap-2 w-max" label="Contact Us on WhatsApp" />
+                <WhatsAppButton message={t('ContactPage.WhatsAppMessage', null, 'Hi! I have an inquiry.')} className="bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 px-6 rounded-full shadow-md flex items-center justify-center gap-2 w-max" label={t('ContactPage.WhatsAppLabel', null, 'Contact Us on WhatsApp')} />
               </div>
               <div className="mt-8">
-                <h2 className="text-2xl font-bold text-gray-900 mb-4">Find Us</h2>
+                <h2 className="text-2xl font-bold text-gray-900 mb-4">{t('ContactPage.FindUs', null, 'Find Us')}</h2>
                 
                 <div className="space-y-4 text-gray-700 text-lg">
                   <div className="flex items-start gap-4">
                     <span className="text-2xl mt-1">📍</span>
                     <div>
-                      <p className="font-bold text-gray-900">Sri Tirupathi Venkatachalapathi Bakery</p>
-                      <p>Yeleswaram,</p>
-                      <p>Andhra Pradesh, India</p>
+                      <p className="font-bold text-gray-900">{t('ContactPage.AddressName', null, 'Sri Tirupathi Venkatachalapathi Bakery')}</p>
+                      <p>{t('ContactPage.AddressCity', null, 'Yeleswaram,')}</p>
+                      <p>{t('ContactPage.AddressState', null, 'Andhra Pradesh, India')}</p>
                     </div>
                   </div>
                   
@@ -71,11 +72,11 @@ const Contact = () => {
 
               <div className="bg-amber-50 p-5 rounded-2xl border border-amber-100 shadow-sm">
                 <h3 className="text-lg font-bold text-gray-900 mb-3 flex items-center gap-2">
-                  <span>🕒</span> Opening Hours
+                  <span>🕒</span> {t('ContactPage.OpeningHours', null, 'Opening Hours')}
                 </h3>
                 <ul className="space-y-2 text-gray-700">
                   <li className="flex justify-between">
-                    <span>Monday &ndash; Sunday</span>
+                    <span>{t('ContactPage.Days', null, 'Monday – Sunday')}</span>
                     <span className="font-semibold text-amber-700">9:00 AM &ndash; 9:00 PM</span>
                   </li>
                 </ul>

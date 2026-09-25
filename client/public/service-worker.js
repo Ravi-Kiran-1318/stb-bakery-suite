@@ -1,6 +1,6 @@
 self.addEventListener('push', (event) => {
   const data = event.data ? event.data.json() : {};
-  const title = data.title || 'Sri Tirupati Bakery';
+  const title = data.title || 'Sri Tirupathi Bakery';
   
   // Set badge to small monochrome icon, or fallback
   const badgeIcon = '/icon-192.png';

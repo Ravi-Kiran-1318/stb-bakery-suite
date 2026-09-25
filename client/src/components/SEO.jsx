@@ -2,7 +2,7 @@ import { Helmet } from 'react-helmet-async';
 import PropTypes from 'prop-types';
 
 const SEO = ({ title, description }) => {
-  const siteTitle = title ? `${title} | Sri Tirupati Bakery` : 'Sri Tirupati Bakery';
+  const siteTitle = title ? `${title} | Sri Tirupathi Bakery` : 'Sri Tirupathi Bakery';
   const metaDescription = description || 'Experience the perfect blend of tradition, quality, and flavor in every bite. Order delicious cakes, pastries, and party supplies online.';
 
   return (

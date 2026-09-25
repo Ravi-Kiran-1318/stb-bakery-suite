@@ -11,7 +11,7 @@ const Contact = () => {
 
   return (
     <PageWrapper>
-      <SEO title="Contact Us" description="Get in touch with Sri Tirupati Bakery. Find our location in Yeleswaram or message us on WhatsApp for orders." />
+      <SEO title="Contact Us" description="Get in touch with Sri Tirupathi Bakery. Find our location in Yeleswaram or message us on WhatsApp for orders." />
       <div 
         className="min-h-screen pt-4 flex flex-col bg-cover bg-center bg-no-repeat bg-fixed"
         style={{ backgroundImage: "url('/contact_bg.png')" }}

@@ -15,7 +15,7 @@ const messaging = firebase.messaging();
 messaging.onBackgroundMessage(function(payload) {
   console.log('[firebase-messaging-sw.js] Received background message ', payload);
 
-  const notificationTitle = payload.notification?.title || payload.data?.title || 'Sri Tirupati Bakery';
+  const notificationTitle = payload.notification?.title || payload.data?.title || 'Sri Tirupathi Bakery';
   const notificationOptions = {
     body: payload.notification?.body || payload.data?.body || 'You have a new notification.',
     icon: '/icon-192.png',

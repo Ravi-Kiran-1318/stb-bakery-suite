@@ -100,7 +100,7 @@ const Home = () => {
 
   return (
     <PageWrapper>
-      <SEO title="Home" description="Sri Tirupati Bakery - Experience the perfect blend of tradition, quality, and flavor in every bite. Order delicious cakes, pastries, and party supplies online." />
+      <SEO title="Home" description="Sri Tirupathi Bakery - Experience the perfect blend of tradition, quality, and flavor in every bite. Order delicious cakes, pastries, and party supplies online." />
       <div className="bg-[#fefaf3] min-h-screen">
 
         {/* ═══════════════════════════════════════════════════════

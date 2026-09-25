@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext, useRef } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import axiosInstance from '../../utils/axiosInstance';
 import { ToastContext } from '../../context/ToastContext';
 import Loader from '../../components/Loader';
@@ -69,13 +69,6 @@ const ProductsTab = () => {
     }));
   };
 
-  const handleImageChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setImageFile(file);
-      setImagePreview(URL.createObjectURL(file));
-    }
-  };
 
   const openAddModal = () => {
     setIsEditing(false);
@@ -288,9 +281,15 @@ const ProductsTab = () => {
                 </div>
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-dark mb-1">Weight</label>
-                <input type="text" name="weight" placeholder="e.g., 500g, 1kg" value={formData.weight} onChange={handleInputChange} className="input-field" />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-dark mb-1">Weight</label>
+                  <input type="text" name="weight" placeholder="e.g., 500g, 1kg" value={formData.weight} onChange={handleInputChange} className="input-field" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-dark mb-1">Stock Quantity</label>
+                  <input type="number" name="quantity" min="0" placeholder="e.g., 50" value={formData.quantity} onChange={handleInputChange} className="input-field" />
+                </div>
               </div>
 
               <div>
